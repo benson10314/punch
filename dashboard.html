@@ -93,7 +93,10 @@ input,select{font-family:inherit}
 .p.late{border-left-color:var(--late)}   .p.bad{border-left-color:var(--bad);background:#2a1420}
 .p .nm{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:6px}
 .p .nm em{font-style:normal;font-size:10.5px;color:var(--muted);font-weight:400}
-.p .dp{font-size:11px;color:var(--muted);margin-top:2px}
+.p .dp{font-size:11px;color:var(--muted);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap}
+.p .sft{color:#93c5fd}
+.p .hr{margin-top:5px;font-size:11.5px;color:#a5b4cf}
+.p .hr b{color:#e8eefc;font-size:13px}
 .p .tm{margin-top:7px;font-size:12.5px;display:flex;gap:8px}
 .p .in b{color:var(--ok)} .p .out b{color:var(--off)}
 .p .warn{margin-top:5px;font-size:11px;color:var(--late)}
@@ -136,9 +139,16 @@ td.num{text-align:right}
 .primary:hover{background:#2563eb}
 .primary:disabled{opacity:.5}
 
+/* 日期切換 */
+.datenav{display:inline-flex;align-items:center;gap:5px}
+.datenav .txt{padding:7px 9px;font-size:13px;color-scheme:dark}
+.datenav .chipbtn{padding:7px 10px}
+#pastBox{display:flex;align-items:center;gap:10px}
+#pastBox b{color:#dbeafe}
+
 /* Modal */
-#modal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:flex;align-items:center;
-  justify-content:center;z-index:50;padding:16px}
+#modal,#smodal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:flex;align-items:center;
+  justify-content:center;z-index:50;padding:16px;overflow-y:auto}
 .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;width:100%;max-width:420px}
 .box h3{margin:0 0 16px;font-size:16px;letter-spacing:2px}
 .fld{margin-bottom:13px}
@@ -193,6 +203,12 @@ body.tv .p .nm{font-size:17px}
     <h1>出勤戰情室</h1>
     <span class="date" id="dateTxt">—</span>
     <span class="clock" id="clockTxt">--:--:--</span>
+    <span class="datenav" id="dateNav">
+      <button class="chipbtn" id="prevDay" title="前一天">◀</button>
+      <input class="txt" type="date" id="boardDate">
+      <button class="chipbtn" id="nextDay" title="後一天">▶</button>
+      <button class="chipbtn" id="todayBtn">今天</button>
+    </span>
     <div class="sp">
       <span class="live" id="liveBox"><i></i><span id="updTxt">—</span></span>
       <button class="chipbtn on" id="autoBtn">自動更新 30 秒</button>
@@ -205,10 +221,12 @@ body.tv .p .nm{font-size:17px}
   <div class="tabs">
     <button class="tab on" data-v="board">即時看板</button>
     <button class="tab" data-v="emp">員工管理</button>
+    <button class="tab" data-v="shift">班別設定</button>
     <button class="tab" data-v="export">匯出報表</button>
   </div>
 
   <div id="errBox" class="err hidden"></div>
+  <div id="pastBox" class="info hidden"></div>
 
   <!-- ─── 即時看板 ─── -->
   <div id="viewBoard">
@@ -260,14 +278,40 @@ body.tv .p .nm{font-size:17px}
       </div>
       <div class="tblwrap">
         <table>
-          <thead><tr><th>員工編號</th><th>姓名</th><th>部門</th><th>PIN</th><th>狀態</th>
+          <thead><tr><th>員工編號</th><th>姓名</th><th>部門</th><th>班別</th><th>PIN</th><th>狀態</th>
             <th class="num">打卡筆數</th><th>操作</th></tr></thead>
           <tbody id="empBody"></tbody>
         </table>
       </div>
       <div class="info" style="margin:14px 0 0">
         改 PIN 後，該員工手機上的登入會自動失效並要求重新登入。<br>
+        沒有指定班別的員工，會套用「班別設定」中第一個啟用的班別。<br>
         已有打卡紀錄的員工<b>不能刪除</b>（出勤紀錄依勞基法須保存 5 年），離職請改為「停用」。
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 班別設定 ─── -->
+  <div id="viewShift" class="hidden">
+    <div class="panel">
+      <h2>班別 <span id="sftCnt"></span></h2>
+      <div class="filters"><button class="primary" id="addSft">＋ 新增班別</button></div>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>代號</th><th>名稱</th><th>上班</th><th>下班</th><th>休息時段</th>
+            <th class="num">休息(分)</th><th class="num">應出勤(小時)</th><th>遲到寬限</th>
+            <th>狀態</th><th class="num">人數</th><th>操作</th></tr></thead>
+          <tbody id="sftBody"></tbody>
+        </table>
+      </div>
+      <div class="info" style="margin:14px 0 0">
+        <b>工時＝下班時間 − 上班時間 − 落在休息時段內的時間。</b>
+        例如日班 08:00–17:30、休息 12:00–13:00，正常上下班就是 8.5 小時；
+        若 12:30 就下班，只會扣掉 12:00–12:30 這 30 分鐘。<br>
+        <b>休息時段</b>格式為 <code>HH:MM-HH:MM</code>，多段用逗號分隔，例如
+        <code>12:00-13:00,15:00-15:15</code>。不需要就留空。<br>
+        <b>跨日夜班</b>直接填 <code>23:00</code> 到 <code>08:00</code> 即可，
+        系統會自動把隔天的下班卡算回開始上班的那一天。
       </div>
     </div>
   </div>
@@ -311,6 +355,10 @@ body.tv .p .nm{font-size:17px}
     <div class="fld"><label>姓名</label><input id="mName" placeholder="王小明"></div>
     <div class="fld"><label>部門</label><input id="mDept" list="deptList" placeholder="管理部">
       <datalist id="deptList"></datalist></div>
+    <div class="fld"><label>班別</label>
+      <select id="mShift"></select>
+      <div class="hint" id="mShiftHint">決定遲到判定與工時怎麼扣休息時間。</div>
+    </div>
     <div class="fld"><label>PIN 碼</label>
       <div class="row"><input id="mPin" class="pin" placeholder="4～12 碼英數字">
         <button class="mini" id="mRand" style="flex:none">隨機</button></div>
@@ -327,6 +375,33 @@ body.tv .p .nm{font-size:17px}
   </div>
 </div>
 
+<!-- ══════════ 班別編輯視窗 ══════════ -->
+<div id="smodal" class="hidden">
+  <div class="box">
+    <h3 id="sTitle">新增班別</h3>
+    <div class="fld"><label>班別代號</label><input id="sCode" placeholder="例如 日、夜、A">
+      <div class="hint">員工名冊上填的就是這個代號，越短越好。</div></div>
+    <div class="fld"><label>班別名稱</label><input id="sName" placeholder="例如 日班"></div>
+    <div class="fld"><label>上班／下班時間</label>
+      <div class="row"><input id="sStart" placeholder="08:00"><input id="sEnd" placeholder="17:30"></div>
+      <div class="hint" id="sHint">夜班直接填 23:00 → 08:00，系統會自動處理跨日。</div>
+    </div>
+    <div class="fld"><label>休息時段</label>
+      <input id="sBreak" placeholder="12:00-13:00　（不需要就留空）">
+      <div class="hint">多段用逗號分隔，例如 <code>12:00-13:00,15:00-15:15</code>。這段時間會從工時裡扣掉。</div>
+    </div>
+    <div class="fld"><label>遲到寬限（分鐘）</label><input id="sGrace" type="number" min="0" value="5"></div>
+    <div class="fld"><label>狀態</label>
+      <select id="sActive"><option value="true">啟用</option><option value="false">停用</option></select>
+    </div>
+    <div class="modalerr" id="sErr"></div>
+    <div class="acts">
+      <button class="chipbtn" id="sCancel" style="flex:none">取消</button>
+      <button class="primary" id="sSave">儲存</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -339,7 +414,8 @@ const LS = 'gpsclock.admin';
 const $ = id => document.getElementById(id);
 let token = null, data = null, timer = null, auto = true;
 let view = 'board', dept = '全部', kw = '', lastFeedTop = '';
-let emps = [], empDepts = [], editing = null, exResult = null;
+let emps = [], empDepts = [], empShifts = [], editing = null, exResult = null;
+let shifts = [], editingShift = null, boardDate = '';   // boardDate 空＝今天
 
 async function api(action, body) {
   const res = await fetch(API_URL, {
@@ -375,19 +451,21 @@ function switchTab(v) {
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   $('viewBoard').classList.toggle('hidden', v !== 'board');
   $('viewEmp').classList.toggle('hidden', v !== 'emp');
+  $('viewShift').classList.toggle('hidden', v !== 'shift');
   $('viewExport').classList.toggle('hidden', v !== 'export');
   // 自動更新只在看板頁跑，避免打斷編輯
-  $('liveBox').classList.toggle('hidden', v !== 'board');
-  $('autoBtn').classList.toggle('hidden', v !== 'board');
-  $('refreshBtn').classList.toggle('hidden', v !== 'board');
+  const onBoard = v === 'board';
+  ['liveBox', 'autoBtn', 'refreshBtn', 'dateNav'].forEach(id => $(id).classList.toggle('hidden', !onBoard));
+  $('pastBox').classList.toggle('hidden', !onBoard || !data || data.isToday);
   setAuto(auto);
   if (v === 'emp' && !emps.length) loadEmps();
+  if (v === 'shift' && !shifts.length) loadShifts();
 }
 
 /* ════════ 即時看板 ════════ */
 async function load(showErr) {
   try {
-    data = await api('board');
+    data = await api('board', { date: boardDate });
     $('errBox').classList.add('hidden');
     render();
     const n = new Date();
@@ -404,7 +482,25 @@ async function load(showErr) {
 function render() {
   const d = data, s = d.summary;
   $('dateTxt').textContent = d.date + '（' + d.weekday + '）';
-  $('shiftTxt').textContent = '上班 ' + d.shiftStart + '　寬限 ' + d.grace + ' 分';
+  $('boardDate').value = d.dateInput;
+  $('boardDate').max = d.today;
+  boardDate = d.isToday ? '' : d.dateInput;
+  $('todayBtn').classList.toggle('on', d.isToday);
+  $('nextDay').disabled = d.isToday;
+
+  // 看的不是今天就停掉自動更新，並提示目前在看歷史資料
+  $('pastBox').classList.toggle('hidden', d.isToday || view !== 'board');
+  if (!d.isToday) {
+    $('pastBox').innerHTML = '📅 目前檢視的是 <b>' + d.date + '（' + d.weekday +
+      '）</b>的歷史出勤，非即時資料，自動更新已暫停。' +
+      '<button class="chipbtn" id="backToday" style="margin-left:auto">回到今天</button>';
+    $('backToday').onclick = () => { boardDate = ''; load(); };
+  }
+  setAuto(auto);
+
+  $('shiftTxt').textContent = d.shifts.length
+    ? d.shifts.map(x => x.name + ' ' + x.time + (x.breakStr ? '（休 ' + x.breakStr + '）' : '')).join('　｜　')
+    : '尚未設定班別';
 
   const set = (id, v) => {
     const el = $(id);
@@ -437,7 +533,8 @@ function drawGrid() {
   const rows = data.rows.filter(r =>
     (dept === '全部' || r.dept === dept) &&
     (!k || r.name.toLowerCase().includes(k) || r.empId.toLowerCase().includes(k)));
-  const rank = r => r.flags.length ? 0 : r.late ? 1 : r.status === '未打卡' ? 2 : r.status === '上班中' ? 3 : 4;
+  const rank = r => r.flags.length ? 0 : (r.late || r.early) ? 1
+    : r.status === '未打卡' ? 2 : r.status === '上班中' ? 3 : 4;
   rows.sort((a, b) => rank(a) - rank(b) || (a.inTime || '~').localeCompare(b.inTime || '~'));
 
   $('grid').innerHTML = rows.length ? rows.map(r => {
@@ -446,12 +543,17 @@ function drawGrid() {
     const body = r.status === '未打卡'
       ? '<div class="no">— 尚未打卡 —</div>'
       : '<div class="tm"><span class="in">上 <b>' + r.inTime + '</b></span>' +
-        (r.outTime ? '<span class="out">下 <b>' + r.outTime + '</b></span>' : '') + '</div>';
+        (r.outTime ? '<span class="out">下 <b>' + r.outTime + '</b></span>' : '') + '</div>' +
+        (r.hours !== '' ? '<div class="hr">工時 <b>' + r.hours + '</b> 小時' +
+          (r.breakMin ? '（已扣休息 ' + r.breakMin + ' 分）' : '') + '</div>' : '');
     let warn = '';
     if (r.late) warn += '<div class="warn">遲到 ' + r.late + ' 分鐘</div>';
+    if (r.early) warn += '<div class="warn">早退 ' + r.early + ' 分鐘</div>';
     if (r.flags.length) warn += '<div class="warn err">⚠ ' + esc(r.flags.join('、')) + '</div>';
     return '<div class="' + cls + '"><div class="nm">' + esc(r.name) + '<em>' + esc(r.empId) +
-           '</em></div><div class="dp">' + esc(r.dept) + '</div>' + body + warn + '</div>';
+           '</em></div><div class="dp"><span>' + esc(r.dept) + '</span>' +
+           '<span class="sft" title="' + esc(r.shiftTime + (r.breakStr ? '　休 ' + r.breakStr : '')) +
+           '">' + esc(r.shift) + '</span></div>' + body + warn + '</div>';
   }).join('') : '<div class="empty">沒有符合條件的人員</div>';
 }
 
@@ -503,7 +605,7 @@ async function loadEmps() {
   $('empBody').innerHTML = '<tr><td colspan="7" class="empty">載入中…</td></tr>';
   try {
     const r = await api('empList');
-    emps = r.rows; empDepts = r.depts;
+    emps = r.rows; empDepts = r.depts; empShifts = r.shifts || [];
     const sel = $('empDept'), cur = sel.value;
     sel.innerHTML = ['全部'].concat(empDepts).map(d => '<option>' + esc(d) + '</option>').join('');
     sel.value = empDepts.includes(cur) || cur === '全部' ? cur : '全部';
@@ -526,6 +628,7 @@ function drawEmps() {
   $('empCnt').textContent = '共 ' + rows.length + ' 人（啟用 ' + emps.filter(e => e.active).length + '）';
   $('empBody').innerHTML = rows.length ? rows.map(e =>
     '<tr><td><b>' + esc(e.empId) + '</b></td><td>' + esc(e.name) + '</td><td>' + esc(e.dept) + '</td>' +
+    '<td>' + esc(e.shiftName) + '</td>' +
     '<td class="pin">' + (showPin ? esc(e.pin) : '••••') + '</td>' +
     '<td><span class="badge ' + (e.active ? 'on">啟用' : 'off">停用') + '</span>' +
     (e.locked ? '<span class="badge lock">已鎖定</span>' : '') + '</td>' +
@@ -533,7 +636,7 @@ function drawEmps() {
     '<button class="mini" data-act="edit" data-id="' + esc(e.empId) + '">編輯</button>' +
     (e.locked ? '<button class="mini" data-act="unlock" data-id="' + esc(e.empId) + '">解鎖</button>' : '') +
     (e.punches === 0 ? '<button class="mini danger" data-act="del" data-id="' + esc(e.empId) + '">刪除</button>' : '') +
-    '</td></tr>').join('') : '<tr><td colspan="7" class="empty">沒有符合條件的員工</td></tr>';
+    '</td></tr>').join('') : '<tr><td colspan="8" class="empty">沒有符合條件的員工</td></tr>';
 
   $('empBody').querySelectorAll('[data-act]').forEach(b => b.onclick = () => {
     const e = emps.find(x => x.empId === b.dataset.id);
@@ -553,6 +656,10 @@ function openModal(e) {
     : '建立後不建議變更，因為打卡紀錄是用編號對應的。';
   $('mName').value = e ? e.name : '';
   $('mDept').value = e ? e.dept : '';
+  $('mShift').innerHTML = '<option value="">（未指定，套用預設班別）</option>' +
+    empShifts.map(s => '<option value="' + esc(s.code) + '">' + esc(s.code + '　' + s.name + '　' + s.time) +
+      (s.breakStr ? '　休 ' + esc(s.breakStr) : '') + (s.active ? '' : '（停用）') + '</option>').join('');
+  $('mShift').value = e ? e.shift : (empShifts.find(s => s.active) || {}).code || '';
   $('mPin').value = e ? e.pin : '';
   $('mActive').value = e ? String(e.active) : 'true';
   $('mErr').textContent = '';
@@ -568,7 +675,7 @@ async function saveEmp() {
       orig: editing ? editing.empId : '',
       empId: $('mId').value.trim(), name: $('mName').value.trim(),
       dept: $('mDept').value.trim(), pin: $('mPin').value.trim(),
-      active: $('mActive').value
+      shift: $('mShift').value, active: $('mActive').value
     });
     closeModal(); toast('✓ ' + r.msg); await loadEmps();
   } catch (e) {
@@ -585,6 +692,103 @@ async function doDelete(e) {
   if (!confirm('確定刪除「' + e.name + '（' + e.empId + '）」？\n此員工目前沒有任何打卡紀錄。')) return;
   try { const r = await api('empDelete', { empId: e.empId }); toast('✓ ' + r.msg); loadEmps(); }
   catch (x) { toast('✕ ' + x.message, 'bad'); }
+}
+
+/* ════════ 班別設定 ════════ */
+async function loadShifts() {
+  $('sftBody').innerHTML = '<tr><td colspan="11" class="empty">載入中…</td></tr>';
+  try {
+    shifts = (await api('shiftList')).rows;
+    drawShifts();
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('sftBody').innerHTML = '<tr><td colspan="11" class="empty">載入失敗：' + esc(e.message) + '</td></tr>';
+  }
+}
+
+function drawShifts() {
+  $('sftCnt').textContent = '共 ' + shifts.length + ' 種（啟用 ' + shifts.filter(s => s.active).length + '）';
+  $('sftBody').innerHTML = shifts.length ? shifts.map(s =>
+    '<tr><td><b>' + esc(s.code) + '</b></td><td>' + esc(s.name) + '</td>' +
+    '<td>' + esc(s.start) + '</td><td>' + esc(s.end) + (s.overnight ? ' <span class="badge lock">跨日</span>' : '') + '</td>' +
+    '<td>' + (esc(s.breakStr) || '—') + '</td><td class="num">' + s.breakMin + '</td>' +
+    '<td class="num">' + s.dutyHours + '</td><td>' + s.grace + ' 分</td>' +
+    '<td><span class="badge ' + (s.active ? 'on">啟用' : 'off">停用') + '</span></td>' +
+    '<td class="num">' + s.members + '</td><td>' +
+    '<button class="mini" data-sact="edit" data-c="' + esc(s.code) + '">編輯</button>' +
+    (s.members === 0 ? '<button class="mini danger" data-sact="del" data-c="' + esc(s.code) + '">刪除</button>' : '') +
+    '</td></tr>').join('') : '<tr><td colspan="11" class="empty">尚未建立任何班別</td></tr>';
+
+  $('sftBody').querySelectorAll('[data-sact]').forEach(b => b.onclick = () => {
+    const s = shifts.find(x => x.code === b.dataset.c);
+    if (b.dataset.sact === 'edit') openShiftModal(s); else delShift(s);
+  });
+}
+
+function openShiftModal(s) {
+  editingShift = s || null;
+  $('sTitle').textContent = s ? '編輯班別' : '新增班別';
+  $('sCode').value = s ? s.code : '';
+  $('sName').value = s ? s.name : '';
+  $('sStart').value = s ? s.start : '08:00';
+  $('sEnd').value = s ? s.end : '17:30';
+  $('sBreak').value = s ? s.breakStr : '12:00-13:00';
+  $('sGrace').value = s ? s.grace : 5;
+  $('sActive').value = s ? String(s.active) : 'true';
+  $('sErr').textContent = '';
+  updateShiftHint();
+  $('smodal').classList.remove('hidden');
+  $('sCode').focus();
+}
+function closeShiftModal() { $('smodal').classList.add('hidden'); editingShift = null; }
+
+/** 即時算出應出勤時數，讓人資填的時候就看得到結果 */
+function updateShiftHint() {
+  const mins = v => {
+    const m = String(v || '').match(/^(\d{1,2})\s*[:：]\s*(\d{1,2})$/);
+    return m ? +m[1] * 60 + +m[2] : null;
+  };
+  const st = mins($('sStart').value), en = mins($('sEnd').value);
+  if (st === null || en === null) {
+    $('sHint').textContent = '時間格式為 HH:MM，例如 08:00。夜班直接填 23:00 → 08:00 即可。';
+    return;
+  }
+  let span = ((en - st) % 1440 + 1440) % 1440; if (!span) span = 1440;
+  let brk = 0, bad = false;
+  String($('sBreak').value || '').split(/[,，;；]/).map(x => x.trim()).filter(Boolean).forEach(seg => {
+    const m = seg.match(/^(\d{1,2})[:：](\d{1,2})\s*[-~〜–]\s*(\d{1,2})[:：](\d{1,2})$/);
+    if (!m) { bad = true; return; }
+    let bs = ((+m[1] * 60 + +m[2] - st) % 1440 + 1440) % 1440;
+    let be = ((+m[3] * 60 + +m[4] - st) % 1440 + 1440) % 1440;
+    if (be <= bs) be += 1440;
+    brk += Math.max(0, Math.min(span, be) - Math.min(span, bs));
+  });
+  $('sHint').innerHTML = bad
+    ? '⚠ 休息時段格式不正確，應為 HH:MM-HH:MM'
+    : '在班時間 ' + (span / 60).toFixed(2) + ' 小時 − 休息 ' + brk + ' 分鐘 = <b>應出勤 ' +
+      (Math.round((span - brk) / 60 * 100) / 100) + ' 小時</b>' + (en <= st ? '（跨日夜班）' : '');
+}
+
+async function saveShift() {
+  $('sSave').disabled = true; $('sErr').textContent = '';
+  try {
+    const r = await api('shiftSave', {
+      orig: editingShift ? editingShift.code : '',
+      code: $('sCode').value.trim(), name: $('sName').value.trim(),
+      start: $('sStart').value.trim(), end: $('sEnd').value.trim(),
+      breakStr: $('sBreak').value.trim(), grace: $('sGrace').value, active: $('sActive').value
+    });
+    closeShiftModal(); toast('✓ ' + r.msg);
+    await loadShifts();
+    emps = []; if (view === 'emp') loadEmps();   // 班別改了，員工頁要重讀
+  } catch (e) { $('sErr').textContent = e.message; }
+  finally { $('sSave').disabled = false; }
+}
+
+async function delShift(s) {
+  if (!confirm('確定刪除班別「' + s.name + '（' + s.code + '）」？')) return;
+  try { const r = await api('shiftDelete', { code: s.code }); toast('✓ ' + r.msg); loadShifts(); }
+  catch (e) { toast('✕ ' + e.message, 'bad'); }
 }
 
 /* ════════ 匯出 ════════ */
@@ -648,10 +852,21 @@ function download() {
 /* ════════ 自動更新 / 登入登出 ════════ */
 function setAuto(on) {
   auto = on;
+  const live = on && view === 'board' && (!data || data.isToday);
   $('autoBtn').classList.toggle('on', on);
   $('autoBtn').textContent = on ? '自動更新 30 秒' : '自動更新 已關閉';
+  $('autoBtn').disabled = !!(data && !data.isToday);
   clearInterval(timer);
-  if (on && view === 'board') timer = setInterval(load, 30000);
+  if (live) timer = setInterval(load, 30000);
+}
+
+/** 依目前檢視日期前後移動一天 */
+function shiftDay(n) {
+  const base = data ? data.dateInput : new Date().toISOString().slice(0, 10);
+  const d = new Date(base + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  if (data && ymd(d) > data.today) return;
+  boardDate = ymd(d); load();
 }
 
 async function login() {
@@ -678,7 +893,7 @@ function enter() {
 
 function logout(msg) {
   clearInterval(timer);
-  token = null; data = null; emps = []; exResult = null;
+  token = null; data = null; emps = []; shifts = []; exResult = null; boardDate = '';
   localStorage.removeItem(LS);
   $('app').classList.add('hidden');
   $('login').classList.remove('hidden');
@@ -707,7 +922,21 @@ $('mCancel').onclick = closeModal;
 $('mSave').onclick = saveEmp;
 $('mRand').onclick = () => { $('mPin').value = String(Math.floor(1000 + Math.random() * 9000)); };
 $('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+$('addSft').onclick = () => openShiftModal(null);
+$('sCancel').onclick = closeShiftModal;
+$('sSave').onclick = saveShift;
+['sStart', 'sEnd', 'sBreak'].forEach(id => $(id).addEventListener('input', updateShiftHint));
+$('smodal').addEventListener('click', e => { if (e.target.id === 'smodal') closeShiftModal(); });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeShiftModal(); }
+});
+
+$('prevDay').onclick = () => shiftDay(-1);
+$('nextDay').onclick = () => shiftDay(1);
+$('todayBtn').onclick = () => { boardDate = ''; load(); };
+$('boardDate').onchange = () => { boardDate = $('boardDate').value; load(); };
 
 $('exBtn').onclick = doExport;
 $('dlBtn').onclick = download;
