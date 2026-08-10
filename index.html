@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="行動打卡">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>行動打卡</title>
+<style>
+:root{
+  --bg:#0f172a; --card:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --ok:#059669; --okbg:#ecfdf5; --warn:#d97706; --warnbg:#fffbeb;
+  --bad:#dc2626; --badbg:#fef2f2; --brand:#2563eb; --brand2:#1d4ed8;
+  --radius:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  background:linear-gradient(180deg,#0f172a 0,#1e293b 260px,#f1f5f9 260px,#f1f5f9 100%);
+  background-attachment:fixed; color:var(--ink); min-height:100vh;
+  padding:0 16px calc(28px + env(safe-area-inset-bottom));
+  padding-top:calc(14px + env(safe-area-inset-top));
+}
+.wrap{max-width:460px;margin:0 auto}
+.hidden{display:none !important}
+
+/* 頂部 */
+.top{display:flex;align-items:center;justify-content:space-between;color:#fff;margin-bottom:14px}
+.who{min-width:0}
+.who b{display:block;font-size:19px;font-weight:700;letter-spacing:.5px}
+.who span{font-size:13px;color:#94a3b8}
+.linkbtn{background:rgba(255,255,255,.12);color:#e2e8f0;border:0;border-radius:999px;
+  padding:7px 14px;font-size:13px;font-family:inherit;cursor:pointer}
+.linkbtn:active{background:rgba(255,255,255,.22)}
+
+/* 時鐘 */
+.clock{text-align:center;color:#fff;margin:4px 0 18px}
+.clock .t{font-size:52px;font-weight:200;letter-spacing:2px;line-height:1.1;
+  font-variant-numeric:tabular-nums}
+.clock .t small{font-size:24px;opacity:.6;margin-left:2px}
+.clock .d{font-size:14px;color:#94a3b8;margin-top:4px}
+
+/* 卡片 */
+.card{background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:14px;
+  box-shadow:0 4px 18px rgba(15,23,42,.09)}
+.card h3{margin:0 0 12px;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.5px}
+
+/* 定位狀態 */
+#gpsCard{border-left:5px solid var(--muted);transition:border-color .25s}
+#gpsCard.ok{border-color:var(--ok)}
+#gpsCard.warn{border-color:var(--warn)}
+#gpsCard.bad{border-color:var(--bad)}
+.gps-head{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}
+.dot.live{animation:pulse 1.6s infinite}
+#gpsCard.ok .dot{background:var(--ok)} #gpsCard.warn .dot{background:var(--warn)}
+#gpsCard.bad .dot{background:var(--bad)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.gps-sub{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.65}
+.bar{height:7px;border-radius:99px;background:var(--line);margin-top:12px;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:var(--ok);width:0;
+  transition:width .4s ease,background .3s}
+#gpsCard.warn .bar>i,#gpsCard.bad .bar>i{background:var(--bad)}
+
+/* 打卡按鈕 */
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.punch{border:0;border-radius:var(--radius);padding:24px 8px;font-family:inherit;color:#fff;
+  font-size:19px;font-weight:700;letter-spacing:2px;cursor:pointer;
+  box-shadow:0 6px 16px rgba(15,23,42,.14);transition:transform .08s,opacity .2s}
+.punch small{display:block;font-size:11.5px;font-weight:400;letter-spacing:1px;opacity:.85;margin-top:5px}
+.punch.in{background:linear-gradient(160deg,#10b981,#047857)}
+.punch.out{background:linear-gradient(160deg,#f97316,#c2410c)}
+.punch:active{transform:scale(.97)}
+.punch:disabled{opacity:.35;box-shadow:none;cursor:not-allowed}
+
+/* 紀錄 */
+.rec{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+.rec:last-child{border-bottom:0}
+.tag{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;flex:none}
+.tag.in{background:var(--okbg);color:var(--ok)} .tag.out{background:#fff7ed;color:#c2410c}
+.rec .tm{font-weight:700;font-variant-numeric:tabular-nums;font-size:15px}
+.rec .mt{color:var(--muted);font-size:12.5px;margin-left:auto;text-align:right}
+.empty{color:var(--muted);font-size:13.5px;text-align:center;padding:14px 0}
+
+/* 登入 */
+#loginView .card{margin-top:22px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600}
+.field input{width:100%;padding:14px;font-size:17px;font-family:inherit;border:1.5px solid var(--line);
+  border-radius:12px;background:#f8fafc;color:var(--ink)}
+.field input:focus{outline:0;border-color:var(--brand);background:#fff}
+.primary{width:100%;padding:15px;border:0;border-radius:12px;background:var(--brand);color:#fff;
+  font-size:16.5px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:1px}
+.primary:active{background:var(--brand2)} .primary:disabled{opacity:.5}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-bottom:16px}
+.check input{width:18px;height:18px;accent-color:var(--brand)}
+
+/* 提示 / Toast */
+.note{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.7;margin-top:10px}
+.banner{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:12px;
+  padding:11px 13px;font-size:12.5px;line-height:1.6;margin-bottom:14px;display:flex;gap:8px}
+.banner button{margin-left:auto;background:0;border:0;color:#1e40af;font-size:18px;cursor:pointer;padding:0 2px}
+#toast{position:fixed;left:16px;right:16px;bottom:calc(22px + env(safe-area-inset-bottom));
+  max-width:428px;margin:0 auto;padding:15px 17px;border-radius:14px;color:#fff;font-size:14.5px;
+  line-height:1.6;box-shadow:0 10px 30px rgba(0,0,0,.28);z-index:99;
+  transform:translateY(140%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
+#toast.show{transform:translateY(0)}
+#toast.ok{background:#047857} #toast.bad{background:#b91c1c} #toast.warn{background:#b45309}
+#loader{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;
+  justify-content:center;z-index:100;color:#fff;font-size:15px;letter-spacing:1px}
+.spin{width:34px;height:34px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;
+  border-radius:50%;animation:sp .8s linear infinite;margin-right:12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ══════════ 登入 ══════════ -->
+  <div id="loginView" class="hidden">
+    <div class="clock" style="margin-top:26px">
+      <div class="t" style="font-size:30px;font-weight:600;letter-spacing:6px">行動打卡</div>
+      <div class="d" id="loginSub">請輸入員工編號與 PIN 碼</div>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label for="empId">員工編號</label>
+        <input id="empId" type="text" inputmode="text" autocomplete="username"
+               autocapitalize="characters" placeholder="例如 A001">
+      </div>
+      <div class="field">
+        <label for="pin">PIN 碼</label>
+        <input id="pin" type="password" inputmode="numeric" autocomplete="current-password"
+               placeholder="人資提供的 4 碼數字">
+      </div>
+      <label class="check"><input id="remember" type="checkbox" checked>在這支手機記住我</label>
+      <button id="loginBtn" class="primary">登　入</button>
+      <div class="note">忘記 PIN 碼請洽人資重設。<br>本系統會在打卡當下記錄你的所在位置。</div>
+    </div>
+  </div>
+
+  <!-- ══════════ 主畫面 ══════════ -->
+  <div id="mainView" class="hidden">
+    <div class="top">
+      <div class="who"><b id="uName">—</b><span id="uMeta">—</span></div>
+      <button class="linkbtn" id="logoutBtn">登出</button>
+    </div>
+
+    <div class="clock">
+      <div class="t" id="clockT">--:--<small id="clockS">:--</small></div>
+      <div class="d" id="clockD">—</div>
+    </div>
+
+    <div id="installBanner" class="banner hidden">
+      <div>把這頁「加入主畫面」，之後就能像 App 一樣一鍵開啟。<br>
+      <b>iPhone</b>：分享 → 加入主畫面　<b>Android</b>：右上 ⋮ → 安裝應用程式</div>
+      <button id="closeBanner">×</button>
+    </div>
+
+    <div class="card" id="gpsCard">
+      <div class="gps-head"><span class="dot live"></span><span id="gpsTitle">定位中…</span></div>
+      <div class="gps-sub" id="gpsSub">正在取得手機定位，第一次可能需要 5～15 秒。</div>
+      <div class="bar"><i id="gpsBar"></i></div>
+    </div>
+
+    <div class="btns">
+      <button class="punch in"  id="btnIn"  disabled>上班打卡<small>CLOCK IN</small></button>
+      <button class="punch out" id="btnOut" disabled>下班打卡<small>CLOCK OUT</small></button>
+    </div>
+
+    <div class="card">
+      <h3>今日打卡紀錄</h3>
+      <div id="todayList"><div class="empty">今天還沒有打卡紀錄</div></div>
+    </div>
+
+    <div class="card">
+      <h3 style="display:flex;align-items:center">本月紀錄
+        <button class="linkbtn" id="histBtn"
+                style="margin-left:auto;background:#f1f5f9;color:#475569">查詢</button></h3>
+      <div id="histList"><div class="empty">點「查詢」載入本月所有打卡紀錄</div></div>
+    </div>
+
+    <div class="note">打卡時間以伺服器時間為準，手機時間不影響紀錄。</div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="loader" class="hidden"><span class="spin"></span><span id="loaderMsg">處理中…</span></div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   ★★★ 唯一需要修改的地方 ★★★
+   把 Apps Script 部署後拿到的「網頁應用程式」網址貼在這裡
+   （長得像 https://script.google.com/macros/s/AKfycb.../exec）
+   ════════════════════════════════════════════════════════════ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbxbyGMSYWs67z04nGR7iY1dg4Xvx3moLMDJf5gmi2UssLUtmLOnPUnzGAfYDxG1T_Hc7Q/exec';
+
+/* ─── 狀態 ─── */
+const LS = 'gpsclock.auth', LS_DEV = 'gpsclock.device', LS_BANNER = 'gpsclock.banner';
+let auth = null;          // {empId, token, name, dept}
+let cfg = null;           // 伺服器設定 + 地點清單
+let pos = null;           // 最近一次定位 {lat,lng,acc}
+let near = null;          // 最近的打卡地點 {name,dist,radius}
+let watchId = null;
+let busy = false;
+
+const $ = id => document.getElementById(id);
+const WD = ['日','一','二','三','四','五','六'];
+
+/* ─── 與後端溝通 ───
+   用 text/plain 送出，避開 CORS preflight（Apps Script 不支援 OPTIONS） */
+async function api(action, data) {
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL)) {
+    throw new Error('系統尚未設定 API 網址，請聯絡人資');
+  }
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ action }, data || {}))
+  });
+  if (!res.ok) throw new Error('連線失敗（HTTP ' + res.status + '）');
+  const json = await res.json();
+  if (json.ok === false) throw new Error(json.msg || '操作失敗');
+  return json;
+}
+
+/* ─── 小工具 ─── */
+function toast(msg, kind) {
+  const t = $('toast');
+  t.textContent = msg; t.className = 'show ' + (kind || 'ok');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(() => { t.className = ''; }, kind === 'bad' ? 6000 : 3800);
+}
+function loading(on, msg) {
+  $('loaderMsg').textContent = msg || '處理中…';
+  $('loader').classList.toggle('hidden', !on);
+}
+function deviceId() {
+  let d = localStorage.getItem(LS_DEV);
+  if (!d) {
+    d = (self.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())).slice(0, 8);
+    localStorage.setItem(LS_DEV, d);
+  }
+  const ua = navigator.userAgent;
+  const os = /iPhone|iPad|iPod/.test(ua) ? 'iOS' : /Android/.test(ua) ? 'Android' : 'Other';
+  return d + '/' + os;
+}
+function haversine(a, b, c, d) {
+  const R = 6371000, r = Math.PI / 180;
+  const dLat = (c - a) * r, dLng = (d - b) * r;
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+}
+
+/* ─── 時鐘 ─── */
+function tick() {
+  const n = new Date();
+  const p = v => String(v).padStart(2, '0');
+  $('clockT').innerHTML = p(n.getHours()) + ':' + p(n.getMinutes()) +
+                          '<small>:' + p(n.getSeconds()) + '</small>';
+  $('clockD').textContent = n.getFullYear() + ' 年 ' + (n.getMonth() + 1) + ' 月 ' +
+                            n.getDate() + ' 日　星期' + WD[n.getDay()];
+}
+
+/* ─── 定位 ─── */
+function startWatch() {
+  if (!navigator.geolocation) return gpsState('bad', '此裝置不支援定位', '請改用 Chrome 或 Safari 開啟。');
+  if (!window.isSecureContext) {
+    return gpsState('bad', '網址不是 HTTPS', '瀏覽器只允許在 https:// 網址下取得定位，請確認開啟的是人資提供的正式網址。');
+  }
+  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+  watchId = navigator.geolocation.watchPosition(
+    p => { pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy }; render(); },
+    err => gpsError(err),
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 }
+  );
+}
+function gpsError(err) {
+  pos = null;
+  if (err.code === 1) {
+    gpsState('bad', '定位權限被拒絕',
+      '請到手機「設定 → 瀏覽器 → 位置」開啟權限，或點網址列左側的鎖頭圖示允許定位，然後重新整理。');
+  } else if (err.code === 3) {
+    gpsState('warn', '定位逾時', '訊號不佳，請走到戶外或靠近窗邊，稍候會自動重試。');
+  } else {
+    gpsState('bad', '無法取得定位', '請確認手機的「定位服務」已開啟。');
+  }
+  refreshButtons();
+}
+function gpsState(kind, title, sub, pct) {
+  const c = $('gpsCard');
+  c.className = kind;
+  $('gpsTitle').textContent = title;
+  $('gpsSub').innerHTML = sub;
+  $('gpsBar').style.width = (pct == null ? 0 : Math.max(3, Math.min(100, pct))) + '%';
+}
+
+/** 依目前定位計算最近地點並更新畫面 */
+function render() {
+  if (!pos || !cfg) return;
+  if (!cfg.locations.length) {
+    near = null;
+    gpsState('bad', '尚未設定打卡地點', '請聯絡人資在系統中設定公司座標。');
+    return refreshButtons();
+  }
+  near = cfg.locations.reduce((best, L) => {
+    const d = haversine(pos.lat, pos.lng, L.lat, L.lng);
+    return (!best || d < best.dist) ? { name: L.name, radius: L.radius, dist: d } : best;
+  }, null);
+
+  const limit = near.radius + (cfg.tolerance || 0);
+  const inside = near.dist <= limit;
+  const accBad = pos.acc > cfg.accuracyLimit;
+  const dist = Math.round(near.dist);
+  const meta = '距離 <b>' + dist + '</b> 公尺（允許 ' + near.radius + ' 公尺）<br>' +
+               '定位誤差 ±' + Math.round(pos.acc) + ' 公尺';
+
+  if (accBad) {
+    gpsState('warn', '定位訊號不穩', meta + '<br>誤差超過 ±' + cfg.accuracyLimit +
+             ' 公尺，請走到戶外或靠近窗邊再打卡。', 100);
+  } else if (inside) {
+    gpsState('ok', '已在「' + near.name + '」範圍內', meta, (1 - dist / limit) * 100);
+  } else {
+    gpsState('bad', '不在打卡範圍內', meta + '<br>請靠近「' + near.name + '」再打卡。', 100);
+  }
+  refreshButtons();
+}
+
+function refreshButtons() {
+  const limit = near ? near.radius + (cfg.tolerance || 0) : 0;
+  const can = !busy && !!pos && !!near && pos.acc <= cfg.accuracyLimit &&
+              (near.dist <= limit || cfg.allowOutside);
+  $('btnIn').disabled = !can;
+  $('btnOut').disabled = !can;
+}
+
+/** 打卡當下重新抓一次「新鮮」座標，不吃快取 */
+function freshPosition() {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy }),
+      err => reject(new Error(err.code === 1 ? '定位權限被拒絕，無法打卡' : '取得定位失敗，請到訊號較好的地方再試')),
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+    );
+  });
+}
+
+/* ─── 打卡 ─── */
+async function punch(type) {
+  if (busy) return;
+  busy = true; refreshButtons(); loading(true, '確認位置中…');
+  try {
+    const fresh = await freshPosition();
+    pos = fresh; render();
+    loading(true, '送出打卡…');
+    const r = await api('punch', {
+      empId: auth.empId, token: auth.token, type: type,
+      lat: fresh.lat, lng: fresh.lng, acc: fresh.acc, device: deviceId()
+    });
+    drawToday(r.today);
+    toast('✓ ' + type + '打卡成功　' + r.time + '　@' + r.location +
+          '（' + r.distance + ' 公尺）', r.result === '正常' ? 'ok' : 'warn');
+    if (navigator.vibrate) navigator.vibrate(60);
+  } catch (e) {
+    toast('✕ ' + e.message, 'bad');
+    if (/重新登入|停用|查無/.test(e.message)) logout();
+  } finally {
+    busy = false; loading(false); refreshButtons();
+  }
+}
+
+function drawToday(rows) {
+  const box = $('todayList');
+  if (!rows || !rows.length) { box.innerHTML = '<div class="empty">今天還沒有打卡紀錄</div>'; return; }
+  box.innerHTML = rows.map(r =>
+    '<div class="rec"><span class="tag ' + (r.type === '上班' ? 'in' : 'out') + '">' + r.type + '</span>' +
+    '<span class="tm">' + r.time + '</span>' +
+    '<span class="mt">' + r.loc + '　' + r.dist + ' 公尺' +
+    (r.result !== '正常' ? '<br>⚠ ' + r.result : '') + '</span></div>').join('');
+}
+
+async function loadHistory() {
+  $('histList').innerHTML = '<div class="empty">載入中…</div>';
+  try {
+    const r = await api('history', { empId: auth.empId, token: auth.token });
+    $('histList').innerHTML = r.rows.length
+      ? r.rows.map(x =>
+          '<div class="rec"><span class="tag ' + (x.type === '上班' ? 'in' : 'out') + '">' + x.type + '</span>' +
+          '<span class="tm">' + x.date + ' ' + x.time + '</span>' +
+          '<span class="mt">' + x.loc + (x.result !== '正常' ? '　⚠ ' + x.result : '') + '</span></div>').join('')
+      : '<div class="empty">本月尚無紀錄</div>';
+  } catch (e) {
+    $('histList').innerHTML = '<div class="empty">載入失敗：' + e.message + '</div>';
+  }
+}
+
+/* ─── 登入 / 登出 ─── */
+async function login() {
+  const empId = $('empId').value.trim();
+  const pin = $('pin').value.trim();
+  if (!empId || !pin) return toast('請輸入員工編號與 PIN 碼', 'bad');
+  $('loginBtn').disabled = true; loading(true, '登入中…');
+  try {
+    const r = await api('login', { empId: empId, pin: pin });
+    auth = { empId: r.empId, token: r.token, name: r.name, dept: r.dept };
+    if ($('remember').checked) localStorage.setItem(LS, JSON.stringify(auth));
+    else sessionStorage.setItem(LS, JSON.stringify(auth));
+    enterMain(r.today);
+  } catch (e) {
+    toast('✕ ' + e.message, 'bad');
+  } finally {
+    $('loginBtn').disabled = false; loading(false);
+  }
+}
+
+function logout() {
+  localStorage.removeItem(LS); sessionStorage.removeItem(LS);
+  auth = null;
+  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  $('mainView').classList.add('hidden');
+  $('loginView').classList.remove('hidden');
+  $('pin').value = '';
+}
+
+function enterMain(today) {
+  $('uName').textContent = auth.name;
+  $('uMeta').textContent = auth.dept + '　' + auth.empId;
+  $('loginView').classList.add('hidden');
+  $('mainView').classList.remove('hidden');
+  drawToday(today || []);
+  startWatch();
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (!standalone && !localStorage.getItem(LS_BANNER)) $('installBanner').classList.remove('hidden');
+}
+
+/* ─── 啟動 ─── */
+async function boot() {
+  tick(); setInterval(tick, 1000);
+
+  $('loginBtn').onclick = login;
+  $('pin').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  $('logoutBtn').onclick = () => { if (confirm('確定要登出嗎？')) logout(); };
+  $('btnIn').onclick = () => punch('上班');
+  $('btnOut').onclick = () => punch('下班');
+  $('histBtn').onclick = loadHistory;
+  $('closeBanner').onclick = () => {
+    $('installBanner').classList.add('hidden'); localStorage.setItem(LS_BANNER, '1');
+  };
+
+  try {
+    cfg = await api('config');
+  } catch (e) {
+    $('loginSub').textContent = '無法連線：' + e.message;
+    $('loginView').classList.remove('hidden');
+    return;
+  }
+
+  const saved = localStorage.getItem(LS) || sessionStorage.getItem(LS);
+  if (saved) {
+    try {
+      auth = JSON.parse(saved);
+      const r = await api('today', { empId: auth.empId, token: auth.token });
+      return enterMain(r.today);
+    } catch (e) {
+      localStorage.removeItem(LS); sessionStorage.removeItem(LS); auth = null;
+    }
+  }
+  $('loginView').classList.remove('hidden');
+}
+
+if ('serviceWorker' in navigator) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+boot();
+</script>
+</body>
+</html>
