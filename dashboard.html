@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070c18">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="favicon-32.png">
+<title>出勤戰情室</title>
+<style>
+:root{
+  --bg:#070c18; --panel:#0f1729; --panel2:#141f38; --line:#1f2d4d;
+  --ink:#e8eefc; --muted:#7d8cad;
+  --ok:#22c55e; --work:#38bdf8; --off:#94a3b8; --late:#f59e0b; --bad:#ef4444; --none:#475569;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  min-height:100vh;padding:14px 16px 28px;font-variant-numeric:tabular-nums}
+.hidden{display:none !important}
+button{font-family:inherit;cursor:pointer}
+
+/* 登入 */
+#login{max-width:400px;margin:14vh auto 0;background:var(--panel);border:1px solid var(--line);
+  border-radius:18px;padding:30px 26px;text-align:center}
+#login h1{margin:0 0 6px;font-size:23px;letter-spacing:5px}
+#login p{margin:0 0 22px;color:var(--muted);font-size:13px}
+#login input{width:100%;padding:14px;font-size:17px;border:1.5px solid var(--line);border-radius:12px;
+  background:#0a1120;color:var(--ink);text-align:center;letter-spacing:3px;font-family:inherit}
+#login input:focus{outline:0;border-color:var(--work)}
+#login button{width:100%;margin-top:14px;padding:14px;border:0;border-radius:12px;background:#1d4ed8;
+  color:#fff;font-size:16px;font-weight:700;letter-spacing:2px}
+#login .err{color:var(--bad);font-size:13px;margin-top:12px;line-height:1.6;min-height:18px}
+
+/* 頂列 */
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.bar h1{margin:0;font-size:20px;font-weight:800;letter-spacing:3px}
+.bar .date{color:var(--muted);font-size:13.5px}
+.bar .clock{font-size:26px;font-weight:300;letter-spacing:1px;margin-left:4px}
+.bar .sp{margin-left:auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.chipbtn{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:9px;
+  padding:8px 13px;font-size:12.5px}
+.chipbtn:hover{color:var(--ink);border-color:#31456f}
+.chipbtn.on{background:#16305c;border-color:#2f5fb0;color:#cfe1ff}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:bl 1.8s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:11px;margin-bottom:14px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 12px;
+  border-top:3px solid var(--none)}
+.kpi .n{font-size:34px;font-weight:700;line-height:1.1}
+.kpi .l{font-size:12px;color:var(--muted);margin-top:3px;letter-spacing:1px}
+.kpi.k-total{border-top-color:#64748b}
+.kpi.k-arr{border-top-color:var(--ok)}   .kpi.k-arr .n{color:var(--ok)}
+.kpi.k-work{border-top-color:var(--work)} .kpi.k-work .n{color:var(--work)}
+.kpi.k-off{border-top-color:var(--off)}   .kpi.k-off .n{color:var(--off)}
+.kpi.k-abs{border-top-color:var(--none)}  .kpi.k-abs .n{color:#cbd5e1}
+.kpi.k-late{border-top-color:var(--late)} .kpi.k-late .n{color:var(--late)}
+.kpi.k-bad{border-top-color:var(--bad)}   .kpi.k-bad .n{color:var(--bad)}
+.kpi.hot{animation:flash 1.2s ease-out}
+@keyframes flash{0%{background:#2a1520}100%{background:var(--panel)}}
+
+/* 版面 */
+.cols{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.panel h2{margin:0 0 11px;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:2px;
+  display:flex;align-items:center;gap:8px}
+.panel h2 span{margin-left:auto;font-weight:400;font-size:12px}
+
+/* 篩選 */
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filters input{background:#0a1120;border:1px solid var(--line);color:var(--ink);border-radius:9px;
+  padding:7px 11px;font-size:13px;font-family:inherit;width:150px;margin-left:auto}
+.filters input:focus{outline:0;border-color:var(--work)}
+
+/* 人員卡 */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:9px}
+.p{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:10px 11px;
+  border-left:4px solid var(--none);position:relative;transition:transform .12s}
+.p:hover{transform:translateY(-2px)}
+.p.s-work{border-left-color:var(--work)} .p.s-off{border-left-color:var(--off)}
+.p.s-none{border-left-color:var(--none);opacity:.62}
+.p.late{border-left-color:var(--late)}   .p.bad{border-left-color:var(--bad);background:#2a1420}
+.p .nm{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:6px}
+.p .nm em{font-style:normal;font-size:10.5px;color:var(--muted);font-weight:400}
+.p .dp{font-size:11px;color:var(--muted);margin-top:2px}
+.p .tm{margin-top:7px;font-size:12.5px;display:flex;gap:8px}
+.p .tm b{font-weight:700}
+.p .in b{color:var(--ok)} .p .out b{color:var(--off)}
+.p .warn{margin-top:5px;font-size:11px;color:var(--late)}
+.p .warn.err{color:var(--bad)}
+.p .no{margin-top:7px;font-size:12.5px;color:var(--none)}
+
+/* 動態 */
+.feed{max-height:352px;overflow-y:auto;margin:-4px -4px 0}
+.f{display:flex;gap:9px;align-items:baseline;padding:8px 4px;border-bottom:1px solid var(--line);font-size:13px}
+.f:last-child{border-bottom:0}
+.f .t{color:var(--muted);font-size:11.5px;flex:none;width:56px}
+.f .n{font-weight:700}
+.f .g{font-size:10.5px;padding:2px 7px;border-radius:99px;flex:none}
+.g.in{background:#0d3b26;color:#4ade80} .g.out{background:#3a2410;color:#fbbf24}
+.f .d{margin-left:auto;color:var(--muted);font-size:11px;text-align:right;flex:none}
+.f.bad .d{color:var(--bad)}
+
+/* 地圖 */
+#mapWrap{margin-top:14px}
+#map{width:100%;height:auto;display:block;background:#0a1120;border-radius:10px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:9px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:26px 0}
+.err{background:#2a1420;border:1px solid #5b2230;color:#fca5a5;border-radius:11px;padding:11px 13px;
+  font-size:13px;margin-bottom:12px;line-height:1.6}
+
+@media(max-width:1180px){ .kpis{grid-template-columns:repeat(4,1fr)} .cols{grid-template-columns:1fr} }
+@media(max-width:640px){
+  body{padding:10px 11px 24px}
+  .kpis{grid-template-columns:repeat(2,1fr);gap:8px}
+  .kpi .n{font-size:27px}
+  .bar h1{font-size:17px} .bar .clock{font-size:21px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+}
+/* 投影/大螢幕模式 */
+body.tv .grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+body.tv .kpi .n{font-size:46px}
+body.tv .p .nm{font-size:17px}
+</style>
+</head>
+<body>
+
+<!-- ══════════ 登入 ══════════ -->
+<div id="login" class="hidden">
+  <h1>出勤戰情室</h1>
+  <p>本頁僅供人資與主管使用</p>
+  <input id="pw" type="password" placeholder="管理密碼" autocomplete="current-password">
+  <button id="loginBtn">進　入</button>
+  <div class="err" id="loginErr"></div>
+</div>
+
+<!-- ══════════ 看板 ══════════ -->
+<div id="board" class="hidden">
+  <div class="bar">
+    <h1>出勤戰情室</h1>
+    <span class="date" id="dateTxt">—</span>
+    <span class="clock" id="clockTxt">--:--:--</span>
+    <div class="sp">
+      <span class="live"><i></i><span id="updTxt">—</span></span>
+      <button class="chipbtn on" id="autoBtn">自動更新 30 秒</button>
+      <button class="chipbtn" id="refreshBtn">立即更新</button>
+      <button class="chipbtn" id="tvBtn">大螢幕</button>
+      <button class="chipbtn" id="outBtn">登出</button>
+    </div>
+  </div>
+
+  <div id="errBox" class="err hidden"></div>
+
+  <div class="kpis">
+    <div class="kpi k-total"><div class="n" id="kTotal">0</div><div class="l">應到人數</div></div>
+    <div class="kpi k-arr"><div class="n" id="kArr">0</div><div class="l">已到</div></div>
+    <div class="kpi k-work"><div class="n" id="kWork">0</div><div class="l">上班中</div></div>
+    <div class="kpi k-off"><div class="n" id="kOff">0</div><div class="l">已下班</div></div>
+    <div class="kpi k-abs"><div class="n" id="kAbs">0</div><div class="l">尚未打卡</div></div>
+    <div class="kpi k-late"><div class="n" id="kLate">0</div><div class="l">遲到</div></div>
+    <div class="kpi k-bad"><div class="n" id="kBad">0</div><div class="l">位置異常</div></div>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <h2>人員狀態 <span id="shiftTxt"></span></h2>
+      <div class="filters" id="filters"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>即時打卡動態 <span id="feedCnt"></span></h2>
+        <div class="feed" id="feed"></div>
+      </div>
+      <div class="panel" id="mapWrap">
+        <h2>今日打卡位置</h2>
+        <svg id="map" viewBox="0 0 300 300"></svg>
+        <div class="legend">
+          <span><i style="background:var(--ok)"></i>上班</span>
+          <span><i style="background:#fbbf24"></i>下班</span>
+          <span><i style="background:var(--bad)"></i>異常</span>
+          <span><i style="background:#2f5fb0"></i>打卡範圍</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   ★ 與 index.html 用同一個 API 網址 ★
+   ════════════════════════════════════════════════════════════ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbxbyGMSYWs67z04nGR7iY1dg4Xvx3moLMDJf5gmi2UssLUtmLOnPUnzGAfYDxG1T_Hc7Q/exec';
+
+const LS = 'gpsclock.admin';
+const $ = id => document.getElementById(id);
+let token = null, data = null, timer = null, auto = true, dept = '全部', kw = '';
+let lastFeedTop = '';
+
+async function api(action, body) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ action }, body || {}))
+  });
+  if (!res.ok) throw new Error('連線失敗（HTTP ' + res.status + '）');
+  const j = await res.json();
+  if (j.ok === false) throw new Error(j.msg || '讀取失敗');
+  return j;
+}
+
+/* ─── 時鐘 ─── */
+setInterval(() => {
+  const n = new Date(), p = v => String(v).padStart(2, '0');
+  $('clockTxt').textContent = p(n.getHours()) + ':' + p(n.getMinutes()) + ':' + p(n.getSeconds());
+}, 1000);
+
+/* ─── 載入 ─── */
+async function load(showErr) {
+  try {
+    const d = await api('board', { token });
+    data = d;
+    $('errBox').classList.add('hidden');
+    render();
+    const n = new Date(), p = v => String(v).padStart(2, '0');
+    $('updTxt').textContent = '最後更新 ' + p(n.getHours()) + ':' + p(n.getMinutes()) + ':' + p(n.getSeconds());
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    if (showErr !== false) {
+      $('errBox').textContent = '⚠ ' + e.message + '（將繼續自動重試）';
+      $('errBox').classList.remove('hidden');
+    }
+  }
+}
+
+function render() {
+  const d = data, s = d.summary;
+  $('dateTxt').textContent = d.date + '（' + d.weekday + '）';
+  $('shiftTxt').textContent = '上班 ' + d.shiftStart + '　寬限 ' + d.grace + ' 分';
+
+  const set = (id, v) => {
+    const el = $(id);
+    if (el.textContent !== String(v)) {
+      el.textContent = v;
+      el.parentElement.classList.remove('hot');
+      void el.parentElement.offsetWidth;
+      el.parentElement.classList.add('hot');
+    }
+  };
+  set('kTotal', s.total); set('kArr', s.arrived); set('kWork', s.working);
+  set('kOff', s.off); set('kAbs', s.absent); set('kLate', s.late); set('kBad', s.abnormal);
+
+  // 部門篩選
+  const f = $('filters');
+  if (f.dataset.sig !== d.depts.join('|')) {
+    f.dataset.sig = d.depts.join('|');
+    f.innerHTML = ['全部'].concat(d.depts)
+      .map(x => '<button class="chipbtn" data-d="' + x + '">' + x + '</button>').join('') +
+      '<input id="kw" placeholder="搜尋姓名／工號" value="' + kw + '">';
+    f.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { dept = b.dataset.d; render(); });
+    $('kw').oninput = e => { kw = e.target.value.trim(); drawGrid(); };
+  }
+  f.querySelectorAll('[data-d]').forEach(b => b.classList.toggle('on', b.dataset.d === dept));
+
+  drawGrid();
+  drawFeed();
+  drawMap();
+}
+
+function drawGrid() {
+  const k = kw.toLowerCase();
+  const rows = data.rows.filter(r =>
+    (dept === '全部' || r.dept === dept) &&
+    (!k || r.name.toLowerCase().includes(k) || r.empId.toLowerCase().includes(k)));
+
+  // 需要注意的排前面：異常 → 遲到 → 未打卡 → 上班中 → 已下班
+  const rank = r => r.flags.length ? 0 : r.late ? 1 : r.status === '未打卡' ? 2 : r.status === '上班中' ? 3 : 4;
+  rows.sort((a, b) => rank(a) - rank(b) || (a.inTime || '~').localeCompare(b.inTime || '~'));
+
+  $('grid').innerHTML = rows.length ? rows.map(r => {
+    const cls = ['p',
+      r.status === '上班中' ? 's-work' : r.status === '已下班' ? 's-off' : 's-none',
+      r.late ? 'late' : '', r.flags.length ? 'bad' : ''].filter(Boolean).join(' ');
+    let body;
+    if (r.status === '未打卡') {
+      body = '<div class="no">— 尚未打卡 —</div>';
+    } else {
+      body = '<div class="tm"><span class="in">上 <b>' + r.inTime + '</b></span>' +
+             (r.outTime ? '<span class="out">下 <b>' + r.outTime + '</b></span>' : '') + '</div>';
+    }
+    let warn = '';
+    if (r.late) warn += '<div class="warn">遲到 ' + r.late + ' 分鐘</div>';
+    if (r.flags.length) warn += '<div class="warn err">⚠ ' + r.flags.join('、') + '</div>';
+    return '<div class="' + cls + '"><div class="nm">' + esc(r.name) +
+           '<em>' + esc(r.empId) + '</em></div><div class="dp">' + esc(r.dept) + '</div>' +
+           body + warn + '</div>';
+  }).join('') : '<div class="empty">沒有符合條件的人員</div>';
+}
+
+function drawFeed() {
+  const f = data.feed;
+  $('feedCnt').textContent = '今日 ' + f.length + ' 筆';
+  $('feed').innerHTML = f.length ? f.map(x =>
+    '<div class="f' + (x.result !== '正常' ? ' bad' : '') + '">' +
+    '<span class="t">' + x.time + '</span>' +
+    '<span class="g ' + (x.type === '上班' ? 'in' : 'out') + '">' + x.type + '</span>' +
+    '<span class="n">' + esc(x.name) + '</span>' +
+    '<span class="d">' + esc(x.loc) + ' ' + x.dist + 'm' +
+    (x.result !== '正常' ? '<br>⚠ ' + esc(x.result) : '') + '</span></div>').join('')
+    : '<div class="empty">今日尚無打卡</div>';
+
+  // 有新紀錄時輕微提示
+  const top = f.length ? f[0].time + f[0].name : '';
+  if (lastFeedTop && top && top !== lastFeedTop) {
+    const el = $('feed').firstElementChild;
+    if (el) { el.style.background = '#16305c'; setTimeout(() => el.style.background = '', 1500); }
+  }
+  lastFeedTop = top;
+}
+
+/** 以第一個打卡地點為圓心，畫出今日所有打卡點的相對位置 */
+function drawMap() {
+  const svg = $('map'), L = data.locations[0], pts = data.points;
+  if (!L) { svg.innerHTML = '<text x="150" y="150" fill="#7d8cad" font-size="12" text-anchor="middle">尚未設定打卡地點</text>'; return; }
+  const C = 150, R = 128;
+  const rad = Math.PI / 180;
+  const xy = p => [(p.lng - L.lng) * 111320 * Math.cos(L.lat * rad), (p.lat - L.lat) * 110540];
+  let maxM = L.radius * 1.35;
+  pts.forEach(p => { const [dx, dy] = xy(p); maxM = Math.max(maxM, Math.hypot(dx, dy) * 1.12); });
+  const s = R / maxM;
+
+  let g = '';
+  // 距離刻度圈
+  [0.33, 0.66, 1].forEach(t => {
+    g += '<circle cx="150" cy="150" r="' + (R * t).toFixed(1) + '" fill="none" stroke="#1f2d4d" stroke-width="1"/>';
+  });
+  g += '<text x="150" y="' + (C - R + 12) + '" fill="#4a5b80" font-size="9" text-anchor="middle">' +
+       Math.round(maxM) + ' m</text>';
+  // 允許範圍
+  g += '<circle cx="150" cy="150" r="' + (L.radius * s).toFixed(1) +
+       '" fill="rgba(47,95,176,.16)" stroke="#2f5fb0" stroke-width="1.4"/>';
+  // 公司
+  g += '<circle cx="150" cy="150" r="4" fill="#60a5fa"/>' +
+       '<text x="150" y="141" fill="#93c5fd" font-size="9.5" text-anchor="middle">' + esc(L.name) + '</text>';
+  // 打卡點
+  pts.forEach(p => {
+    const [dx, dy] = xy(p);
+    const x = C + dx * s, y = C - dy * s;
+    const col = p.result !== '正常' ? '#ef4444' : p.type === '上班' ? '#22c55e' : '#fbbf24';
+    g += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.4" fill="' + col +
+         '" fill-opacity=".82"><title>' + esc(p.name) + ' ' + p.type + ' ' + p.dist + 'm</title></circle>';
+  });
+  svg.innerHTML = g;
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+/* ─── 自動更新 ─── */
+function setAuto(on) {
+  auto = on;
+  $('autoBtn').classList.toggle('on', on);
+  $('autoBtn').textContent = on ? '自動更新 30 秒' : '自動更新 已關閉';
+  clearInterval(timer);
+  if (on) timer = setInterval(load, 30000);
+}
+
+/* ─── 登入 / 登出 ─── */
+async function login() {
+  const pw = $('pw').value.trim();
+  if (!pw) return;
+  $('loginBtn').disabled = true; $('loginErr').textContent = '';
+  try {
+    const d = await api('adminLogin', { pw: pw, device: 'dashboard' });
+    token = d.token; data = d;
+    localStorage.setItem(LS, token);
+    enter();
+  } catch (e) {
+    $('loginErr').textContent = e.message;
+  } finally {
+    $('loginBtn').disabled = false;
+  }
+}
+
+function enter() {
+  $('login').classList.add('hidden');
+  $('board').classList.remove('hidden');
+  if (data) render();
+  setAuto(true);
+  load();
+}
+
+function logout(msg) {
+  clearInterval(timer); token = null; data = null;
+  localStorage.removeItem(LS);
+  $('board').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('pw').value = '';
+  $('loginErr').textContent = msg || '';
+}
+
+/* ─── 啟動 ─── */
+$('loginBtn').onclick = login;
+$('pw').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+$('refreshBtn').onclick = () => load();
+$('autoBtn').onclick = () => setAuto(!auto);
+$('outBtn').onclick = () => { if (confirm('確定登出戰情室？')) logout(); };
+$('tvBtn').onclick = () => {
+  document.body.classList.toggle('tv');
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+};
+
+token = localStorage.getItem(LS);
+if (token) { enter(); } else { $('login').classList.remove('hidden'); $('pw').focus(); }
+</script>
+</body>
+</html>
