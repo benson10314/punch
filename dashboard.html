@@ -19,6 +19,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","Pin
   min-height:100vh;padding:14px 16px 28px;font-variant-numeric:tabular-nums}
 .hidden{display:none !important}
 button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
 
 /* 登入 */
 #login{max-width:400px;margin:14vh auto 0;background:var(--panel);border:1px solid var(--line);
@@ -26,14 +27,14 @@ button{font-family:inherit;cursor:pointer}
 #login h1{margin:0 0 6px;font-size:23px;letter-spacing:5px}
 #login p{margin:0 0 22px;color:var(--muted);font-size:13px}
 #login input{width:100%;padding:14px;font-size:17px;border:1.5px solid var(--line);border-radius:12px;
-  background:#0a1120;color:var(--ink);text-align:center;letter-spacing:3px;font-family:inherit}
+  background:#0a1120;color:var(--ink);text-align:center;letter-spacing:3px}
 #login input:focus{outline:0;border-color:var(--work)}
 #login button{width:100%;margin-top:14px;padding:14px;border:0;border-radius:12px;background:#1d4ed8;
   color:#fff;font-size:16px;font-weight:700;letter-spacing:2px}
-#login .err{color:var(--bad);font-size:13px;margin-top:12px;line-height:1.6;min-height:18px}
+#login .msg{color:var(--bad);font-size:13px;margin-top:12px;line-height:1.6;min-height:18px}
 
 /* 頂列 */
-.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
 .bar h1{margin:0;font-size:20px;font-weight:800;letter-spacing:3px}
 .bar .date{color:var(--muted);font-size:13.5px}
 .bar .clock{font-size:26px;font-weight:300;letter-spacing:1px;margin-left:4px}
@@ -46,6 +47,13 @@ button{font-family:inherit;cursor:pointer}
 .live i{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:bl 1.8s infinite}
 @keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
 
+/* 分頁 */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tab{background:0;border:0;border-bottom:2px solid transparent;color:var(--muted);
+  padding:10px 18px;font-size:14px;font-weight:600;letter-spacing:1px}
+.tab:hover{color:var(--ink)}
+.tab.on{color:#cfe1ff;border-bottom-color:#2f5fb0}
+
 /* KPI */
 .kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:11px;margin-bottom:14px}
 .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 12px;
@@ -53,7 +61,7 @@ button{font-family:inherit;cursor:pointer}
 .kpi .n{font-size:34px;font-weight:700;line-height:1.1}
 .kpi .l{font-size:12px;color:var(--muted);margin-top:3px;letter-spacing:1px}
 .kpi.k-total{border-top-color:#64748b}
-.kpi.k-arr{border-top-color:var(--ok)}   .kpi.k-arr .n{color:var(--ok)}
+.kpi.k-arr{border-top-color:var(--ok)}    .kpi.k-arr .n{color:var(--ok)}
 .kpi.k-work{border-top-color:var(--work)} .kpi.k-work .n{color:var(--work)}
 .kpi.k-off{border-top-color:var(--off)}   .kpi.k-off .n{color:var(--off)}
 .kpi.k-abs{border-top-color:var(--none)}  .kpi.k-abs .n{color:#cbd5e1}
@@ -64,21 +72,21 @@ button{font-family:inherit;cursor:pointer}
 
 /* 版面 */
 .cols{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
 .panel h2{margin:0 0 11px;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:2px;
   display:flex;align-items:center;gap:8px}
 .panel h2 span{margin-left:auto;font-weight:400;font-size:12px}
 
-/* 篩選 */
 .filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
-.filters input{background:#0a1120;border:1px solid var(--line);color:var(--ink);border-radius:9px;
-  padding:7px 11px;font-size:13px;font-family:inherit;width:150px;margin-left:auto}
-.filters input:focus{outline:0;border-color:var(--work)}
+.txt{background:#0a1120;border:1px solid var(--line);color:var(--ink);border-radius:9px;
+  padding:8px 11px;font-size:13px}
+.txt:focus{outline:0;border-color:var(--work)}
+.filters .push{margin-left:auto}
 
 /* 人員卡 */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:9px}
 .p{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:10px 11px;
-  border-left:4px solid var(--none);position:relative;transition:transform .12s}
+  border-left:4px solid var(--none);transition:transform .12s}
 .p:hover{transform:translateY(-2px)}
 .p.s-work{border-left-color:var(--work)} .p.s-off{border-left-color:var(--off)}
 .p.s-none{border-left-color:var(--none);opacity:.62}
@@ -87,7 +95,6 @@ button{font-family:inherit;cursor:pointer}
 .p .nm em{font-style:normal;font-size:10.5px;color:var(--muted);font-weight:400}
 .p .dp{font-size:11px;color:var(--muted);margin-top:2px}
 .p .tm{margin-top:7px;font-size:12.5px;display:flex;gap:8px}
-.p .tm b{font-weight:700}
 .p .in b{color:var(--ok)} .p .out b{color:var(--off)}
 .p .warn{margin-top:5px;font-size:11px;color:var(--late)}
 .p .warn.err{color:var(--bad)}
@@ -105,14 +112,56 @@ button{font-family:inherit;cursor:pointer}
 .f.bad .d{color:var(--bad)}
 
 /* 地圖 */
-#mapWrap{margin-top:14px}
 #map{width:100%;height:auto;display:block;background:#0a1120;border-radius:10px}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:9px}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
 
+/* 表格 */
+.tblwrap{overflow-x:auto;max-height:64vh;overflow-y:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line)}
+th{position:sticky;top:0;background:#111c33;color:var(--muted);font-size:11.5px;letter-spacing:1px;z-index:1}
+tbody tr:hover{background:var(--panel2)}
+td.num{text-align:right}
+.badge{font-size:11px;padding:3px 9px;border-radius:99px}
+.badge.on{background:#0d3b26;color:#4ade80}
+.badge.off{background:#33202a;color:#fca5a5}
+.badge.lock{background:#3a2410;color:#fbbf24;margin-left:6px}
+.mini{background:var(--panel2);border:1px solid var(--line);color:#b9c8e6;border-radius:7px;
+  padding:5px 10px;font-size:12px;margin-right:5px}
+.mini:hover{border-color:#31456f;color:#fff}
+.mini.danger{color:#fca5a5;border-color:#5b2230}
+.pin{letter-spacing:2px}
+.primary{background:#1d4ed8;border:0;color:#fff;border-radius:9px;padding:9px 18px;font-size:13.5px;font-weight:700}
+.primary:hover{background:#2563eb}
+.primary:disabled{opacity:.5}
+
+/* Modal */
+#modal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:flex;align-items:center;
+  justify-content:center;z-index:50;padding:16px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;width:100%;max-width:420px}
+.box h3{margin:0 0 16px;font-size:16px;letter-spacing:2px}
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+.fld input,.fld select{width:100%;padding:11px;font-size:15px;border:1.5px solid var(--line);
+  border-radius:10px;background:#0a1120;color:var(--ink)}
+.fld input:focus,.fld select:focus{outline:0;border-color:var(--work)}
+.fld input:disabled{opacity:.55}
+.fld .row{display:flex;gap:8px}
+.fld .hint{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.55}
+.box .acts{display:flex;gap:9px;margin-top:19px}
+.box .acts .primary{flex:1}
+.modalerr{color:#fca5a5;font-size:12.5px;margin-top:11px;line-height:1.6;min-height:16px}
+
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:26px 0}
 .err{background:#2a1420;border:1px solid #5b2230;color:#fca5a5;border-radius:11px;padding:11px 13px;
   font-size:13px;margin-bottom:12px;line-height:1.6}
+.info{background:#0f2440;border:1px solid #24456f;color:#a8c6f0;border-radius:11px;padding:11px 13px;
+  font-size:12.5px;margin-bottom:12px;line-height:1.7}
+#toast{position:fixed;left:50%;transform:translate(-50%,140%);bottom:26px;padding:13px 22px;border-radius:12px;
+  font-size:14px;color:#fff;z-index:80;transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+#toast.show{transform:translate(-50%,0)}
+#toast.ok{background:#047857} #toast.bad{background:#b91c1c}
 
 @media(max-width:1180px){ .kpis{grid-template-columns:repeat(4,1fr)} .cols{grid-template-columns:1fr} }
 @media(max-width:640px){
@@ -120,9 +169,8 @@ button{font-family:inherit;cursor:pointer}
   .kpis{grid-template-columns:repeat(2,1fr);gap:8px}
   .kpi .n{font-size:27px}
   .bar h1{font-size:17px} .bar .clock{font-size:21px}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .tab{padding:9px 12px;font-size:13px}
 }
-/* 投影/大螢幕模式 */
 body.tv .grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
 body.tv .kpi .n{font-size:46px}
 body.tv .p .nm{font-size:17px}
@@ -136,17 +184,17 @@ body.tv .p .nm{font-size:17px}
   <p>本頁僅供人資與主管使用</p>
   <input id="pw" type="password" placeholder="管理密碼" autocomplete="current-password">
   <button id="loginBtn">進　入</button>
-  <div class="err" id="loginErr"></div>
+  <div class="msg" id="loginErr"></div>
 </div>
 
-<!-- ══════════ 看板 ══════════ -->
-<div id="board" class="hidden">
+<!-- ══════════ 主體 ══════════ -->
+<div id="app" class="hidden">
   <div class="bar">
     <h1>出勤戰情室</h1>
     <span class="date" id="dateTxt">—</span>
     <span class="clock" id="clockTxt">--:--:--</span>
     <div class="sp">
-      <span class="live"><i></i><span id="updTxt">—</span></span>
+      <span class="live" id="liveBox"><i></i><span id="updTxt">—</span></span>
       <button class="chipbtn on" id="autoBtn">自動更新 30 秒</button>
       <button class="chipbtn" id="refreshBtn">立即更新</button>
       <button class="chipbtn" id="tvBtn">大螢幕</button>
@@ -154,43 +202,132 @@ body.tv .p .nm{font-size:17px}
     </div>
   </div>
 
-  <div id="errBox" class="err hidden"></div>
-
-  <div class="kpis">
-    <div class="kpi k-total"><div class="n" id="kTotal">0</div><div class="l">應到人數</div></div>
-    <div class="kpi k-arr"><div class="n" id="kArr">0</div><div class="l">已到</div></div>
-    <div class="kpi k-work"><div class="n" id="kWork">0</div><div class="l">上班中</div></div>
-    <div class="kpi k-off"><div class="n" id="kOff">0</div><div class="l">已下班</div></div>
-    <div class="kpi k-abs"><div class="n" id="kAbs">0</div><div class="l">尚未打卡</div></div>
-    <div class="kpi k-late"><div class="n" id="kLate">0</div><div class="l">遲到</div></div>
-    <div class="kpi k-bad"><div class="n" id="kBad">0</div><div class="l">位置異常</div></div>
+  <div class="tabs">
+    <button class="tab on" data-v="board">即時看板</button>
+    <button class="tab" data-v="emp">員工管理</button>
+    <button class="tab" data-v="export">匯出報表</button>
   </div>
 
-  <div class="cols">
-    <div class="panel">
-      <h2>人員狀態 <span id="shiftTxt"></span></h2>
-      <div class="filters" id="filters"></div>
-      <div class="grid" id="grid"></div>
+  <div id="errBox" class="err hidden"></div>
+
+  <!-- ─── 即時看板 ─── -->
+  <div id="viewBoard">
+    <div class="kpis">
+      <div class="kpi k-total"><div class="n" id="kTotal">0</div><div class="l">應到人數</div></div>
+      <div class="kpi k-arr"><div class="n" id="kArr">0</div><div class="l">已到</div></div>
+      <div class="kpi k-work"><div class="n" id="kWork">0</div><div class="l">上班中</div></div>
+      <div class="kpi k-off"><div class="n" id="kOff">0</div><div class="l">已下班</div></div>
+      <div class="kpi k-abs"><div class="n" id="kAbs">0</div><div class="l">尚未打卡</div></div>
+      <div class="kpi k-late"><div class="n" id="kLate">0</div><div class="l">遲到</div></div>
+      <div class="kpi k-bad"><div class="n" id="kBad">0</div><div class="l">位置異常</div></div>
     </div>
 
-    <div>
+    <div class="cols">
       <div class="panel">
-        <h2>即時打卡動態 <span id="feedCnt"></span></h2>
-        <div class="feed" id="feed"></div>
+        <h2>人員狀態 <span id="shiftTxt"></span></h2>
+        <div class="filters" id="filters"></div>
+        <div class="grid" id="grid"></div>
       </div>
-      <div class="panel" id="mapWrap">
-        <h2>今日打卡位置</h2>
-        <svg id="map" viewBox="0 0 300 300"></svg>
-        <div class="legend">
-          <span><i style="background:var(--ok)"></i>上班</span>
-          <span><i style="background:#fbbf24"></i>下班</span>
-          <span><i style="background:var(--bad)"></i>異常</span>
-          <span><i style="background:#2f5fb0"></i>打卡範圍</span>
+      <div>
+        <div class="panel">
+          <h2>即時打卡動態 <span id="feedCnt"></span></h2>
+          <div class="feed" id="feed"></div>
+        </div>
+        <div class="panel">
+          <h2>今日打卡位置</h2>
+          <svg id="map" viewBox="0 0 300 300"></svg>
+          <div class="legend">
+            <span><i style="background:var(--ok)"></i>上班</span>
+            <span><i style="background:#fbbf24"></i>下班</span>
+            <span><i style="background:var(--bad)"></i>異常</span>
+            <span><i style="background:#2f5fb0"></i>打卡範圍</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- ─── 員工管理 ─── -->
+  <div id="viewEmp" class="hidden">
+    <div class="panel">
+      <h2>員工名冊 <span id="empCnt"></span></h2>
+      <div class="filters">
+        <button class="primary" id="addBtn">＋ 新增員工</button>
+        <select class="txt" id="empDept"><option>全部</option></select>
+        <label class="live"><input type="checkbox" id="showOff"> 顯示已停用</label>
+        <label class="live"><input type="checkbox" id="showPin"> 顯示 PIN</label>
+        <input class="txt push" id="empKw" placeholder="搜尋姓名／工號">
+      </div>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>員工編號</th><th>姓名</th><th>部門</th><th>PIN</th><th>狀態</th>
+            <th class="num">打卡筆數</th><th>操作</th></tr></thead>
+          <tbody id="empBody"></tbody>
+        </table>
+      </div>
+      <div class="info" style="margin:14px 0 0">
+        改 PIN 後，該員工手機上的登入會自動失效並要求重新登入。<br>
+        已有打卡紀錄的員工<b>不能刪除</b>（出勤紀錄依勞基法須保存 5 年），離職請改為「停用」。
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 匯出報表 ─── -->
+  <div id="viewExport" class="hidden">
+    <div class="panel">
+      <h2>匯出打卡資料</h2>
+      <div class="filters">
+        <label class="live">起</label><input class="txt" type="date" id="exFrom">
+        <label class="live">迄</label><input class="txt" type="date" id="exTo">
+        <select class="txt" id="exDept"><option>全部</option></select>
+        <select class="txt" id="exMode">
+          <option value="summary">每日彙總（每人每日一列）</option>
+          <option value="detail">打卡明細（每筆一列）</option>
+        </select>
+        <button class="primary" id="exBtn">查詢</button>
+        <button class="chipbtn" id="dlBtn" disabled>下載 CSV</button>
+      </div>
+      <div class="filters" style="margin-bottom:8px">
+        <button class="chipbtn" data-q="thisMonth">本月</button>
+        <button class="chipbtn" data-q="lastMonth">上月</button>
+        <button class="chipbtn" data-q="7d">近 7 天</button>
+        <button class="chipbtn" data-q="today">今天</button>
+      </div>
+      <div id="exInfo" class="info hidden"></div>
+      <div class="tblwrap"><table><thead id="exHead"></thead><tbody id="exBody"></tbody></table></div>
+      <div class="empty" id="exEmpty">選好條件後按「查詢」</div>
+    </div>
+  </div>
 </div>
+
+<!-- ══════════ 員工編輯視窗 ══════════ -->
+<div id="modal" class="hidden">
+  <div class="box">
+    <h3 id="mTitle">新增員工</h3>
+    <div class="fld"><label>員工編號</label>
+      <input id="mId" placeholder="例如 A001" autocapitalize="characters">
+      <div class="hint" id="mIdHint">建立後不建議變更，因為打卡紀錄是用編號對應的。</div>
+    </div>
+    <div class="fld"><label>姓名</label><input id="mName" placeholder="王小明"></div>
+    <div class="fld"><label>部門</label><input id="mDept" list="deptList" placeholder="管理部">
+      <datalist id="deptList"></datalist></div>
+    <div class="fld"><label>PIN 碼</label>
+      <div class="row"><input id="mPin" class="pin" placeholder="4～12 碼英數字">
+        <button class="mini" id="mRand" style="flex:none">隨機</button></div>
+      <div class="hint">員工用「員工編號＋PIN」登入打卡 App。</div>
+    </div>
+    <div class="fld"><label>狀態</label>
+      <select id="mActive"><option value="true">啟用</option><option value="false">停用（離職／留職停薪）</option></select>
+    </div>
+    <div class="modalerr" id="mErr"></div>
+    <div class="acts">
+      <button class="chipbtn" id="mCancel" style="flex:none">取消</button>
+      <button class="primary" id="mSave">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
 
 <script>
 /* ════════════════════════════════════════════════════════════
@@ -200,36 +337,61 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxbyGMSYWs67z04nGR7iY1d
 
 const LS = 'gpsclock.admin';
 const $ = id => document.getElementById(id);
-let token = null, data = null, timer = null, auto = true, dept = '全部', kw = '';
-let lastFeedTop = '';
+let token = null, data = null, timer = null, auto = true;
+let view = 'board', dept = '全部', kw = '', lastFeedTop = '';
+let emps = [], empDepts = [], editing = null, exResult = null;
 
 async function api(action, body) {
   const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ action }, body || {}))
+    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ action, token }, body || {}))
   });
   if (!res.ok) throw new Error('連線失敗（HTTP ' + res.status + '）');
   const j = await res.json();
-  if (j.ok === false) throw new Error(j.msg || '讀取失敗');
+  if (j.ok === false) throw new Error(j.msg || '操作失敗');
   return j;
 }
 
-/* ─── 時鐘 ─── */
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+function toast(msg, kind) {
+  const t = $('toast');
+  t.textContent = msg; t.className = 'show ' + (kind || 'ok');
+  clearTimeout(toast._h); toast._h = setTimeout(() => t.className = '', 3600);
+}
+function pad(v) { return String(v).padStart(2, '0'); }
+function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+
 setInterval(() => {
-  const n = new Date(), p = v => String(v).padStart(2, '0');
-  $('clockTxt').textContent = p(n.getHours()) + ':' + p(n.getMinutes()) + ':' + p(n.getSeconds());
+  const n = new Date();
+  $('clockTxt').textContent = pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
 }, 1000);
 
-/* ─── 載入 ─── */
+/* ════════ 分頁切換 ════════ */
+function switchTab(v) {
+  view = v;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $('viewBoard').classList.toggle('hidden', v !== 'board');
+  $('viewEmp').classList.toggle('hidden', v !== 'emp');
+  $('viewExport').classList.toggle('hidden', v !== 'export');
+  // 自動更新只在看板頁跑，避免打斷編輯
+  $('liveBox').classList.toggle('hidden', v !== 'board');
+  $('autoBtn').classList.toggle('hidden', v !== 'board');
+  $('refreshBtn').classList.toggle('hidden', v !== 'board');
+  setAuto(auto);
+  if (v === 'emp' && !emps.length) loadEmps();
+}
+
+/* ════════ 即時看板 ════════ */
 async function load(showErr) {
   try {
-    const d = await api('board', { token });
-    data = d;
+    data = await api('board');
     $('errBox').classList.add('hidden');
     render();
-    const n = new Date(), p = v => String(v).padStart(2, '0');
-    $('updTxt').textContent = '最後更新 ' + p(n.getHours()) + ':' + p(n.getMinutes()) + ':' + p(n.getSeconds());
+    const n = new Date();
+    $('updTxt').textContent = '最後更新 ' + pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
   } catch (e) {
     if (/失效|密碼/.test(e.message)) return logout(e.message);
     if (showErr !== false) {
@@ -256,21 +418,18 @@ function render() {
   set('kTotal', s.total); set('kArr', s.arrived); set('kWork', s.working);
   set('kOff', s.off); set('kAbs', s.absent); set('kLate', s.late); set('kBad', s.abnormal);
 
-  // 部門篩選
   const f = $('filters');
   if (f.dataset.sig !== d.depts.join('|')) {
     f.dataset.sig = d.depts.join('|');
     f.innerHTML = ['全部'].concat(d.depts)
-      .map(x => '<button class="chipbtn" data-d="' + x + '">' + x + '</button>').join('') +
-      '<input id="kw" placeholder="搜尋姓名／工號" value="' + kw + '">';
+      .map(x => '<button class="chipbtn" data-d="' + esc(x) + '">' + esc(x) + '</button>').join('') +
+      '<input class="txt push" id="kw" placeholder="搜尋姓名／工號" value="' + esc(kw) + '">';
     f.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { dept = b.dataset.d; render(); });
     $('kw').oninput = e => { kw = e.target.value.trim(); drawGrid(); };
   }
   f.querySelectorAll('[data-d]').forEach(b => b.classList.toggle('on', b.dataset.d === dept));
 
-  drawGrid();
-  drawFeed();
-  drawMap();
+  drawGrid(); drawFeed(); drawMap();
 }
 
 function drawGrid() {
@@ -278,28 +437,21 @@ function drawGrid() {
   const rows = data.rows.filter(r =>
     (dept === '全部' || r.dept === dept) &&
     (!k || r.name.toLowerCase().includes(k) || r.empId.toLowerCase().includes(k)));
-
-  // 需要注意的排前面：異常 → 遲到 → 未打卡 → 上班中 → 已下班
   const rank = r => r.flags.length ? 0 : r.late ? 1 : r.status === '未打卡' ? 2 : r.status === '上班中' ? 3 : 4;
   rows.sort((a, b) => rank(a) - rank(b) || (a.inTime || '~').localeCompare(b.inTime || '~'));
 
   $('grid').innerHTML = rows.length ? rows.map(r => {
-    const cls = ['p',
-      r.status === '上班中' ? 's-work' : r.status === '已下班' ? 's-off' : 's-none',
+    const cls = ['p', r.status === '上班中' ? 's-work' : r.status === '已下班' ? 's-off' : 's-none',
       r.late ? 'late' : '', r.flags.length ? 'bad' : ''].filter(Boolean).join(' ');
-    let body;
-    if (r.status === '未打卡') {
-      body = '<div class="no">— 尚未打卡 —</div>';
-    } else {
-      body = '<div class="tm"><span class="in">上 <b>' + r.inTime + '</b></span>' +
-             (r.outTime ? '<span class="out">下 <b>' + r.outTime + '</b></span>' : '') + '</div>';
-    }
+    const body = r.status === '未打卡'
+      ? '<div class="no">— 尚未打卡 —</div>'
+      : '<div class="tm"><span class="in">上 <b>' + r.inTime + '</b></span>' +
+        (r.outTime ? '<span class="out">下 <b>' + r.outTime + '</b></span>' : '') + '</div>';
     let warn = '';
     if (r.late) warn += '<div class="warn">遲到 ' + r.late + ' 分鐘</div>';
-    if (r.flags.length) warn += '<div class="warn err">⚠ ' + r.flags.join('、') + '</div>';
-    return '<div class="' + cls + '"><div class="nm">' + esc(r.name) +
-           '<em>' + esc(r.empId) + '</em></div><div class="dp">' + esc(r.dept) + '</div>' +
-           body + warn + '</div>';
+    if (r.flags.length) warn += '<div class="warn err">⚠ ' + esc(r.flags.join('、')) + '</div>';
+    return '<div class="' + cls + '"><div class="nm">' + esc(r.name) + '<em>' + esc(r.empId) +
+           '</em></div><div class="dp">' + esc(r.dept) + '</div>' + body + warn + '</div>';
   }).join('') : '<div class="empty">沒有符合條件的人員</div>';
 }
 
@@ -314,8 +466,6 @@ function drawFeed() {
     '<span class="d">' + esc(x.loc) + ' ' + x.dist + 'm' +
     (x.result !== '正常' ? '<br>⚠ ' + esc(x.result) : '') + '</span></div>').join('')
     : '<div class="empty">今日尚無打卡</div>';
-
-  // 有新紀錄時輕微提示
   const top = f.length ? f[0].time + f[0].name : '';
   if (lastFeedTop && top && top !== lastFeedTop) {
     const el = $('feed').firstElementChild;
@@ -324,90 +474,219 @@ function drawFeed() {
   lastFeedTop = top;
 }
 
-/** 以第一個打卡地點為圓心，畫出今日所有打卡點的相對位置 */
 function drawMap() {
   const svg = $('map'), L = data.locations[0], pts = data.points;
   if (!L) { svg.innerHTML = '<text x="150" y="150" fill="#7d8cad" font-size="12" text-anchor="middle">尚未設定打卡地點</text>'; return; }
-  const C = 150, R = 128;
-  const rad = Math.PI / 180;
+  const C = 150, R = 128, rad = Math.PI / 180;
   const xy = p => [(p.lng - L.lng) * 111320 * Math.cos(L.lat * rad), (p.lat - L.lat) * 110540];
   let maxM = L.radius * 1.35;
   pts.forEach(p => { const [dx, dy] = xy(p); maxM = Math.max(maxM, Math.hypot(dx, dy) * 1.12); });
   const s = R / maxM;
-
   let g = '';
-  // 距離刻度圈
-  [0.33, 0.66, 1].forEach(t => {
-    g += '<circle cx="150" cy="150" r="' + (R * t).toFixed(1) + '" fill="none" stroke="#1f2d4d" stroke-width="1"/>';
-  });
-  g += '<text x="150" y="' + (C - R + 12) + '" fill="#4a5b80" font-size="9" text-anchor="middle">' +
-       Math.round(maxM) + ' m</text>';
-  // 允許範圍
+  [0.33, 0.66, 1].forEach(t =>
+    g += '<circle cx="150" cy="150" r="' + (R * t).toFixed(1) + '" fill="none" stroke="#1f2d4d" stroke-width="1"/>');
+  g += '<text x="150" y="' + (C - R + 12) + '" fill="#4a5b80" font-size="9" text-anchor="middle">' + Math.round(maxM) + ' m</text>';
   g += '<circle cx="150" cy="150" r="' + (L.radius * s).toFixed(1) +
        '" fill="rgba(47,95,176,.16)" stroke="#2f5fb0" stroke-width="1.4"/>';
-  // 公司
-  g += '<circle cx="150" cy="150" r="4" fill="#60a5fa"/>' +
-       '<text x="150" y="141" fill="#93c5fd" font-size="9.5" text-anchor="middle">' + esc(L.name) + '</text>';
-  // 打卡點
+  g += '<circle cx="150" cy="150" r="4" fill="#60a5fa"/><text x="150" y="141" fill="#93c5fd" font-size="9.5" text-anchor="middle">' + esc(L.name) + '</text>';
   pts.forEach(p => {
     const [dx, dy] = xy(p);
-    const x = C + dx * s, y = C - dy * s;
     const col = p.result !== '正常' ? '#ef4444' : p.type === '上班' ? '#22c55e' : '#fbbf24';
-    g += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.4" fill="' + col +
-         '" fill-opacity=".82"><title>' + esc(p.name) + ' ' + p.type + ' ' + p.dist + 'm</title></circle>';
+    g += '<circle cx="' + (C + dx * s).toFixed(1) + '" cy="' + (C - dy * s).toFixed(1) +
+         '" r="3.4" fill="' + col + '" fill-opacity=".82"><title>' + esc(p.name) + ' ' + p.type + ' ' + p.dist + 'm</title></circle>';
   });
   svg.innerHTML = g;
 }
 
-function esc(s) {
-  return String(s == null ? '' : s).replace(/[&<>"]/g, c =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/* ════════ 員工管理 ════════ */
+async function loadEmps() {
+  $('empBody').innerHTML = '<tr><td colspan="7" class="empty">載入中…</td></tr>';
+  try {
+    const r = await api('empList');
+    emps = r.rows; empDepts = r.depts;
+    const sel = $('empDept'), cur = sel.value;
+    sel.innerHTML = ['全部'].concat(empDepts).map(d => '<option>' + esc(d) + '</option>').join('');
+    sel.value = empDepts.includes(cur) || cur === '全部' ? cur : '全部';
+    $('deptList').innerHTML = empDepts.map(d => '<option value="' + esc(d) + '">').join('');
+    $('exDept').innerHTML = sel.innerHTML;
+    drawEmps();
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('empBody').innerHTML = '<tr><td colspan="7" class="empty">載入失敗：' + esc(e.message) + '</td></tr>';
+  }
 }
 
-/* ─── 自動更新 ─── */
+function drawEmps() {
+  const d = $('empDept').value, k = $('empKw').value.trim().toLowerCase();
+  const showOff = $('showOff').checked, showPin = $('showPin').checked;
+  const rows = emps.filter(e =>
+    (showOff || e.active) && (d === '全部' || e.dept === d) &&
+    (!k || e.name.toLowerCase().includes(k) || e.empId.toLowerCase().includes(k)));
+
+  $('empCnt').textContent = '共 ' + rows.length + ' 人（啟用 ' + emps.filter(e => e.active).length + '）';
+  $('empBody').innerHTML = rows.length ? rows.map(e =>
+    '<tr><td><b>' + esc(e.empId) + '</b></td><td>' + esc(e.name) + '</td><td>' + esc(e.dept) + '</td>' +
+    '<td class="pin">' + (showPin ? esc(e.pin) : '••••') + '</td>' +
+    '<td><span class="badge ' + (e.active ? 'on">啟用' : 'off">停用') + '</span>' +
+    (e.locked ? '<span class="badge lock">已鎖定</span>' : '') + '</td>' +
+    '<td class="num">' + e.punches + '</td><td>' +
+    '<button class="mini" data-act="edit" data-id="' + esc(e.empId) + '">編輯</button>' +
+    (e.locked ? '<button class="mini" data-act="unlock" data-id="' + esc(e.empId) + '">解鎖</button>' : '') +
+    (e.punches === 0 ? '<button class="mini danger" data-act="del" data-id="' + esc(e.empId) + '">刪除</button>' : '') +
+    '</td></tr>').join('') : '<tr><td colspan="7" class="empty">沒有符合條件的員工</td></tr>';
+
+  $('empBody').querySelectorAll('[data-act]').forEach(b => b.onclick = () => {
+    const e = emps.find(x => x.empId === b.dataset.id);
+    if (b.dataset.act === 'edit') openModal(e);
+    if (b.dataset.act === 'unlock') doUnlock(e);
+    if (b.dataset.act === 'del') doDelete(e);
+  });
+}
+
+function openModal(e) {
+  editing = e || null;
+  $('mTitle').textContent = e ? '編輯員工' : '新增員工';
+  $('mId').value = e ? e.empId : '';
+  $('mId').disabled = !!(e && e.punches > 0);
+  $('mIdHint').textContent = (e && e.punches > 0)
+    ? '此員工已有 ' + e.punches + ' 筆打卡紀錄，編號不可變更。'
+    : '建立後不建議變更，因為打卡紀錄是用編號對應的。';
+  $('mName').value = e ? e.name : '';
+  $('mDept').value = e ? e.dept : '';
+  $('mPin').value = e ? e.pin : '';
+  $('mActive').value = e ? String(e.active) : 'true';
+  $('mErr').textContent = '';
+  $('modal').classList.remove('hidden');
+  ($('mId').disabled ? $('mName') : $('mId')).focus();
+}
+function closeModal() { $('modal').classList.add('hidden'); editing = null; }
+
+async function saveEmp() {
+  $('mSave').disabled = true; $('mErr').textContent = '';
+  try {
+    const r = await api('empSave', {
+      orig: editing ? editing.empId : '',
+      empId: $('mId').value.trim(), name: $('mName').value.trim(),
+      dept: $('mDept').value.trim(), pin: $('mPin').value.trim(),
+      active: $('mActive').value
+    });
+    closeModal(); toast('✓ ' + r.msg); await loadEmps();
+  } catch (e) {
+    $('mErr').textContent = e.message;
+  } finally { $('mSave').disabled = false; }
+}
+
+async function doUnlock(e) {
+  try { const r = await api('empUnlock', { empId: e.empId }); toast('✓ ' + r.msg); loadEmps(); }
+  catch (x) { toast('✕ ' + x.message, 'bad'); }
+}
+
+async function doDelete(e) {
+  if (!confirm('確定刪除「' + e.name + '（' + e.empId + '）」？\n此員工目前沒有任何打卡紀錄。')) return;
+  try { const r = await api('empDelete', { empId: e.empId }); toast('✓ ' + r.msg); loadEmps(); }
+  catch (x) { toast('✕ ' + x.message, 'bad'); }
+}
+
+/* ════════ 匯出 ════════ */
+function setRange(q) {
+  const n = new Date();
+  let f, t = n;
+  if (q === 'thisMonth') f = new Date(n.getFullYear(), n.getMonth(), 1);
+  else if (q === 'lastMonth') {
+    f = new Date(n.getFullYear(), n.getMonth() - 1, 1);
+    t = new Date(n.getFullYear(), n.getMonth(), 0);
+  } else if (q === '7d') { f = new Date(n); f.setDate(n.getDate() - 6); }
+  else f = n;
+  $('exFrom').value = ymd(f); $('exTo').value = ymd(t);
+}
+
+async function doExport() {
+  $('exBtn').disabled = true; $('dlBtn').disabled = true;
+  $('exEmpty').textContent = '查詢中…'; $('exEmpty').classList.remove('hidden');
+  $('exHead').innerHTML = ''; $('exBody').innerHTML = ''; $('exInfo').classList.add('hidden');
+  try {
+    const r = await api('export', {
+      from: $('exFrom').value, to: $('exTo').value,
+      dept: $('exDept').value, mode: $('exMode').value
+    });
+    exResult = r;
+    if (!r.count) { $('exEmpty').textContent = '這個範圍內沒有資料'; return; }
+    $('exEmpty').classList.add('hidden');
+    $('exHead').innerHTML = '<tr>' + r.header.map(h => '<th>' + esc(h) + '</th>').join('') + '</tr>';
+    $('exBody').innerHTML = r.rows.slice(0, 200).map(row =>
+      '<tr>' + row.map(c => '<td>' + esc(c) + '</td>').join('') + '</tr>').join('');
+    $('exInfo').innerHTML = '共 <b>' + r.count + '</b> 列' +
+      (r.count > 200 ? '（畫面只顯示前 200 列，下載的 CSV 是完整資料）' : '') +
+      (r.truncated ? '　⚠ 資料超過 2 萬列已截斷，請縮小日期範圍' : '');
+    $('exInfo').classList.remove('hidden');
+    $('dlBtn').disabled = false;
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('exEmpty').textContent = '查詢失敗：' + e.message;
+  } finally { $('exBtn').disabled = false; }
+}
+
+function download() {
+  if (!exResult) return;
+  const q = v => {
+    const s = String(v == null ? '' : v);
+    return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  // 開頭必須放 BOM(﻿)，否則 Excel 會用 ANSI 開檔造成中文亂碼
+  const csv = '﻿' + [exResult.header].concat(exResult.rows)
+    .map(r => r.map(q).join(',')).join('\r\n');
+  const name = (exResult.mode === 'detail' ? '打卡明細_' : '每日彙總_') +
+    exResult.from + '_' + exResult.to +
+    (exResult.dept !== '全部' ? '_' + exResult.dept : '') + '.csv';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast('✓ 已下載 ' + name);
+}
+
+/* ════════ 自動更新 / 登入登出 ════════ */
 function setAuto(on) {
   auto = on;
   $('autoBtn').classList.toggle('on', on);
   $('autoBtn').textContent = on ? '自動更新 30 秒' : '自動更新 已關閉';
   clearInterval(timer);
-  if (on) timer = setInterval(load, 30000);
+  if (on && view === 'board') timer = setInterval(load, 30000);
 }
 
-/* ─── 登入 / 登出 ─── */
 async function login() {
   const pw = $('pw').value.trim();
   if (!pw) return;
   $('loginBtn').disabled = true; $('loginErr').textContent = '';
   try {
-    const d = await api('adminLogin', { pw: pw, device: 'dashboard' });
+    const d = await api('adminLogin', { pw });
     token = d.token; data = d;
     localStorage.setItem(LS, token);
     enter();
-  } catch (e) {
-    $('loginErr').textContent = e.message;
-  } finally {
-    $('loginBtn').disabled = false;
-  }
+  } catch (e) { $('loginErr').textContent = e.message; }
+  finally { $('loginBtn').disabled = false; }
 }
 
 function enter() {
   $('login').classList.add('hidden');
-  $('board').classList.remove('hidden');
+  $('app').classList.remove('hidden');
+  setRange('thisMonth');
   if (data) render();
-  setAuto(true);
+  switchTab('board');
   load();
 }
 
 function logout(msg) {
-  clearInterval(timer); token = null; data = null;
+  clearInterval(timer);
+  token = null; data = null; emps = []; exResult = null;
   localStorage.removeItem(LS);
-  $('board').classList.add('hidden');
+  $('app').classList.add('hidden');
   $('login').classList.remove('hidden');
   $('pw').value = '';
   $('loginErr').textContent = msg || '';
 }
 
-/* ─── 啟動 ─── */
+/* ════════ 綁定 ════════ */
 $('loginBtn').onclick = login;
 $('pw').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 $('refreshBtn').onclick = () => load();
@@ -418,6 +697,21 @@ $('tvBtn').onclick = () => {
   if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
   else document.exitFullscreen?.();
 };
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => switchTab(b.dataset.v));
+
+$('addBtn').onclick = () => openModal(null);
+['empDept', 'empKw', 'showOff', 'showPin'].forEach(id => {
+  $(id).addEventListener(id === 'empKw' ? 'input' : 'change', drawEmps);
+});
+$('mCancel').onclick = closeModal;
+$('mSave').onclick = saveEmp;
+$('mRand').onclick = () => { $('mPin').value = String(Math.floor(1000 + Math.random() * 9000)); };
+$('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+$('exBtn').onclick = doExport;
+$('dlBtn').onclick = download;
+document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { setRange(b.dataset.q); doExport(); });
 
 token = localStorage.getItem(LS);
 if (token) { enter(); } else { $('login').classList.remove('hidden'); $('pw').focus(); }
