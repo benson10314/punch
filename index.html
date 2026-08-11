@@ -21,7 +21,8 @@
 html,body{margin:0;padding:0}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
-  background:linear-gradient(180deg,#0f172a 0,#1e293b 260px,#f1f5f9 260px,#f1f5f9 100%);
+  /* 深→淺用漸層柔和過渡，避免卡片剛好壓在硬邊界上；過渡在卡片開始前就收完 */
+  background:linear-gradient(180deg,#0f172a 0,#16223a 155px,#54627c 200px,#d5dde7 232px,#f1f5f9 260px,#f1f5f9 100%);
   background-attachment:fixed; color:var(--ink); min-height:100vh;
   padding:0 16px calc(28px + env(safe-area-inset-bottom));
   padding-top:calc(14px + env(safe-area-inset-top));
@@ -51,18 +52,34 @@ body{
 .card h3{margin:0 0 12px;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.5px}
 
 /* 定位狀態 */
-#gpsCard{border-left:5px solid var(--muted);transition:border-color .25s}
-#gpsCard.ok{border-color:var(--ok)}
-#gpsCard.warn{border-color:var(--warn)}
-#gpsCard.bad{border-color:var(--bad)}
-.gps-head{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px}
+#gpsCard{border-top:4px solid var(--muted);transition:border-color .25s;padding-top:15px}
+#gpsCard.ok{border-top-color:var(--ok)}
+#gpsCard.warn{border-top-color:var(--warn)}
+#gpsCard.bad{border-top-color:var(--bad)}
+.gps-head{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16.5px;
+  letter-spacing:.3px;line-height:1.4}
+#gpsCard.ok .gps-head{color:#047857}
+#gpsCard.warn .gps-head{color:#b45309}
+#gpsCard.bad .gps-head{color:#b91c1c}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}
 .dot.live{animation:pulse 1.6s infinite}
 #gpsCard.ok .dot{background:var(--ok)} #gpsCard.warn .dot{background:var(--warn)}
 #gpsCard.bad .dot{background:var(--bad)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-.gps-sub{margin-top:8px;font-size:13.5px;color:var(--muted);line-height:1.65}
-.bar{height:7px;border-radius:99px;background:var(--line);margin-top:12px;overflow:hidden}
+
+/* 距離／誤差兩格數字 */
+.gps-metrics{display:flex;gap:9px;margin-top:13px}
+.gps-metrics>div{flex:1;background:#f8fafc;border:1px solid var(--line);border-radius:12px;
+  padding:9px 6px;text-align:center}
+.gps-metrics b{display:block;font-size:21px;font-weight:700;line-height:1.15;
+  font-variant-numeric:tabular-nums;color:var(--ink)}
+.gps-metrics span{display:block;font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.3px}
+#gpsCard.ok  .m-dist b{color:var(--ok)}
+#gpsCard.bad .m-dist b{color:var(--bad)}
+#gpsCard.warn .m-acc b{color:var(--warn)}
+
+.gps-sub{margin-top:11px;font-size:13px;color:var(--muted);line-height:1.7}
+.bar{height:7px;border-radius:99px;background:var(--line);margin-top:13px;overflow:hidden}
 .bar>i{display:block;height:100%;border-radius:99px;background:var(--ok);width:0;
   transition:width .4s ease,background .3s}
 #gpsCard.warn .bar>i,#gpsCard.bad .bar>i{background:var(--bad)}
@@ -165,6 +182,7 @@ body{
 
     <div class="card" id="gpsCard">
       <div class="gps-head"><span class="dot live"></span><span id="gpsTitle">定位中…</span></div>
+      <div class="gps-metrics hidden" id="gpsMetrics"></div>
       <div class="gps-sub" id="gpsSub">正在取得手機定位，第一次可能需要 5～15 秒。</div>
       <div class="bar"><i id="gpsBar"></i></div>
     </div>
@@ -293,11 +311,27 @@ function gpsError(err) {
   }
   refreshButtons();
 }
-function gpsState(kind, title, sub, pct) {
+/**
+ * kind: ''|ok|warn|bad　title: 標題　sub: 補充說明（可省略）
+ * metrics: {dist, radius, acc} 有給才顯示「距離／定位誤差」兩格數字
+ */
+function gpsState(kind, title, sub, pct, metrics) {
   const c = $('gpsCard');
-  c.className = kind;
+  c.className = 'card ' + kind;          // 一定要保留 card，否則卡片會失去白底與圓角
   $('gpsTitle').textContent = title;
-  $('gpsSub').innerHTML = sub;
+
+  const m = $('gpsMetrics');
+  if (metrics) {
+    m.innerHTML =
+      '<div class="m-dist"><b>' + metrics.dist + '</b><span>公尺　允許 ' + metrics.radius + '</span></div>' +
+      '<div class="m-acc"><b>±' + metrics.acc + '</b><span>定位誤差（公尺）</span></div>';
+    m.classList.remove('hidden');
+  } else {
+    m.classList.add('hidden');
+  }
+
+  $('gpsSub').innerHTML = sub || '';
+  $('gpsSub').classList.toggle('hidden', !sub);
   $('gpsBar').style.width = (pct == null ? 0 : Math.max(3, Math.min(100, pct))) + '%';
 }
 
@@ -318,16 +352,17 @@ function render() {
   const inside = near.dist <= limit;
   const accBad = pos.acc > cfg.accuracyLimit;
   const dist = Math.round(near.dist);
-  const meta = '距離 <b>' + dist + '</b> 公尺（允許 ' + near.radius + ' 公尺）<br>' +
-               '定位誤差 ±' + Math.round(pos.acc) + ' 公尺';
+  const metrics = { dist: dist, radius: near.radius, acc: Math.round(pos.acc) };
 
   if (accBad) {
-    gpsState('warn', '定位訊號不穩', meta + '<br>誤差超過 ±' + cfg.accuracyLimit +
-             ' 公尺，請走到戶外或靠近窗邊再打卡。', 100);
+    gpsState('warn', '定位訊號不穩',
+      '定位誤差超過 ±' + cfg.accuracyLimit + ' 公尺，請走到戶外或靠近窗邊，等訊號穩定再打卡。',
+      100, metrics);
   } else if (inside) {
-    gpsState('ok', '已在「' + near.name + '」範圍內', meta, (1 - dist / limit) * 100);
+    gpsState('ok', '已在「' + near.name + '」範圍內', '', (1 - dist / limit) * 100, metrics);
   } else {
-    gpsState('bad', '不在打卡範圍內', meta + '<br>請靠近「' + near.name + '」再打卡。', 100);
+    gpsState('bad', '不在打卡範圍內',
+      '請靠近「' + near.name + '」，進入 ' + near.radius + ' 公尺範圍內才能打卡。', 100, metrics);
   }
   refreshButtons();
 }
