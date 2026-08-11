@@ -65,7 +65,7 @@ input,select{font-family:inherit}
 .kpi.k-work{border-top-color:var(--work)} .kpi.k-work .n{color:var(--work)}
 .kpi.k-off{border-top-color:var(--off)}   .kpi.k-off .n{color:var(--off)}
 .kpi.k-abs{border-top-color:var(--none)}  .kpi.k-abs .n{color:#cbd5e1}
-.kpi.k-late{border-top-color:var(--late)} .kpi.k-late .n{color:var(--late)}
+.kpi.k-hr{border-top-color:#a78bfa}       .kpi.k-hr .n{color:#c4b5fd}
 .kpi.k-bad{border-top-color:var(--bad)}   .kpi.k-bad .n{color:var(--bad)}
 .kpi.hot{animation:flash 1.2s ease-out}
 @keyframes flash{0%{background:#2a1520}100%{background:var(--panel)}}
@@ -90,7 +90,7 @@ input,select{font-family:inherit}
 .p:hover{transform:translateY(-2px)}
 .p.s-work{border-left-color:var(--work)} .p.s-off{border-left-color:var(--off)}
 .p.s-none{border-left-color:var(--none);opacity:.62}
-.p.late{border-left-color:var(--late)}   .p.bad{border-left-color:var(--bad);background:#2a1420}
+.p.bad{border-left-color:var(--bad);background:#2a1420}
 .p .nm{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:6px}
 .p .nm em{font-style:normal;font-size:10.5px;color:var(--muted);font-weight:400}
 .p .dp{font-size:11px;color:var(--muted);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap}
@@ -235,13 +235,13 @@ body.tv .p .nm{font-size:17px}
       <div class="kpi k-work"><div class="n" id="kWork">0</div><div class="l">上班中</div></div>
       <div class="kpi k-off"><div class="n" id="kOff">0</div><div class="l">已下班</div></div>
       <div class="kpi k-abs"><div class="n" id="kAbs">0</div><div class="l">尚未打卡</div></div>
-      <div class="kpi k-late"><div class="n" id="kLate">0</div><div class="l">遲到</div></div>
+      <div class="kpi k-hr"><div class="n" id="kHours">0</div><div class="l">累計工時(小時)</div></div>
       <div class="kpi k-bad"><div class="n" id="kBad">0</div><div class="l">位置異常</div></div>
     </div>
 
     <div class="cols">
       <div class="panel">
-        <h2>人員狀態 <span id="shiftTxt"></span></h2>
+        <h2>人員狀態 <span id="ruleTxt"></span></h2>
         <div class="filters" id="filters"></div>
         <div class="grid" id="grid"></div>
       </div>
@@ -439,11 +439,9 @@ function render() {
   setAuto(auto);
 
   const R = d.rule || {};
-  $('shiftTxt').textContent = [
-    R.start ? '上班 ' + R.start + '（寬限 ' + R.grace + ' 分）' : '不判斷遲到',
-    R.end ? '下班 ' + R.end : '',
-    R.breakStr ? '工時扣除休息 ' + R.breakStr : '工時＝下班打卡 − 上班打卡'
-  ].filter(Boolean).join('　｜　');
+  $('ruleTxt').textContent = R.breakStr
+    ? '工時＝下班打卡 − 上班打卡 − 休息 ' + R.breakStr
+    : '工時＝下班打卡 − 上班打卡';
 
   const set = (id, v) => {
     const el = $(id);
@@ -455,7 +453,7 @@ function render() {
     }
   };
   set('kTotal', s.total); set('kArr', s.arrived); set('kWork', s.working);
-  set('kOff', s.off); set('kAbs', s.absent); set('kLate', s.late); set('kBad', s.abnormal);
+  set('kOff', s.off); set('kAbs', s.absent); set('kHours', s.hours); set('kBad', s.abnormal);
 
   const f = $('filters');
   if (f.dataset.sig !== d.depts.join('|')) {
@@ -476,13 +474,13 @@ function drawGrid() {
   const rows = data.rows.filter(r =>
     (dept === '全部' || r.dept === dept) &&
     (!k || r.name.toLowerCase().includes(k) || r.empId.toLowerCase().includes(k)));
-  const rank = r => r.flags.length ? 0 : (r.late || r.early) ? 1
-    : r.status === '未打卡' ? 2 : r.status === '上班中' ? 3 : 4;
+  const rank = r => r.flags.length ? 0 : r.status === '未打卡' ? 1
+    : r.status === '上班中' ? 2 : 3;
   rows.sort((a, b) => rank(a) - rank(b) || (a.inTime || '~').localeCompare(b.inTime || '~'));
 
   $('grid').innerHTML = rows.length ? rows.map(r => {
     const cls = ['p', r.status === '上班中' ? 's-work' : r.status === '已下班' ? 's-off' : 's-none',
-      r.late ? 'late' : '', r.flags.length ? 'bad' : ''].filter(Boolean).join(' ');
+      r.flags.length ? 'bad' : ''].filter(Boolean).join(' ');
     const body = r.status === '未打卡'
       ? '<div class="no">— 尚未打卡 —</div>'
       : '<div class="tm"><span class="in">上 <b>' + r.inTime + '</b></span>' +
@@ -491,8 +489,6 @@ function drawGrid() {
         (r.hours !== '' ? '<div class="hr">工時 <b>' + r.hours + '</b> 小時' +
           (r.breakMin ? '（已扣休息 ' + r.breakMin + ' 分）' : '') + '</div>' : '');
     let warn = '';
-    if (r.late) warn += '<div class="warn">遲到 ' + r.late + ' 分鐘</div>';
-    if (r.early) warn += '<div class="warn">早退 ' + r.early + ' 分鐘</div>';
     if (r.flags.length) warn += '<div class="warn err">⚠ ' + esc(r.flags.join('、')) + '</div>';
     return '<div class="' + cls + '"><div class="nm">' + esc(r.name) + '<em>' + esc(r.empId) +
            '</em></div><div class="dp"><span>' + esc(r.dept) + '</span></div>' +
