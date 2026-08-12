@@ -159,6 +159,10 @@ body{
 .cacts .go.in{background:linear-gradient(160deg,#10b981,#047857)}
 .cacts .go.out{background:linear-gradient(160deg,#f97316,#c2410c)}
 .cacts .go:active{transform:scale(.98)}
+/* 倒數期間（規則放在 .in/.out 之後才蓋得掉漸層） */
+.cacts .go:disabled{background:#e2e8f0;color:#94a3b8;letter-spacing:1px;font-size:15px}
+.cacts .go:disabled:active{transform:none}
+.cacts .go:disabled .cd{display:inline-block;min-width:1.4em;font-variant-numeric:tabular-nums}
 
 #loader{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;
   justify-content:center;z-index:100;color:#fff;font-size:15px;letter-spacing:1px}
@@ -276,6 +280,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxbyGMSYWs67z04nGR7iY1d
    ──────────────────────────────────────────────────────────── */
 const NOTICE = {
   showOn: '上班',
+  countdown: 3,          // 顯示提醒時，「確認打卡」要等幾秒才能按（0＝不等待）
   zh: '打卡前請先至 UOF 完成下班打卡。',
   vi: 'Trước khi chấm công, vui lòng hoàn tất thao tác chấm công tan ca trên hệ thống UOF.',
   en: 'Before clocking in, please complete the clock-out procedure on the UOF system.'
@@ -291,6 +296,7 @@ let watchId = null;
 let busy = false;
 let todayRows = [];       // 今日已打卡紀錄，用來提醒重複打卡
 let pendingType = null;   // 等待確認的打卡類型
+let cdTimer = null;       // 確認鈕的倒數計時
 
 const $ = id => document.getElementById(id);
 const WD = ['日','一','二','三','四','五','六'];
@@ -481,13 +487,40 @@ function askPunch(type) {
     warn.classList.add('hidden');
   }
 
+  // 有提醒要看時，確認鈕先鎖住倒數幾秒，逼使用者真的把提醒讀完
+  startCountdown(showNotice ? (Number(NOTICE.countdown) || 0) : 0);
+
   const box = $('confirm');
   box.classList.remove('hidden');
   void box.offsetWidth;            // 強制重繪，確保滑入動畫一定會播（rAF 在背景分頁可能不觸發）
   box.classList.add('on');
 }
 
+/** sec > 0 時，確認鈕在倒數結束前不能按 */
+function startCountdown(sec) {
+  const go = $('cGo');
+  clearInterval(cdTimer); cdTimer = null;
+
+  if (!sec || sec < 1) {
+    go.disabled = false;
+    go.textContent = '確認打卡';
+    return;
+  }
+  let left = Math.round(sec);
+  const paint = () => { go.innerHTML = '請詳閱提醒　<span class="cd">' + left + '</span> 秒'; };
+  go.disabled = true;
+  paint();
+  cdTimer = setInterval(() => {
+    left--;
+    if (left > 0) return paint();
+    clearInterval(cdTimer); cdTimer = null;
+    go.disabled = false;
+    go.textContent = '確認打卡';
+  }, 1000);
+}
+
 function closeConfirm() {
+  clearInterval(cdTimer); cdTimer = null;
   pendingType = null;
   $('confirm').classList.remove('on');
   setTimeout(() => $('confirm').classList.add('hidden'), 280);
