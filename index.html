@@ -150,23 +150,25 @@ body{
   padding:13px 14px;margin:16px 0 4px}
 .cnotice .zh{font-size:15px;font-weight:700;color:#92400e;line-height:1.6}
 .cnotice .vi,.cnotice .en{font-size:11.5px;color:#a16207;line-height:1.55;margin-top:7px}
-/* 倒數期間的「請詳閱提醒」三語字樣 */
-.cread{margin-top:13px;padding-top:12px;border-top:1px dashed #f59e0b}
-.cread .zh{font-size:14px;font-weight:700;color:#92400e;line-height:1.5}
-.cread .vi,.cread .en{font-size:11.5px;color:#a16207;line-height:1.55;margin-top:5px}
 .cacts{display:flex;gap:11px;margin-top:19px}
 .cacts button{flex:1;padding:16px 0;border:0;border-radius:14px;font-family:inherit;
   font-size:16px;font-weight:700;letter-spacing:2px}
-.cacts .cancel{flex:0 0 34%;background:#f1f5f9;color:var(--muted)}
+.cacts .cancel{flex:0 0 88px;background:#f1f5f9;color:var(--muted)}
 .cacts .cancel:active{background:#e2e8f0}
 .cacts .go{color:#fff}
 .cacts .go.in{background:linear-gradient(160deg,#10b981,#047857)}
 .cacts .go.out{background:linear-gradient(160deg,#f97316,#c2410c)}
 .cacts .go:active{transform:scale(.98)}
 /* 倒數期間（規則放在 .in/.out 之後才蓋得掉漸層） */
-.cacts .go:disabled{background:#e2e8f0;color:#94a3b8;letter-spacing:1px;font-size:15px}
+.cacts .go:disabled{background:#e2e8f0;color:#7c8ba3;letter-spacing:0;
+  padding:12px 8px;line-height:1.35;text-align:center}
 .cacts .go:disabled:active{transform:none}
-.cacts .go:disabled .cd{display:inline-block;min-width:1.4em;font-variant-numeric:tabular-nums}
+.cacts.waiting{align-items:stretch}
+.cacts .go .bzh{display:block;font-size:13.5px;font-weight:700;color:#5b6a83}
+.cacts .go .bvi,.cacts .go .ben{display:block;font-size:9.5px;font-weight:400;
+  margin-top:3px;line-height:1.35}
+.cacts .go .bcd{display:block;font-size:20px;font-weight:700;margin-top:6px;
+  color:#475569;font-variant-numeric:tabular-nums}
 
 #loader{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;
   justify-content:center;z-index:100;color:#fff;font-size:15px;letter-spacing:1px}
@@ -257,11 +259,6 @@ body{
       <div class="zh" id="cNoticeZh"></div>
       <div class="vi" id="cNoticeVi"></div>
       <div class="en" id="cNoticeEn"></div>
-      <div class="cread hidden" id="cRead">
-        <div class="zh" id="cReadZh"></div>
-        <div class="vi" id="cReadVi"></div>
-        <div class="en" id="cReadEn"></div>
-      </div>
     </div>
     <div class="cwarn hidden" id="cWarn"></div>
     <div class="cacts">
@@ -509,27 +506,31 @@ function askPunch(type) {
   box.classList.add('on');
 }
 
-/** sec > 0 時，確認鈕在倒數結束前不能按，並在提醒框下方顯示三語「請詳閱提醒」 */
+/** sec > 0 時，確認鈕在倒數結束前不能按，鈕面顯示三語「請詳閱提醒」與剩餘秒數 */
 function startCountdown(sec) {
-  const go = $('cGo'), read = $('cRead');
+  const go = $('cGo'), acts = go.parentElement;
   clearInterval(cdTimer); cdTimer = null;
 
   const done = () => {
     clearInterval(cdTimer); cdTimer = null;
     go.disabled = false;
     go.textContent = '確認打卡';
-    read.classList.add('hidden');
+    acts.classList.remove('waiting');
   };
   if (!sec || sec < 1) return done();
 
-  $('cReadZh').textContent = NOTICE.waitZh || '';
-  $('cReadVi').textContent = NOTICE.waitVi || '';
-  $('cReadEn').textContent = NOTICE.waitEn || '';
-  read.classList.remove('hidden');
-
+  const esc = t => String(t == null ? '' : t)
+    .replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
   let left = Math.round(sec);
-  const paint = () => { go.innerHTML = '確認打卡　<span class="cd">' + left + '</span>'; };
+  const paint = () => {
+    go.innerHTML =
+      (NOTICE.waitZh ? '<span class="bzh">' + esc(NOTICE.waitZh) + '</span>' : '') +
+      (NOTICE.waitVi ? '<span class="bvi">' + esc(NOTICE.waitVi) + '</span>' : '') +
+      (NOTICE.waitEn ? '<span class="ben">' + esc(NOTICE.waitEn) + '</span>' : '') +
+      '<span class="bcd">' + left + '</span>';
+  };
   go.disabled = true;
+  acts.classList.add('waiting');
   paint();
   cdTimer = setInterval(() => {
     left--;
