@@ -150,6 +150,10 @@ body{
   padding:13px 14px;margin:16px 0 4px}
 .cnotice .zh{font-size:15px;font-weight:700;color:#92400e;line-height:1.6}
 .cnotice .vi,.cnotice .en{font-size:11.5px;color:#a16207;line-height:1.55;margin-top:7px}
+/* 倒數期間的「請詳閱提醒」三語字樣 */
+.cread{margin-top:13px;padding-top:12px;border-top:1px dashed #f59e0b}
+.cread .zh{font-size:14px;font-weight:700;color:#92400e;line-height:1.5}
+.cread .vi,.cread .en{font-size:11.5px;color:#a16207;line-height:1.55;margin-top:5px}
 .cacts{display:flex;gap:11px;margin-top:19px}
 .cacts button{flex:1;padding:16px 0;border:0;border-radius:14px;font-family:inherit;
   font-size:16px;font-weight:700;letter-spacing:2px}
@@ -253,6 +257,11 @@ body{
       <div class="zh" id="cNoticeZh"></div>
       <div class="vi" id="cNoticeVi"></div>
       <div class="en" id="cNoticeEn"></div>
+      <div class="cread hidden" id="cRead">
+        <div class="zh" id="cReadZh"></div>
+        <div class="vi" id="cReadVi"></div>
+        <div class="en" id="cReadEn"></div>
+      </div>
     </div>
     <div class="cwarn hidden" id="cWarn"></div>
     <div class="cacts">
@@ -280,10 +289,14 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxbyGMSYWs67z04nGR7iY1d
    ──────────────────────────────────────────────────────────── */
 const NOTICE = {
   showOn: '上班',
-  countdown: 3,          // 顯示提醒時，「確認打卡」要等幾秒才能按（0＝不等待）
+  countdown: 5,          // 顯示提醒時，「確認打卡」要等幾秒才能按（0＝不等待）
   zh: '打卡前請先至 UOF 完成下班打卡。',
   vi: 'Trước khi chấm công, vui lòng hoàn tất thao tác chấm công tan ca trên hệ thống UOF.',
-  en: 'Before clocking in, please complete the clock-out procedure on the UOF system.'
+  en: 'Before clocking in, please complete the clock-out procedure on the UOF system.',
+  // 倒數期間顯示在提醒框下方的字
+  waitZh: '請詳閱提醒',
+  waitVi: 'Vui lòng đọc kỹ thông báo nhắc nhở.',
+  waitEn: 'Please read the reminder carefully.'
 };
 
 /* ─── 狀態 ─── */
@@ -496,26 +509,32 @@ function askPunch(type) {
   box.classList.add('on');
 }
 
-/** sec > 0 時，確認鈕在倒數結束前不能按 */
+/** sec > 0 時，確認鈕在倒數結束前不能按，並在提醒框下方顯示三語「請詳閱提醒」 */
 function startCountdown(sec) {
-  const go = $('cGo');
+  const go = $('cGo'), read = $('cRead');
   clearInterval(cdTimer); cdTimer = null;
 
-  if (!sec || sec < 1) {
+  const done = () => {
+    clearInterval(cdTimer); cdTimer = null;
     go.disabled = false;
     go.textContent = '確認打卡';
-    return;
-  }
+    read.classList.add('hidden');
+  };
+  if (!sec || sec < 1) return done();
+
+  $('cReadZh').textContent = NOTICE.waitZh || '';
+  $('cReadVi').textContent = NOTICE.waitVi || '';
+  $('cReadEn').textContent = NOTICE.waitEn || '';
+  read.classList.remove('hidden');
+
   let left = Math.round(sec);
-  const paint = () => { go.innerHTML = '請詳閱提醒　<span class="cd">' + left + '</span> 秒'; };
+  const paint = () => { go.innerHTML = '確認打卡　<span class="cd">' + left + '</span>'; };
   go.disabled = true;
   paint();
   cdTimer = setInterval(() => {
     left--;
     if (left > 0) return paint();
-    clearInterval(cdTimer); cdTimer = null;
-    go.disabled = false;
-    go.textContent = '確認打卡';
+    done();
   }, 1000);
 }
 
