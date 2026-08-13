@@ -117,6 +117,23 @@ body{
 .check{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-bottom:16px}
 .check input{width:18px;height:18px;accent-color:var(--brand)}
 
+/* 推播通知 */
+#pushCard{display:flex;align-items:center;gap:13px}
+#pushCard .pi{width:42px;height:42px;border-radius:12px;flex:none;display:flex;
+  align-items:center;justify-content:center;font-size:21px;background:#f1f5f9}
+#pushCard.on .pi{background:var(--okbg)}
+#pushCard.off .pi{background:#fef2f2}
+#pushCard .px{min-width:0;flex:1}
+#pushCard .pt{font-size:15px;font-weight:700;line-height:1.4}
+#pushCard.on .pt{color:#047857}
+#pushCard.off .pt{color:#b91c1c}
+#pushCard .ps{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:3px}
+#pushBtn{flex:none;border:0;border-radius:11px;padding:11px 16px;font-family:inherit;
+  font-size:14px;font-weight:700;background:var(--brand);color:#fff;cursor:pointer}
+#pushBtn:active{background:var(--brand2)}
+#pushBtn:disabled{opacity:.45;cursor:not-allowed}
+#pushBtn.ghost{background:#f1f5f9;color:var(--muted);font-weight:600}
+
 /* 提示 / Toast */
 .note{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.7;margin-top:10px}
 .banner{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:12px;
@@ -246,6 +263,15 @@ body{
       <div id="histList"><div class="empty">點「查詢」載入本月所有打卡紀錄</div></div>
     </div>
 
+    <div class="card hidden" id="pushCard">
+      <div class="pi" id="pushIcon">🔔</div>
+      <div class="px">
+        <div class="pt" id="pushTitle">推播通知</div>
+        <div class="ps" id="pushSub">—</div>
+      </div>
+      <button id="pushBtn" class="hidden"></button>
+    </div>
+
     <div class="note">打卡時間以伺服器時間為準，手機時間不影響紀錄。</div>
   </div>
 </div>
@@ -270,6 +296,9 @@ body{
 
 <div id="toast"></div>
 <div id="loader" class="hidden"><span class="spin"></span><span id="loaderMsg">處理中…</span></div>
+
+<!-- 推播設定（apiKey／VAPID 金鑰）。沒填之前推播會自動停用，其他功能不受影響。 -->
+<script src="firebase-config.js"></script>
 
 <script>
 /* ════════════════════════════════════════════════════════════
@@ -298,6 +327,7 @@ const NOTICE = {
 
 /* ─── 狀態 ─── */
 const LS = 'gpsclock.auth', LS_DEV = 'gpsclock.device', LS_BANNER = 'gpsclock.banner';
+const LS_FCM = 'gpsclock.fcm';   // 記住這台裝置上次註冊的 FCM token，登出時才有東西可以退掉
 let auth = null;          // {empId, token, name, dept}
 let cfg = null;           // 伺服器設定 + 地點清單
 let pos = null;           // 最近一次定位 {lat,lng,acc}
@@ -307,6 +337,10 @@ let busy = false;
 let todayRows = [];       // 今日已打卡紀錄，用來提醒重複打卡
 let pendingType = null;   // 等待確認的打卡類型
 let cdTimer = null;       // 確認鈕的倒數計時
+let swReady = null;       // Service Worker registration 的 Promise，推播要用
+let fb = null;            // 已初始化的 Firebase Messaging {mod, inst}
+let fcmToken = null;      // 這台裝置目前的推播 token
+let pushBusy = false;
 
 const $ = id => document.getElementById(id);
 const WD = ['日','一','二','三','四','五','六'];
@@ -596,6 +630,178 @@ async function loadHistory() {
   }
 }
 
+/* ════════════════════════════════════════════════════════════
+   推播通知
+   ════════════════════════════════════════════════════════════ */
+
+function pushSupported() {
+  return 'Notification' in window && 'serviceWorker' in navigator &&
+         'PushManager' in window && window.isSecureContext;
+}
+function isIOS() {
+  return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function isStandalone() {
+  return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+}
+
+/** 動態載入 Firebase SDK 並初始化 Messaging。只做一次，之後直接回傳。 */
+async function fbInit() {
+  if (fb) return fb;
+  const base = 'https://www.gstatic.com/firebasejs/' + self.FIREBASE_SDK_VERSION + '/';
+  const [appMod, msgMod] = await Promise.all([
+    import(base + 'firebase-app.js'),
+    import(base + 'firebase-messaging.js')
+  ]);
+  if (!(await msgMod.isSupported())) throw new Error('這個瀏覽器不支援推播通知');
+  const app = appMod.getApps().length ? appMod.getApps()[0]
+                                      : appMod.initializeApp(self.FIREBASE_CONFIG);
+  fb = { mod: msgMod, inst: msgMod.getMessaging(app) };
+
+  // App 開著的時候收到推播，瀏覽器不會自動顯示通知，改用畫面上的 Toast
+  msgMod.onMessage(fb.inst, p => {
+    const d = p.data || p.notification || {};
+    toast('🔔 ' + (d.title ? d.title + '　' : '') + (d.body || '你有一則新通知'), 'ok');
+    if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+  });
+  return fb;
+}
+
+/**
+ * 取得 FCM token 並登記到後端。
+ * 呼叫前必須已經是 granted 狀態（權限視窗要由點擊事件直接觸發，不能放這裡）。
+ */
+async function registerPush() {
+  const { mod, inst } = await fbInit();
+  const reg = await swReady;
+  if (!reg) throw new Error('Service Worker 尚未就緒，請重新整理後再試');
+
+  // 明確指定用「我們自己那支 sw.js」，否則 SDK 會去根目錄找 firebase-messaging-sw.js
+  const t = await mod.getToken(inst, {
+    vapidKey: self.VAPID_KEY,
+    serviceWorkerRegistration: reg
+  });
+  if (!t) throw new Error('無法取得推播識別碼，請稍後再試');
+
+  await api('pushRegister', {
+    empId: auth.empId, token: auth.token,
+    fcmToken: t, device: deviceId()
+  });
+  fcmToken = t;
+  localStorage.setItem(LS_FCM, t);
+  return t;
+}
+
+/** 關閉推播：後端退掉登記，本機也把 token 刪掉 */
+async function unregisterPush(silent) {
+  const t = fcmToken || localStorage.getItem(LS_FCM);
+  if (t && auth) {
+    try {
+      await api('pushUnregister', { empId: auth.empId, token: auth.token, fcmToken: t });
+    } catch (e) { if (!silent) throw e; }
+  }
+  try {
+    const { mod, inst } = await fbInit();
+    await mod.deleteToken(inst);
+  } catch (e) { /* 刪不掉不影響，後端那筆已經退掉了 */ }
+  fcmToken = null;
+  localStorage.removeItem(LS_FCM);
+}
+
+/** 依目前狀態把推播卡片畫出來。kind: ok / off / '' */
+function paintPush(kind, icon, title, sub, btnText, btnGhost) {
+  const c = $('pushCard');
+  c.classList.remove('hidden');
+  c.className = 'card ' + (kind || '');   // 保留 card，否則失去白底圓角
+  $('pushIcon').textContent = icon;
+  $('pushTitle').textContent = title;
+  $('pushSub').innerHTML = sub;
+  const b = $('pushBtn');
+  b.classList.toggle('hidden', !btnText);
+  b.classList.toggle('ghost', !!btnGhost);
+  b.disabled = pushBusy;
+  if (btnText) b.textContent = btnText;
+}
+
+function renderPush() {
+  // 還沒設定 Firebase 就整張卡片不顯示，使用者不會看到一個按了也沒用的東西
+  if (!self.FIREBASE_READY) return $('pushCard').classList.add('hidden');
+
+  if (!pushSupported()) {
+    return paintPush('', '🔕', '此裝置不支援推播通知',
+      '請改用較新版的 Chrome 或 Safari 開啟。', '', false);
+  }
+  // iOS 只有「加入主畫面」後的 PWA 才能收推播（iOS 16.4 以上）
+  if (isIOS() && !isStandalone()) {
+    return paintPush('', '📲', '要收通知請先加入主畫面',
+      'iPhone 只有從主畫面圖示開啟時才能收推播。<br>' +
+      '請按瀏覽器下方「分享」→「加入主畫面」，之後從桌面圖示開啟本 App 再開通知。', '', false);
+  }
+  if (Notification.permission === 'denied') {
+    return paintPush('off', '🔕', '通知權限已被封鎖',
+      '請到手機「設定 → 瀏覽器 → 通知」把本網站的通知打開，再回來重新整理。', '', false);
+  }
+  if (fcmToken) {
+    return paintPush('ok', '🔔', '通知已開啟',
+      '人資發布的公告會直接推送到這支手機。', '關閉', true);
+  }
+  paintPush('', '🔔', '開啟推播通知',
+    '開啟後才收得到人資發布的公告與提醒。', '開啟', false);
+}
+
+/** 使用者按下卡片上的按鈕 */
+async function togglePush() {
+  if (pushBusy || !auth) return;
+  const turningOn = !fcmToken;
+
+  // ★ 權限視窗一定要在點擊當下直接叫，中間不能先 await 別的東西，
+  //   否則 Safari 會判定不是使用者操作而直接拒絕。
+  if (turningOn && Notification.permission === 'default') {
+    let p;
+    try { p = await Notification.requestPermission(); }
+    catch (e) { p = 'denied'; }
+    if (p !== 'granted') {
+      renderPush();
+      return toast('✕ 你沒有允許通知權限，無法開啟推播', 'bad');
+    }
+  }
+
+  pushBusy = true; renderPush();
+  try {
+    if (turningOn) {
+      await registerPush();
+      toast('✓ 推播通知已開啟', 'ok');
+    } else {
+      await unregisterPush();
+      toast('已關閉推播通知', 'warn');
+    }
+  } catch (e) {
+    toast('✕ ' + e.message, 'bad');
+  } finally {
+    pushBusy = false; renderPush();
+  }
+}
+
+/**
+ * 登入後自動跑一次。
+ * 已經授權過就靜靜地把 token 重新登記一次 —— FCM token 會過期或輪替，
+ * 每次開 App 補登記一次，人資才不會推給一個早就失效的裝置。
+ */
+async function syncPush() {
+  renderPush();
+  if (!self.FIREBASE_READY || !pushSupported()) return;
+  if (isIOS() && !isStandalone()) return;
+  if (Notification.permission !== 'granted') return;
+  try {
+    await registerPush();
+  } catch (e) {
+    // 靜默失敗：使用者沒主動要求，不需要跳錯誤打擾他
+    fcmToken = null;
+  }
+  renderPush();
+}
+
 /* ─── 登入 / 登出 ─── */
 async function login() {
   const empId = $('empId').value.trim();
@@ -616,9 +822,12 @@ async function login() {
 }
 
 function logout() {
+  // 先退掉推播登記，否則換人用同一支手機時，通知會繼續推給前一個人
+  if (fcmToken || localStorage.getItem(LS_FCM)) unregisterPush(true);
   localStorage.removeItem(LS); sessionStorage.removeItem(LS);
   if (pendingType) closeConfirm();
   auth = null; todayRows = [];
+  $('pushCard').classList.add('hidden');
   if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
   $('mainView').classList.add('hidden');
   $('loginView').classList.remove('hidden');
@@ -632,8 +841,8 @@ function enterMain(today) {
   $('mainView').classList.remove('hidden');
   drawToday(today || []);
   startWatch();
-  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-  if (!standalone && !localStorage.getItem(LS_BANNER)) $('installBanner').classList.remove('hidden');
+  if (!isStandalone() && !localStorage.getItem(LS_BANNER)) $('installBanner').classList.remove('hidden');
+  syncPush();
 }
 
 /* ─── 啟動 ─── */
@@ -654,6 +863,7 @@ async function boot() {
   $('confirm').addEventListener('click', e => { if (e.target.id === 'confirm') closeConfirm(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && pendingType) closeConfirm(); });
   $('histBtn').onclick = loadHistory;
+  $('pushBtn').onclick = togglePush;
   $('closeBanner').onclick = () => {
     $('installBanner').classList.add('hidden'); localStorage.setItem(LS_BANNER, '1');
   };
@@ -679,8 +889,12 @@ async function boot() {
   $('loginView').classList.remove('hidden');
 }
 
+/* 註冊 Service Worker。推播要拿這個 registration 傳給 getToken()，
+   所以把 Promise 留下來，不能像以前那樣註冊完就丟掉。 */
 if ('serviceWorker' in navigator) {
-  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  swReady = navigator.serviceWorker.register('sw.js')
+    .then(() => navigator.serviceWorker.ready)   // 等到 SW 真的 active 才算就緒
+    .catch(() => null);
 }
 boot();
 </script>

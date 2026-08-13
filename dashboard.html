@@ -163,6 +163,43 @@ td.num{text-align:right}
 .box .acts .primary{flex:1}
 .modalerr{color:#fca5a5;font-size:12.5px;margin-top:11px;line-height:1.6;min-height:16px}
 
+/* 推播 */
+.pushcols{display:grid;grid-template-columns:1fr 400px;gap:14px;align-items:start}
+.fld textarea{width:100%;padding:11px;font-size:15px;border:1.5px solid var(--line);border-radius:10px;
+  background:#0a1120;color:var(--ink);font-family:inherit;resize:vertical;min-height:96px;line-height:1.6}
+.fld textarea:focus{outline:0;border-color:var(--work)}
+.cnt{float:right;font-weight:400;font-variant-numeric:tabular-nums}
+.cnt.over{color:var(--bad)}
+.seg{display:flex;gap:6px;margin-bottom:12px}
+.seg button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--muted);
+  border-radius:9px;padding:9px 6px;font-size:13px}
+.seg button.on{background:#16305c;border-color:#2f5fb0;color:#cfe1ff;font-weight:700}
+.picker{max-height:330px;overflow-y:auto;border:1px solid var(--line);border-radius:11px;background:#0a1120}
+.pk{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid var(--line);font-size:13.5px}
+.pk:last-child{border-bottom:0}
+.pk:hover{background:var(--panel2)}
+.pk input{width:16px;height:16px;accent-color:#2f5fb0;flex:none}
+.pk label{display:flex;align-items:center;gap:9px;flex:1;min-width:0;cursor:pointer}
+.pk .nm{font-weight:600}
+.pk .dp{color:var(--muted);font-size:11.5px}
+.pk .st{margin-left:auto;font-size:11px;flex:none}
+.pk .st.yes{color:var(--ok)} .pk .st.no{color:var(--none)}
+.pk.nodev{opacity:.5}
+.preview{background:#0a1120;border:1px solid var(--line);border-radius:13px;padding:13px}
+.pvbox{display:flex;gap:11px;background:#182130;border-radius:11px;padding:11px 13px}
+.pvbox .ic{width:36px;height:36px;border-radius:9px;background:#1d4ed8;flex:none;display:flex;
+  align-items:center;justify-content:center;font-size:19px}
+.pvbox .tx{min-width:0;flex:1}
+.pvbox .tt{font-size:13.5px;font-weight:700;word-break:break-word}
+.pvbox .bd{font-size:12.5px;color:#b9c8e6;margin-top:3px;line-height:1.55;word-break:break-word;
+  white-space:pre-wrap}
+.pvhint{font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.6}
+.sendbar{display:flex;align-items:center;gap:11px;margin-top:14px}
+.sendbar .primary{padding:12px 26px;font-size:14.5px}
+.sendbar .to{font-size:12.5px;color:var(--muted);line-height:1.6}
+.sendbar .to b{color:#cfe1ff;font-size:14px}
+@media(max-width:1180px){ .pushcols{grid-template-columns:1fr} }
+
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:26px 0}
 .err{background:#2a1420;border:1px solid #5b2230;color:#fca5a5;border-radius:11px;padding:11px 13px;
   font-size:13px;margin-bottom:12px;line-height:1.6}
@@ -221,6 +258,7 @@ body.tv .p .nm{font-size:17px}
   <div class="tabs">
     <button class="tab on" data-v="board">即時看板</button>
     <button class="tab" data-v="emp">員工管理</button>
+    <button class="tab" data-v="push">推播通知</button>
     <button class="tab" data-v="export">匯出報表</button>
   </div>
 
@@ -286,6 +324,84 @@ body.tv .p .nm{font-size:17px}
         改 PIN 後，該員工手機上的登入會自動失效並要求重新登入。<br>
         已有打卡紀錄的員工<b>不能刪除</b>（出勤紀錄依勞基法須保存 5 年），離職請改為「停用」。
       </div>
+    </div>
+  </div>
+
+  <!-- ─── 推播通知 ─── -->
+  <div id="viewPush" class="hidden">
+    <div id="pushSetup" class="err hidden"></div>
+    <div class="pushcols">
+
+      <div class="panel">
+        <h2>發送對象 <span id="pushCnt"></span></h2>
+        <div class="seg" id="pushModeSeg">
+          <button data-m="all" class="on">全體員工</button>
+          <button data-m="dept">依部門</button>
+          <button data-m="emp">指定人員</button>
+        </div>
+        <div class="filters" id="pushDeptRow" style="display:none">
+          <select class="txt" id="pushDept"><option>全部</option></select>
+        </div>
+        <div class="filters" id="pushPickRow" style="display:none">
+          <button class="chipbtn" id="pickAll">全選</button>
+          <button class="chipbtn" id="pickNone">全不選</button>
+          <input class="txt push" id="pickKw" placeholder="搜尋姓名／工號">
+        </div>
+        <div class="picker" id="picker"></div>
+        <div class="info" style="margin:12px 0 0">
+          只有在手機上<b>開啟過推播通知</b>的員工收得到。尚未開啟的人請提醒他登入打卡 App
+          後，在下方「開啟推播通知」按一下。<br>
+          iPhone 需 iOS 16.4 以上，而且必須把打卡 App<b>加入主畫面</b>才收得到通知。
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h2>通知內容</h2>
+          <div class="fld">
+            <label>標題 <span class="cnt" id="ttCnt">0 / 40</span></label>
+            <input id="pushTitle" maxlength="60" placeholder="例如：本週五提前下班">
+          </div>
+          <div class="fld">
+            <label>內容 <span class="cnt" id="bdCnt">0 / 120</span></label>
+            <textarea id="pushBody" maxlength="300"
+              placeholder="例如：本週五（3/14）因公司活動，全體提前至 16:00 下班，請照常打下班卡。"></textarea>
+          </div>
+          <div class="fld">
+            <label>點擊後開啟（選填）</label>
+            <input id="pushUrl" placeholder="留空＝開啟打卡 App">
+            <div class="hint">可填公告網址；留空的話員工點通知就會打開打卡頁面。</div>
+          </div>
+
+          <div class="preview">
+            <div class="pvbox">
+              <div class="ic">🔔</div>
+              <div class="tx">
+                <div class="tt" id="pvTitle">（標題）</div>
+                <div class="bd" id="pvBody">（內容）</div>
+              </div>
+            </div>
+            <div class="pvhint">實際樣式依手機系統略有不同。標題過長會被系統截斷。</div>
+          </div>
+
+          <div class="sendbar">
+            <button class="primary" id="sendBtn" disabled>發送推播</button>
+            <div class="to" id="sendTo">—</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>發送紀錄 <span id="logCnt"></span></h2>
+          <div class="tblwrap" style="max-height:300px">
+            <table>
+              <thead><tr><th>時間</th><th>對象</th><th>標題</th>
+                <th class="num">成功</th><th class="num">失敗</th></tr></thead>
+              <tbody id="logBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -393,6 +509,7 @@ function switchTab(v) {
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   $('viewBoard').classList.toggle('hidden', v !== 'board');
   $('viewEmp').classList.toggle('hidden', v !== 'emp');
+  $('viewPush').classList.toggle('hidden', v !== 'push');
   $('viewExport').classList.toggle('hidden', v !== 'export');
   // 自動更新只在看板頁跑，避免打斷編輯
   const onBoard = v === 'board';
@@ -400,6 +517,8 @@ function switchTab(v) {
   $('pastBox').classList.toggle('hidden', !onBoard || !data || data.isToday);
   setAuto(auto);
   if (v === 'emp' && !emps.length) loadEmps();
+  // 推播頁每次進來都重抓，裝置開關通知的狀況隨時在變
+  if (v === 'push') loadPush();
 }
 
 /* ════════ 即時看板 ════════ */
@@ -628,6 +747,146 @@ async function doDelete(e) {
   catch (x) { toast('✕ ' + x.message, 'bad'); }
 }
 
+/* ════════ 推播通知 ════════ */
+let pushRows = [], pushLog = [], pushMode = 'all', pickSel = new Set(), pushReady = true;
+
+async function loadPush() {
+  $('picker').innerHTML = '<div class="empty">載入中…</div>';
+  try {
+    const r = await api('pushTargets');
+    pushRows = r.rows || [];
+    pushLog = r.log || [];
+    pushReady = r.configured !== false;
+
+    const sel = $('pushDept'), cur = sel.value;
+    sel.innerHTML = ['全部'].concat(r.depts || []).map(d => '<option>' + esc(d) + '</option>').join('');
+    if ((r.depts || []).includes(cur)) sel.value = cur;
+
+    $('pushSetup').classList.toggle('hidden', pushReady);
+    if (!pushReady) {
+      $('pushSetup').innerHTML = '⚠ 後端還沒設定 Firebase 服務帳戶金鑰，現在按發送會失敗。' +
+        '請依 <b>docs/firebase-setup.md</b> 的步驟，把服務帳戶 JSON 存到 Apps Script 的' +
+        '「專案設定 → 指令碼屬性」，屬性名稱 <b>FIREBASE_SERVICE_ACCOUNT</b>。';
+    }
+    drawPicker(); drawLog(); updateSend();
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('picker').innerHTML = '<div class="empty">載入失敗：' + esc(e.message) + '</div>';
+  }
+}
+
+/** 依目前模式算出「會收到這則通知」的員工 */
+function pushTargetRows() {
+  if (pushMode === 'emp') return pushRows.filter(r => pickSel.has(r.empId));
+  const d = $('pushDept').value;
+  return pushRows.filter(r => r.active && (pushMode === 'all' || d === '全部' || r.dept === d));
+}
+
+function drawPicker() {
+  const pick = pushMode === 'emp';
+  $('pushDeptRow').style.display = pushMode === 'dept' ? '' : 'none';
+  $('pushPickRow').style.display = pick ? '' : 'none';
+
+  let rows = pushRows.filter(r => r.active || pickSel.has(r.empId));
+  if (pick) {
+    const k = $('pickKw').value.trim().toLowerCase();
+    if (k) rows = rows.filter(r => r.name.toLowerCase().includes(k) || r.empId.toLowerCase().includes(k));
+  } else {
+    rows = pushTargetRows();
+  }
+
+  const on = pushRows.filter(r => r.active && r.devices > 0).length;
+  $('pushCnt').textContent = '已開啟通知 ' + on + ' / ' + pushRows.filter(r => r.active).length + ' 人';
+
+  $('picker').innerHTML = rows.length ? rows.map(r => {
+    const has = r.devices > 0;
+    return '<div class="pk' + (has ? '' : ' nodev') + '">' +
+      '<label>' +
+        (pick ? '<input type="checkbox" data-id="' + esc(r.empId) + '"' +
+                (pickSel.has(r.empId) ? ' checked' : '') + '>' : '') +
+        '<span class="nm">' + esc(r.name) + '</span>' +
+        '<span class="dp">' + esc(r.dept) + '　' + esc(r.empId) + '</span>' +
+        '<span class="st ' + (has ? 'yes">🔔 ' + r.devices + ' 台裝置' : 'no">未開啟通知') + '</span>' +
+      '</label></div>';
+  }).join('') : '<div class="empty">沒有符合條件的員工</div>';
+
+  if (pick) {
+    $('picker').querySelectorAll('input[data-id]').forEach(c => c.onchange = () => {
+      if (c.checked) pickSel.add(c.dataset.id); else pickSel.delete(c.dataset.id);
+      updateSend();
+    });
+  }
+}
+
+function drawLog() {
+  $('logCnt').textContent = pushLog.length ? '最近 ' + pushLog.length + ' 筆' : '';
+  $('logBody').innerHTML = pushLog.length ? pushLog.map(l =>
+    '<tr><td>' + esc(l.at) + '</td><td>' + esc(l.target) + '</td><td>' + esc(l.title) + '</td>' +
+    '<td class="num">' + l.ok + '</td>' +
+    '<td class="num"' + (l.fail ? ' style="color:var(--bad)"' : '') + '>' + l.fail + '</td></tr>'
+  ).join('') : '<tr><td colspan="5" class="empty">還沒有發送過推播</td></tr>';
+}
+
+/** 標題／內容字數與預覽，順便決定發送鈕能不能按 */
+function updateSend() {
+  const t = $('pushTitle').value.trim(), b = $('pushBody').value.trim();
+  const tc = $('ttCnt'), bc = $('bdCnt');
+  tc.textContent = t.length + ' / 40'; tc.classList.toggle('over', t.length > 40);
+  bc.textContent = b.length + ' / 120'; bc.classList.toggle('over', b.length > 120);
+
+  $('pvTitle').textContent = t || '（標題）';
+  $('pvBody').textContent = b || '（內容）';
+
+  const rows = pushTargetRows();
+  const people = rows.filter(r => r.devices > 0);
+  const devices = people.reduce((s, r) => s + r.devices, 0);
+
+  $('sendTo').innerHTML = devices
+    ? '將送給 <b>' + people.length + '</b> 人共 <b>' + devices + '</b> 台裝置' +
+      (rows.length > people.length
+        ? '<br>另有 ' + (rows.length - people.length) + ' 人尚未開啟通知，收不到' : '')
+    : (rows.length ? '選到的 ' + rows.length + ' 人都還沒開啟推播通知，沒有人收得到'
+                   : '尚未選擇任何對象');
+
+  $('sendBtn').disabled = !(t && b && devices > 0);
+}
+
+async function doSend() {
+  const t = $('pushTitle').value.trim(), b = $('pushBody').value.trim();
+  const rows = pushTargetRows().filter(r => r.devices > 0);
+  const devices = rows.reduce((s, r) => s + r.devices, 0);
+  const label = pushMode === 'all' ? '全體員工'
+              : pushMode === 'dept' ? '部門：' + $('pushDept').value
+              : '指定 ' + rows.length + ' 人';
+
+  // 推播送出去就收不回來了，一定要再問一次
+  if (!confirm('確定發送這則推播？\n\n對象：' + label +
+               '\n人數：' + rows.length + ' 人（' + devices + ' 台裝置）' +
+               '\n\n標題：' + t + '\n內容：' + b +
+               '\n\n※ 推播送出後無法收回。')) return;
+
+  $('sendBtn').disabled = true;
+  const old = $('sendBtn').textContent;
+  $('sendBtn').textContent = '發送中…';
+  try {
+    const r = await api('pushSend', {
+      mode: pushMode,
+      dept: $('pushDept').value,
+      empIds: rows.map(x => x.empId),
+      title: t, body: b, url: $('pushUrl').value.trim()
+    });
+    toast('✓ 已送出：成功 ' + r.sent + ' 台' + (r.failed ? '，失敗 ' + r.failed + ' 台' : ''),
+          r.failed ? 'bad' : 'ok');
+    $('pushTitle').value = ''; $('pushBody').value = ''; $('pushUrl').value = '';
+    await loadPush();
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    toast('✕ ' + e.message, 'bad');
+  } finally {
+    $('sendBtn').textContent = old; updateSend();
+  }
+}
+
 /* ════════ 匯出 ════════ */
 function setRange(q) {
   const n = new Date();
@@ -731,6 +990,7 @@ function enter() {
 function logout(msg) {
   clearInterval(timer);
   token = null; data = null; emps = []; exResult = null; boardDate = '';
+  pushRows = []; pushLog = []; pickSel.clear();
   localStorage.removeItem(LS);
   $('app').classList.add('hidden');
   $('login').classList.remove('hidden');
@@ -765,6 +1025,21 @@ $('prevDay').onclick = () => shiftDay(-1);
 $('nextDay').onclick = () => shiftDay(1);
 $('todayBtn').onclick = () => { boardDate = ''; load(); };
 $('boardDate').onchange = () => { boardDate = $('boardDate').value; load(); };
+
+document.querySelectorAll('#pushModeSeg button').forEach(b => b.onclick = () => {
+  pushMode = b.dataset.m;
+  document.querySelectorAll('#pushModeSeg button').forEach(x => x.classList.toggle('on', x === b));
+  drawPicker(); updateSend();
+});
+$('pushDept').onchange = () => { drawPicker(); updateSend(); };
+$('pickKw').addEventListener('input', drawPicker);
+$('pickAll').onclick = () => {
+  pushRows.filter(r => r.active).forEach(r => pickSel.add(r.empId));
+  drawPicker(); updateSend();
+};
+$('pickNone').onclick = () => { pickSel.clear(); drawPicker(); updateSend(); };
+['pushTitle', 'pushBody'].forEach(id => $(id).addEventListener('input', updateSend));
+$('sendBtn').onclick = doSend;
 
 $('exBtn').onclick = doExport;
 $('dlBtn').onclick = download;
