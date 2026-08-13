@@ -128,6 +128,36 @@ body{
   transform:translateY(140%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
 #toast.show{transform:translateY(0)}
 #toast.ok{background:#047857} #toast.bad{background:#b91c1c} #toast.warn{background:#b45309}
+/* 超時提醒 */
+#remind{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;
+  padding:20px;background:rgba(69,26,3,0);transition:background .25s}
+#remind.on{background:rgba(69,26,3,.72)}
+#remind .rbox{width:100%;max-width:400px;background:#fff;border-radius:20px;overflow:hidden;
+  transform:scale(.88);opacity:0;transition:transform .3s cubic-bezier(.2,.9,.3,1),opacity .25s;
+  box-shadow:0 20px 60px rgba(0,0,0,.4)}
+#remind.on .rbox{transform:scale(1);opacity:1}
+.rhead{background:linear-gradient(160deg,#f59e0b,#c2410c);color:#fff;padding:22px 20px;text-align:center}
+.rhead .ic{font-size:38px;line-height:1}
+.rhead .ti{font-size:19px;font-weight:700;letter-spacing:3px;margin-top:8px}
+.rhead .tm{font-size:13px;opacity:.9;margin-top:5px;letter-spacing:1px}
+.rbody{padding:20px}
+.rbody .msg{font-size:15.5px;line-height:1.85;color:var(--ink);white-space:pre-wrap}
+.rbody .cnt{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
+.rbody button{width:100%;margin-top:16px;padding:15px;border:0;border-radius:13px;
+  background:linear-gradient(160deg,#f59e0b,#c2410c);color:#fff;font-family:inherit;
+  font-size:16px;font-weight:700;letter-spacing:2px;cursor:pointer}
+.rbody button:active{transform:scale(.98)}
+
+/* 今日提醒事項卡 */
+#rmdCard{border-top:4px solid var(--warn);padding-top:15px}
+#rmdCard h3{color:#b45309}
+.rmd{display:flex;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.rmd:last-child{border-bottom:0}
+.rmd .t{font-weight:700;font-variant-numeric:tabular-nums;color:#b45309;flex:none}
+.rmd .m{color:var(--muted);line-height:1.6}
+.rmd.done .t{color:var(--muted)}
+.rmd .ok{margin-left:auto;font-size:11px;color:var(--ok);flex:none}
+
 /* 打卡確認面板 */
 #confirm{position:fixed;inset:0;z-index:90;display:flex;align-items:flex-end;justify-content:center;
   background:rgba(15,23,42,0);transition:background .25s}
@@ -234,6 +264,11 @@ body{
       <button class="punch out" id="btnOut" disabled>下班打卡<small>CLOCK OUT</small></button>
     </div>
 
+    <div class="card hidden" id="rmdCard">
+      <h3>今日提醒事項</h3>
+      <div id="rmdList"></div>
+    </div>
+
     <div class="card">
       <h3>今日打卡紀錄</h3>
       <div id="todayList"><div class="empty">今天還沒有打卡紀錄</div></div>
@@ -247,6 +282,22 @@ body{
     </div>
 
     <div class="note">打卡時間以伺服器時間為準，手機時間不影響紀錄。</div>
+  </div>
+</div>
+
+<!-- ══════════ 超時提醒 ══════════ -->
+<div id="remind" class="hidden">
+  <div class="rbox">
+    <div class="rhead">
+      <div class="ic">⏰</div>
+      <div class="ti">超時提醒</div>
+      <div class="tm" id="rTime">—</div>
+    </div>
+    <div class="rbody">
+      <div class="msg" id="rMsg"></div>
+      <div class="cnt hidden" id="rCnt"></div>
+      <button id="rOk">我知道了</button>
+    </div>
   </div>
 </div>
 
@@ -307,6 +358,10 @@ let busy = false;
 let todayRows = [];       // 今日已打卡紀錄，用來提醒重複打卡
 let pendingType = null;   // 等待確認的打卡類型
 let cdTimer = null;       // 確認鈕的倒數計時
+let reminders = [];       // 今日超時提醒名單
+let firedIds = {};        // 這次開啟已經跳過的提醒，避免重複彈窗
+let rmdQueue = [];        // 同時到期時排隊顯示
+let rmdShowing = null;
 
 const $ = id => document.getElementById(id);
 const WD = ['日','一','二','三','四','五','六'];
@@ -338,6 +393,10 @@ function toast(msg, kind) {
 function loading(on, msg) {
   $('loaderMsg').textContent = msg || '處理中…';
   $('loader').classList.toggle('hidden', !on);
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 function deviceId() {
   let d = localStorage.getItem(LS_DEV);
@@ -464,6 +523,95 @@ function freshPosition() {
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
     );
   });
+}
+
+/* ═══════════ 超時提醒 ═══════════
+   用 20 秒輪詢比對時間，而不是 setTimeout —— 手機休眠後 setTimeout 會失準，
+   輪詢則能在螢幕一亮就補上到期的提醒。 */
+
+function setReminders(list) {
+  reminders = Array.isArray(list) ? list : [];
+  drawReminders();
+  checkReminders();
+}
+
+function drawReminders() {
+  const box = $('rmdCard');
+  if (!reminders.length) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  $('rmdList').innerHTML = reminders.map(r =>
+    '<div class="rmd' + (r.acked ? ' done' : '') + '">' +
+    '<span class="t">' + esc(r.time) + '</span>' +
+    '<span class="m">' + esc(r.msg) + '</span>' +
+    (r.acked ? '<span class="ok">已讀</span>' : '') + '</div>').join('');
+}
+
+/** 目前時間（HH:mm）已經到或超過的、還沒讀過也還沒跳過的，就排進佇列 */
+function checkReminders() {
+  const n = new Date();
+  const now = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0');
+  reminders.forEach(r => {
+    if (r.acked || firedIds[r.id]) return;
+    if (r.time > now) return;
+    firedIds[r.id] = 1;
+    rmdQueue.push(r);
+  });
+  if (!rmdShowing) showNextReminder();
+}
+
+function showNextReminder() {
+  if (rmdShowing || !rmdQueue.length) return;
+  const r = rmdQueue.shift();
+  rmdShowing = r;
+
+  $('rTime').textContent = '預定時間　' + r.time;
+  $('rMsg').textContent = r.msg;
+  $('rCnt').textContent = '尚有 ' + rmdQueue.length + ' 則提醒';
+  $('rCnt').classList.toggle('hidden', rmdQueue.length === 0);
+
+  const box = $('remind');
+  box.classList.remove('hidden');
+  void box.offsetWidth;
+  box.classList.add('on');
+
+  if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+  beep();
+}
+
+async function ackReminder() {
+  const r = rmdShowing;
+  const box = $('remind');
+  box.classList.remove('on');
+  setTimeout(() => box.classList.add('hidden'), 280);
+  rmdShowing = null;
+
+  if (r) {
+    const hit = reminders.find(x => x.id === r.id);
+    if (hit) hit.acked = true;
+    drawReminders();
+    try { await api('ackReminder', { empId: auth.empId, token: auth.token, id: r.id }); }
+    catch (e) { /* 記錄已讀失敗不影響員工，下次開啟會再提醒一次 */ }
+  }
+  setTimeout(showNextReminder, 350);
+}
+
+/** 用 WebAudio 發出提示音，不需要外部音檔 */
+function beep() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    [0, 0.32, 0.64].forEach(t => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.22);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.24);
+    });
+    setTimeout(() => ctx.close(), 1500);
+  } catch (e) { /* 靜音模式或未授權播放，就只靠震動與畫面 */ }
 }
 
 /* ─── 打卡確認面板 ─── */
@@ -607,7 +755,7 @@ async function login() {
     auth = { empId: r.empId, token: r.token, name: r.name, dept: r.dept };
     if ($('remember').checked) localStorage.setItem(LS, JSON.stringify(auth));
     else sessionStorage.setItem(LS, JSON.stringify(auth));
-    enterMain(r.today);
+    enterMain(r.today, r.reminders);
   } catch (e) {
     toast('✕ ' + e.message, 'bad');
   } finally {
@@ -619,18 +767,34 @@ function logout() {
   localStorage.removeItem(LS); sessionStorage.removeItem(LS);
   if (pendingType) closeConfirm();
   auth = null; todayRows = [];
+  reminders = []; firedIds = {}; rmdQueue = []; rmdShowing = null;
+  $('rmdCard').classList.add('hidden');
+  $('remind').classList.remove('on'); $('remind').classList.add('hidden');
   if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
   $('mainView').classList.add('hidden');
   $('loginView').classList.remove('hidden');
   $('pin').value = '';
 }
 
-function enterMain(today) {
+/** 定期回頭問伺服器，才拿得到人資剛加進去的提醒 */
+async function refreshToday() {
+  if (!auth) return;
+  try {
+    const r = await api('today', { empId: auth.empId, token: auth.token });
+    drawToday(r.today);
+    setReminders(r.reminders);
+  } catch (e) {
+    if (/重新登入|停用|查無/.test(e.message)) logout(e.message);
+  }
+}
+
+function enterMain(today, rmds) {
   $('uName').textContent = auth.name;
   $('uMeta').textContent = auth.dept + '　' + auth.empId;
   $('loginView').classList.add('hidden');
   $('mainView').classList.remove('hidden');
   drawToday(today || []);
+  setReminders(rmds || []);
   startWatch();
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   if (!standalone && !localStorage.getItem(LS_BANNER)) $('installBanner').classList.remove('hidden');
@@ -653,6 +817,15 @@ async function boot() {
   };
   $('confirm').addEventListener('click', e => { if (e.target.id === 'confirm') closeConfirm(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && pendingType) closeConfirm(); });
+  $('rOk').onclick = ackReminder;
+
+  // 每 20 秒比對一次提醒時間；每 5 分鐘向伺服器重抓名單
+  setInterval(() => { if (auth) checkReminders(); }, 20000);
+  setInterval(refreshToday, 300000);
+  // 手機從休眠醒來、或切回 App 時立刻補檢查
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && auth) { checkReminders(); refreshToday(); }
+  });
   $('histBtn').onclick = loadHistory;
   $('closeBanner').onclick = () => {
     $('installBanner').classList.add('hidden'); localStorage.setItem(LS_BANNER, '1');
@@ -671,7 +844,7 @@ async function boot() {
     try {
       auth = JSON.parse(saved);
       const r = await api('today', { empId: auth.empId, token: auth.token });
-      return enterMain(r.today);
+      return enterMain(r.today, r.reminders);
     } catch (e) {
       localStorage.removeItem(LS); sessionStorage.removeItem(LS); auth = null;
     }
