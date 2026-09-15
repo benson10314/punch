@@ -552,6 +552,10 @@ const I18N = {
     'punch.ok': '✓ {type}打卡成功　{time}　@{loc}（{dist} 公尺）',
     'note.server': '打卡時間以伺服器時間為準，手機時間不影響紀錄。',
     'err.noApi': '系統尚未設定 API 網址，請聯絡人資', 'err.http': '連線失敗（HTTP {status}）', 'err.generic': '操作失敗',
+    'err.NET_TIMEOUT': '連線逾時，網路訊號可能不穩，請稍後再試', 'err.NET_FAIL': '無法連線，請確認手機網路是否開啟',
+    'err.NET_BAD': '伺服器暫時沒有回應，請稍後再試', 'err.SYS_BUSY': '系統忙碌中，請稍候幾秒再試一次',
+    'loading.verify': '連線不穩，正在確認是否已打卡成功…',
+    'punch.okVerified': '✓ 已確認{type}打卡成功（{time}）', 'net.offline': '⚠ 網路不穩，畫面資料可能不是最新的',
     'err.gpsDenied': '定位權限被拒絕，無法打卡', 'err.gpsFail': '取得定位失敗，請到訊號較好的地方再試',
     'err.AUTH_NOT_FOUND': '查無此員工編號',
     'err.AUTH_DISABLED': '此帳號已停用，請聯絡人資',
@@ -637,6 +641,10 @@ const I18N = {
     'punch.ok': '✓ Chấm công {type} thành công　{time}　@{loc} ({dist} mét)',
     'note.server': 'Thời gian chấm công lấy theo máy chủ, giờ trên điện thoại không ảnh hưởng.',
     'err.noApi': 'Hệ thống chưa cấu hình địa chỉ API, vui lòng liên hệ phòng Nhân sự', 'err.http': 'Kết nối thất bại (HTTP {status})', 'err.generic': 'Thao tác thất bại',
+    'err.NET_TIMEOUT': 'Kết nối quá thời gian, tín hiệu mạng có thể yếu, vui lòng thử lại sau', 'err.NET_FAIL': 'Không thể kết nối, vui lòng kiểm tra mạng điện thoại',
+    'err.NET_BAD': 'Máy chủ tạm thời không phản hồi, vui lòng thử lại sau', 'err.SYS_BUSY': 'Hệ thống đang bận, vui lòng đợi vài giây rồi thử lại',
+    'loading.verify': 'Mạng không ổn định, đang kiểm tra đã chấm công thành công chưa…',
+    'punch.okVerified': '✓ Đã xác nhận chấm công {type} thành công ({time})', 'net.offline': '⚠ Mạng không ổn định, dữ liệu có thể chưa cập nhật',
     'err.gpsDenied': 'Quyền định vị bị từ chối, không thể chấm công', 'err.gpsFail': 'Không lấy được vị trí, vui lòng đến nơi có tín hiệu tốt hơn',
     'err.AUTH_NOT_FOUND': 'Không tìm thấy mã nhân viên',
     'err.AUTH_DISABLED': 'Tài khoản đã bị vô hiệu hóa, vui lòng liên hệ phòng Nhân sự',
@@ -722,6 +730,10 @@ const I18N = {
     'punch.ok': '✓ {type} recorded　{time}　@{loc} ({dist} m)',
     'note.server': 'Times are recorded by the server; your phone’s clock does not affect them.',
     'err.noApi': 'API address is not configured. Please contact HR.', 'err.http': 'Connection failed (HTTP {status})', 'err.generic': 'Operation failed',
+    'err.NET_TIMEOUT': 'Connection timed out. The signal may be weak, please try again.', 'err.NET_FAIL': 'Cannot connect. Please check your mobile data or Wi-Fi.',
+    'err.NET_BAD': 'The server is not responding right now. Please try again.', 'err.SYS_BUSY': 'The system is busy. Please wait a few seconds and try again.',
+    'loading.verify': 'Unstable connection, checking whether your punch was recorded…',
+    'punch.okVerified': '✓ Confirmed: {type} recorded ({time})', 'net.offline': '⚠ Unstable connection, data may be out of date',
     'err.gpsDenied': 'Location permission denied; cannot clock in', 'err.gpsFail': 'Unable to get location. Please move to a spot with better signal.',
     'err.AUTH_NOT_FOUND': 'Employee ID not found',
     'err.AUTH_DISABLED': 'This account is disabled. Please contact HR.',
@@ -905,25 +917,65 @@ function longDate(n) {
 }
 
 /* ─── 與後端溝通 ───
-   用 text/plain 送出，避開 CORS preflight（Apps Script 不支援 OPTIONS） */
-async function api(action, data) {
-  if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL)) {
-    throw new Error(t('err.noApi'));
+   用 text/plain 送出，避開 CORS preflight（Apps Script 不支援 OPTIONS）
+   Google Apps Script 回應時間落差很大（實測 2～16 秒），所以：
+   ・每個請求都有逾時，不會無限轉圈
+   ・「讀取」類請求遇到斷線、逾時、系統忙碌會自動重試；打卡、送單這類「寫入」絕不自動重送，避免重複 */
+const RETRY_ACTIONS = ['today', 'history', 'patchMine', 'patchPending', 'config', 'ackReminder'];
+
+function netErr(code, params) {
+  const e = new Error(t('err.' + code, params));
+  e.code = code; e.params = params || {}; e.net = true;
+  return e;
+}
+
+async function apiOnce(action, data, ms) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  let text, status;
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ action }, data || {})),
+      signal: ctl.signal
+    });
+    status = res.status;
+    text = await res.text();
+  } catch (e) {
+    throw netErr(ctl.signal.aborted ? 'NET_TIMEOUT' : 'NET_FAIL');
+  } finally {
+    clearTimeout(timer);
   }
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ action }, data || {}))
-  });
-  if (!res.ok) throw new Error(t('err.http', { status: res.status }));
-  const json = await res.json();
+  if (status >= 500 || status === 429) throw netErr('NET_BAD');
+  if (status >= 400) throw new Error(t('err.http', { status: status }));
+  let json;
+  try { json = JSON.parse(text); } catch (e) { throw netErr('NET_BAD'); }   // Google 偶爾回錯誤網頁而不是 JSON
   if (json.ok === false) {
     const e = new Error(json.msg || t('err.generic'));
     e.code = json.code || '';
     e.params = json.params || {};
+    e.net = e.code === 'SYS_BUSY';
     throw e;
   }
   return json;
+}
+
+/** opt: {timeout 毫秒, retry 次數}；沒指定時讀取類重試 2 次、寫入類不重試 */
+async function api(action, data, opt) {
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL)) {
+    throw new Error(t('err.noApi'));
+  }
+  opt = opt || {};
+  const retry = opt.retry != null ? opt.retry : (RETRY_ACTIONS.indexOf(action) >= 0 ? 2 : 0);
+  for (let i = 0; ; i++) {
+    try {
+      return await apiOnce(action, data, opt.timeout || 30000);
+    } catch (e) {
+      if (!e.net || i >= retry) throw e;
+      await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+    }
+  }
 }
 const authBody = extra => Object.assign({ empId: auth.empId, token: auth.token }, extra || {});
 
@@ -1244,22 +1296,42 @@ function closeConfirm() {
 /* ─── 打卡 ─── */
 async function punch(type) {
   if (busy) return;
+  const before = todayRows.filter(r => r.type === type).length;
   busy = true; refreshButtons(); loading(true, t('loading.locate'));
   try {
     const fresh = await freshPosition();
     pos = fresh; render();
     loading(true, t('loading.send'));
-    const r = await api('punch', authBody({ type: type, lat: fresh.lat, lng: fresh.lng, acc: fresh.acc, device: deviceId() }));
+    const r = await api('punch', authBody({ type: type, lat: fresh.lat, lng: fresh.lng, acc: fresh.acc, device: deviceId() }),
+                        { timeout: 40000 });
     drawToday(r.today);
     toast(t('punch.ok', { type: typeText(type), time: r.time, loc: r.location, dist: r.distance }),
           r.result === '正常' ? 'ok' : 'warn');
     if (navigator.vibrate) navigator.vibrate(60);
   } catch (e) {
+    // 斷線或逾時時，打卡可能其實已經寫進去了：先回頭確認，不要讓員工以為失敗又重打
+    if (e.net && await verifyPunch(type, before)) return;
     toast('✕ ' + errText(e), 'bad');
     if (isAuthErr(e)) logout();
   } finally {
     busy = false; loading(false); refreshButtons();
   }
+}
+
+/** 打卡請求失敗後，查今日紀錄看這一筆是否已寫入 */
+async function verifyPunch(type, before) {
+  loading(true, t('loading.verify'));
+  try {
+    const r = await api('today', authBody(), { retry: 3, timeout: 25000 });
+    drawToday(r.today);
+    const same = (r.today || []).filter(x => x.type === type);
+    if (same.length > before) {
+      toast(t('punch.okVerified', { type: typeText(type), time: same[same.length - 1].time }), 'ok');
+      if (navigator.vibrate) navigator.vibrate(60);
+      return true;
+    }
+  } catch (e) { /* 還是連不上，就照原本的錯誤訊息提示 */ }
+  return false;
 }
 
 /** 紀錄右側說明：地點距離、異常或補卡標籤 */
@@ -1561,7 +1633,7 @@ async function login() {
 }
 
 function logout() {
-  localStorage.removeItem(LS); sessionStorage.removeItem(LS);
+  localStorage.removeItem(LS); sessionStorage.removeItem(LS); localStorage.removeItem(LS_HOME);
   if (pendingType) closeConfirm();
   ['patchSheet', 'decideSheet'].forEach(id => { $(id).classList.remove('on'); $(id).classList.add('hidden'); });
   auth = null; todayRows = []; histResult = null;
@@ -1576,19 +1648,51 @@ function logout() {
   $('pin').value = '';
 }
 
-/** 定期回頭問伺服器：拿人資剛加的提醒、主管的待簽數量 */
-async function refreshToday() {
-  if (!auth) return;
-  try {
-    const r = await api('today', authBody());
-    drawToday(r.today);
-    setReminders(r.reminders);
-    const prev = approval;
-    approval = r.approval || { isApprover: false, pending: 0 };
-    if (approval.isApprover !== prev.isApprover || approval.pending !== prev.pending) loadPending();
-  } catch (e) {
-    if (isAuthErr(e)) logout();
+/* ─── 首頁資料 ───
+   一個請求（today + full）就帶回設定、今日紀錄、提醒、補卡、待簽；
+   並存一份在手機裡，下次開 App 先秒開畫面，再在背景更新。 */
+const LS_CFG = 'gpsclock.cfg', LS_HOME = 'gpsclock.home';
+let refreshing = null;
+
+function saveLocal(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+function loadLocal(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } }
+
+/** 把伺服器回來的首頁資料套到畫面上；缺哪一塊就保留原本的 */
+function applyHome(r) {
+  if (r.cfg) { cfg = r.cfg; saveLocal(LS_CFG, r.cfg); if (pos) render(); }
+  if (r.today) drawToday(r.today);
+  if (r.reminders) setReminders(r.reminders);
+  if (r.approval) approval = r.approval;
+  if (r.patch) { patchInfo = r.patch; drawPatches(); }
+  if (r.pending) {
+    pendingRows = r.pending.rows || []; pendingLimit = r.pending.limit || 0;
+    approval.pending = pendingRows.length;
+  } else if (r.approval && !r.approval.isApprover) {
+    pendingRows = [];
   }
+  drawPending();
+  if (auth && r.today) {
+    saveLocal(LS_HOME, { empId: auth.empId, day: ymd(new Date()), today: r.today, reminders: r.reminders,
+                         approval: approval, patch: patchInfo,
+                         pending: approval.isApprover ? { rows: pendingRows, limit: pendingLimit } : null });
+  }
+}
+
+/** 向伺服器重抓首頁資料；同時間只跑一個。quiet＝false 時連不上會提示 */
+function refreshToday(quiet) {
+  if (!auth) return Promise.resolve();
+  if (refreshing) return refreshing;
+  refreshing = (async () => {
+    try {
+      applyHome(await api('today', authBody({ full: 1 })));
+    } catch (e) {
+      if (isAuthErr(e)) logout();
+      else if (quiet === false) toast(t('net.offline') + '（' + errText(e) + '）', 'warn');
+    } finally {
+      refreshing = null;
+    }
+  })();
+  return refreshing;
 }
 
 function enterMain(r) {
@@ -1596,16 +1700,13 @@ function enterMain(r) {
   $('uMeta').textContent = auth.dept + '　' + auth.empId;
   $('loginView').classList.add('hidden');
   $('mainView').classList.remove('hidden');
-  drawToday(r.today || []);
-  setReminders(r.reminders || []);
   setQRange('thisMonth');
   histResult = null;
   $('histList').innerHTML = '<div class="empty">' + esc(t('hist.hint')) + '</div>';
   approval = r.approval || { isApprover: false, pending: 0 };
-  patchInfo = null;
-  drawPatches();
-  loadPatches();
-  loadPending();
+  patchInfo = null; pendingRows = [];
+  drawToday([]); setReminders([]); drawPatches();
+  applyHome(r);
   startWatch();
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   if (!standalone && !localStorage.getItem(LS_BANNER)) $('installBanner').classList.remove('hidden');
@@ -1654,7 +1755,7 @@ async function boot() {
   setInterval(refreshToday, 300000);
   // 手機從休眠醒來、或切回 App 時立刻補檢查，順便更新補卡狀態
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && auth) { checkReminders(); refreshToday(); loadPatches(); }
+    if (document.visibilityState === 'visible' && auth) { checkReminders(); refreshToday(); }
   });
   $('histBtn').onclick = loadHistory;
   document.querySelectorAll('[data-q]').forEach(b => {
@@ -1664,23 +1765,19 @@ async function boot() {
     $('installBanner').classList.add('hidden'); localStorage.setItem(LS_BANNER, '1');
   };
 
-  try {
-    cfg = await api('config');
-  } catch (e) {
-    $('loginSub').textContent = t('login.cannotConnect', { msg: errText(e) });
-    $('loginView').classList.remove('hidden');
-    return;
-  }
+  // 打卡地點設定先用手機裡存的，定位畫面不必等網路；登入或背景更新時會換成最新的
+  cfg = loadLocal(LS_CFG);
 
-  const saved = localStorage.getItem(LS) || sessionStorage.getItem(LS);
-  if (saved) {
-    try {
-      auth = JSON.parse(saved);
-      const r = await api('today', authBody());
-      return enterMain(r);
-    } catch (e) {
-      localStorage.removeItem(LS); sessionStorage.removeItem(LS); auth = null;
-    }
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(LS) || sessionStorage.getItem(LS) || 'null'); } catch (e) {}
+  if (saved && saved.empId && saved.token) {
+    auth = saved;
+    // 已登入：立刻用上次的資料開畫面（同一天才用），背景再抓最新的。
+    // 連不上網路不會把人登出，只有伺服器明確說登入失效才登出。
+    const home = loadLocal(LS_HOME);
+    enterMain(home && home.empId === auth.empId && home.day === ymd(new Date()) ? home : {});
+    refreshToday(false);
+    return;
   }
   $('loginView').classList.remove('hidden');
 }

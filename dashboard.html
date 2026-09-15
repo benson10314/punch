@@ -572,15 +572,47 @@ let boardDate = '';   // 空＝今天
 let patchData = null, deptData = null, pmTarget = null;
 const PST = { '待審': 'pending', '核准': 'approved', '駁回': 'rejected', '撤回': 'withdrawn', '作廢': 'voided' };
 
-async function api(action, body) {
-  const res = await fetch(API_URL, {
-    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ action, token }, body || {}))
-  });
-  if (!res.ok) throw new Error('連線失敗（HTTP ' + res.status + '）');
-  const j = await res.json();
-  if (j.ok === false) throw new Error(j.msg || '操作失敗');
+/* Google Apps Script 回應時間落差大（實測 2～16 秒）：每個請求都有逾時；
+   「讀取」類遇到斷線、逾時、系統忙碌自動重試，「寫入」類（存檔、簽核、作廢…）絕不自動重送 */
+const RETRY_ACTIONS = ['board', 'empList', 'adminPatchList', 'adminDeptList', 'adminDay', 'export'];
+
+async function apiOnce(action, body, ms) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  const net = msg => Object.assign(new Error(msg), { net: true });
+  let status, text;
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ action, token }, body || {})),
+      signal: ctl.signal
+    });
+    status = res.status;
+    text = await res.text();
+  } catch (e) {
+    throw net(ctl.signal.aborted ? '連線逾時（超過 ' + Math.round(ms / 1000) + ' 秒沒有回應）' : '無法連線，請確認網路');
+  } finally {
+    clearTimeout(timer);
+  }
+  if (status >= 500 || status === 429) throw net('伺服器暫時沒有回應（HTTP ' + status + '）');
+  if (status >= 400) throw new Error('連線失敗（HTTP ' + status + '）');
+  let j;
+  try { j = JSON.parse(text); } catch (e) { throw net('伺服器暫時沒有回應，請稍後再試'); }
+  if (j.ok === false) throw Object.assign(new Error(j.msg || '操作失敗'), { net: j.code === 'SYS_BUSY' });
   return j;
+}
+
+async function api(action, body, opt) {
+  opt = opt || {};
+  const retry = opt.retry != null ? opt.retry : (RETRY_ACTIONS.includes(action) ? 2 : 0);
+  for (let i = 0; ; i++) {
+    try {
+      return await apiOnce(action, body, opt.timeout || (action === 'export' ? 90000 : 40000));
+    } catch (e) {
+      if (!e.net || i >= retry) throw e;
+      await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+    }
+  }
 }
 
 function esc(s) {
@@ -618,21 +650,44 @@ function switchTab(v) {
 }
 
 /* ════════ 即時看板 ════════ */
+/* 看板載入：
+   ・同時間只跑一個請求；進行中又被要求更新（例如剛改完出勤），等這個結束再補抓一次
+   ・連續失敗時拉長自動更新間隔（30 秒→1 分→2 分…最多 5 分），不要在 Google 忙碌時一直加壓 */
+let boardBusy = false, boardAgain = false, failCount = 0, nextAutoAt = 0;
+
 async function load(showErr) {
+  if (boardBusy) { boardAgain = true; return; }
+  boardBusy = true;
   try {
     data = await api('board', { date: boardDate });
+    failCount = 0; nextAutoAt = 0;
     $('errBox').classList.add('hidden');
     render();
     const n = new Date();
     $('updTxt').textContent = '最後更新 ' + pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
   } catch (e) {
-    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    if (/失效|密碼/.test(e.message)) { boardBusy = false; return logout(e.message); }
+    failCount++;
+    const wait = Math.min(30000 * Math.pow(2, failCount - 1), 300000);
+    nextAutoAt = Date.now() + wait;
     if (showErr !== false) {
-      $('errBox').textContent = '⚠ ' + e.message + '（將繼續自動重試）';
+      $('errBox').textContent = '⚠ ' + e.message + '（' + Math.round(wait / 1000) + ' 秒後自動重試，也可以按「立即更新」）';
       $('errBox').classList.remove('hidden');
     }
+  } finally {
+    boardBusy = false;
   }
+  if (boardAgain) { boardAgain = false; load(showErr); }
 }
+
+/** 自動更新：視窗在背景（切到別的分頁、手機鎖屏）時不抓，回到畫面立刻補一次 */
+function autoTick() {
+  if (document.hidden || Date.now() < nextAutoAt) return;
+  load();
+}
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && token && auto && view === 'board' && (!data || data.isToday)) load(false);
+});
 
 function render() {
   const d = data, s = d.summary;
@@ -1094,7 +1149,7 @@ function setAuto(on) {
   $('autoBtn').textContent = on ? '自動更新 30 秒' : '自動更新 已關閉';
   $('autoBtn').disabled = !!(data && !data.isToday);
   clearInterval(timer);
-  if (live) timer = setInterval(load, 30000);
+  if (live) timer = setInterval(autoTick, 30000);
 }
 
 /** 依目前檢視日期前後移動一天 */

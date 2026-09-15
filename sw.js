@@ -3,7 +3,7 @@
    打卡 API 一律走網路，絕不快取。
    ※ 改版後請把 VERSION 加 1，使用者下次開啟就會自動更新。 */
 
-const VERSION = 'v7';
+const VERSION = 'v8';
 const CACHE = 'punch-' + VERSION;
 const SHELL = [
   './',
@@ -40,16 +40,23 @@ self.addEventListener('fetch', e => {
   // 只處理自家網域的 GET；打卡 API（script.google.com）直接放行
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
 
-  // network-first：有網路就拿最新版，沒網路才用快取
+  // 網路優先，但最多等 3 秒：訊號差時直接用手機裡的版本秒開，網路那份抓到後照樣更新快取（下次開啟生效）
+  const fromNet = fetch(req).then(res => {
+    if (res.ok) {
+      const copy = res.clone();
+      caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+    }
+    return res;
+  });
+  // 沒網路又沒快取時，退回該 App 自己的首頁（戰情室不要掉到打卡畫面）
+  const home = () => caches.match(/dashboard/.test(req.url) ? './dashboard.html' : './index.html');
+
   e.respondWith(
-    fetch(req)
-      .then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
-        return res;
-      })
-      // 沒網路又沒快取時，退回該 App 自己的首頁（戰情室不要掉到打卡畫面）
-      .catch(() => caches.match(req).then(hit => hit ||
-        caches.match(/dashboard/.test(req.url) ? './dashboard.html' : './index.html')))
+    caches.match(req, { ignoreSearch: true }).then(hit => {
+      if (!hit) return fromNet.catch(() => home().then(h => h || Response.error()));
+      const slow = new Promise(resolve => setTimeout(() => resolve(hit), 3000));
+      return Promise.race([fromNet.then(res => res.ok ? res : hit, () => hit), slow]);
+    })
   );
+  e.waitUntil(fromNet.then(() => {}, () => {}));
 });
