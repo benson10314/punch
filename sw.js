@@ -3,14 +3,19 @@
    打卡 API 一律走網路，絕不快取。
    ※ 改版後請把 VERSION 加 1，使用者下次開啟就會自動更新。 */
 
-const VERSION = 'v5';
+const VERSION = 'v6';
 const CACHE = 'punch-' + VERSION;
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  // 出勤戰情室（人資／主管 App）
+  './dashboard.html',
+  './dashboard.webmanifest',
+  './dash-icon-192.png',
+  './dash-icon-512.png'
 ];
 
 self.addEventListener('install', e => {
@@ -43,6 +48,8 @@ self.addEventListener('fetch', e => {
         caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
         return res;
       })
-      .catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
+      // 沒網路又沒快取時，退回該 App 自己的首頁（戰情室不要掉到打卡畫面）
+      .catch(() => caches.match(req).then(hit => hit ||
+        caches.match(/dashboard/.test(req.url) ? './dashboard.html' : './index.html')))
   );
 });

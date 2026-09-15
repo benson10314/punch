@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070c18">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="戰情室">
+<link rel="manifest" href="dashboard.webmanifest">
+<link rel="apple-touch-icon" href="dash-icon-180.png">
+<link rel="icon" href="dash-favicon-32.png">
 <title>出勤戰情室</title>
 <style>
 :root{
@@ -32,6 +38,17 @@ input,select{font-family:inherit}
 #login button{width:100%;margin-top:14px;padding:14px;border:0;border-radius:12px;background:#1d4ed8;
   color:#fff;font-size:16px;font-weight:700;letter-spacing:2px}
 #login .msg{color:var(--bad);font-size:13px;margin-top:12px;line-height:1.6;min-height:18px}
+
+/* 安裝成 App */
+#login .inst{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;
+  color:var(--muted);line-height:1.8}
+#login .inst button{background:#0f2440;border:1px solid #24456f;color:#cfe1ff;font-size:14px;margin-top:0}
+#login .inst b{color:var(--ink)}
+/* 裝成 App 後，iPhone 橫放時避開瀏海 */
+@media (display-mode: standalone){
+  body{padding-left:max(16px, env(safe-area-inset-left));padding-right:max(16px, env(safe-area-inset-right));
+    padding-bottom:max(28px, env(safe-area-inset-bottom))}
+}
 
 /* 頂列 */
 .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
@@ -229,6 +246,13 @@ body.tv .p .nm{font-size:17px}
   <input id="pw" type="password" placeholder="管理密碼" autocomplete="current-password">
   <button id="loginBtn">進　入</button>
   <div class="msg" id="loginErr"></div>
+  <div class="inst hidden" id="instBox">
+    <button id="instBtn" class="hidden">📲 安裝成 App</button>
+    <div id="instIos" class="hidden">
+      想像 App 一樣從主畫面開啟？<br>
+      用 <b>Safari</b> 開啟本頁，點下方 <b>分享</b> ⬆︎ → <b>加入主畫面</b>
+    </div>
+  </div>
 </div>
 
 <!-- ══════════ 主體 ══════════ -->
@@ -248,6 +272,7 @@ body.tv .p .nm{font-size:17px}
       <button class="chipbtn on" id="autoBtn">自動更新 30 秒</button>
       <button class="chipbtn" id="refreshBtn">立即更新</button>
       <button class="chipbtn" id="tvBtn">大螢幕</button>
+      <button class="chipbtn hidden" id="instChip">📲 安裝 App</button>
       <button class="chipbtn" id="outBtn">登出</button>
     </div>
   </div>
@@ -1049,6 +1074,43 @@ $('boardDate').onchange = () => { boardDate = $('boardDate').value; load(); };
 $('exBtn').onclick = doExport;
 $('dlBtn').onclick = download;
 document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { setRange(b.dataset.q); doExport(); });
+
+/* ════════ 安裝成 App ════════
+   Android／電腦版 Chrome、Edge：瀏覽器會發出 beforeinstallprompt，按鈕直接跳安裝視窗。
+   iPhone／iPad：沒有安裝事件，只能從 Safari「分享 → 加入主畫面」，所以改顯示說明。 */
+let installEvt = null;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+function paintInstall() {
+  const app = isStandalone();
+  $('instBox').classList.toggle('hidden', app || !(installEvt || isIOS));
+  $('instBtn').classList.toggle('hidden', !installEvt);
+  $('instIos').classList.toggle('hidden', !isIOS || !!installEvt);
+  $('instChip').classList.toggle('hidden', app || !installEvt);
+}
+
+async function doInstall() {
+  if (!installEvt) return;
+  installEvt.prompt();
+  try { await installEvt.userChoice; } catch (e) { /* 使用者關掉視窗 */ }
+  installEvt = null;
+  paintInstall();
+}
+
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; paintInstall(); });
+addEventListener('appinstalled', () => {
+  installEvt = null; paintInstall();
+  toast('✓ 已安裝「戰情室」，之後可從主畫面或桌面開啟');
+});
+$('instBtn').onclick = doInstall;
+$('instChip').onclick = doInstall;
+paintInstall();
+
+if ('serviceWorker' in navigator) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
 
 token = localStorage.getItem(LS);
 if (token) { enter(); } else { $('login').classList.remove('hidden'); $('pw').focus(); }

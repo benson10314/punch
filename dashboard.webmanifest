@@ -1,0 +1,18 @@
+{
+  "id": "./dashboard.html",
+  "name": "出勤戰情室",
+  "short_name": "戰情室",
+  "description": "人資與主管的出勤即時看板、員工管理、補卡簽核與報表",
+  "start_url": "./dashboard.html",
+  "scope": "./dashboard.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070c18",
+  "theme_color": "#070c18",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "dash-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "dash-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "dash-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
