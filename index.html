@@ -538,7 +538,7 @@ const I18N = {
     'gps.metersAllow': '公尺　允許 {radius}', 'gps.accuracy': '定位誤差（公尺）',
     'punch.in': '上班打卡', 'punch.out': '下班打卡', 'punch.inSub': 'CLOCK IN', 'punch.outSub': 'CLOCK OUT',
     'type.上班': '上班', 'type.下班': '下班',
-    'result.超出範圍': '超出範圍', 'result.補卡': '補卡',
+    'result.超出範圍': '超出範圍', 'result.補卡': '補卡', 'result.人資補登': '人資補登',
     'rmd.title': '今日提醒事項', 'rmd.read': '已讀', 'rmd.popTitle': '超時提醒',
     'rmd.popTime': '預定時間　{time}', 'rmd.more': '尚有 {n} 則提醒', 'rmd.ok': '我知道了',
     'today.title': '今日打卡紀錄', 'today.empty': '今天還沒有打卡紀錄', 'unit.m': '{d} 公尺',
@@ -623,7 +623,7 @@ const I18N = {
     'gps.metersAllow': 'mét · cho phép {radius}', 'gps.accuracy': 'Sai số định vị (mét)',
     'punch.in': 'Vào ca', 'punch.out': 'Tan ca', 'punch.inSub': '上班打卡', 'punch.outSub': '下班打卡',
     'type.上班': 'Vào ca', 'type.下班': 'Tan ca',
-    'result.超出範圍': 'Ngoài phạm vi', 'result.補卡': 'Bổ sung công',
+    'result.超出範圍': 'Ngoài phạm vi', 'result.補卡': 'Bổ sung công', 'result.人資補登': 'Nhân sự bổ sung',
     'rmd.title': 'Nhắc nhở hôm nay', 'rmd.read': 'Đã xem', 'rmd.popTitle': 'Nhắc nhở quá giờ',
     'rmd.popTime': 'Thời gian: {time}', 'rmd.more': 'Còn {n} nhắc nhở', 'rmd.ok': 'Tôi đã hiểu',
     'today.title': 'Chấm công hôm nay', 'today.empty': 'Hôm nay chưa có dữ liệu chấm công', 'unit.m': '{d} mét',
@@ -708,7 +708,7 @@ const I18N = {
     'gps.metersAllow': 'm · limit {radius}', 'gps.accuracy': 'Accuracy (m)',
     'punch.in': 'Clock In', 'punch.out': 'Clock Out', 'punch.inSub': '上班打卡', 'punch.outSub': '下班打卡',
     'type.上班': 'Clock in', 'type.下班': 'Clock out',
-    'result.超出範圍': 'Out of range', 'result.補卡': 'Punch fix',
+    'result.超出範圍': 'Out of range', 'result.補卡': 'Punch fix', 'result.人資補登': 'Added by HR',
     'rmd.title': 'Today’s reminders', 'rmd.read': 'Read', 'rmd.popTitle': 'Overtime reminder',
     'rmd.popTime': 'Scheduled: {time}', 'rmd.more': '{n} more reminder(s)', 'rmd.ok': 'Got it',
     'today.title': 'Today’s records', 'today.empty': 'No records yet today', 'unit.m': '{d} m',
@@ -1264,7 +1264,7 @@ async function punch(type) {
 
 /** 紀錄右側說明：地點距離、異常或補卡標籤 */
 function recMeta(x) {
-  if (x.result === '補卡') return '<span class="tag patch">' + esc(t('result.補卡')) + '</span>';
+  if (x.result === '補卡' || x.result === '人資補登') return '<span class="tag patch">' + esc(t('result.' + x.result)) + '</span>';
   return esc(x.loc) + '　' + esc(t('unit.m', { d: x.dist })) +
     (x.result !== '正常' ? '<br>⚠ ' + esc(t('result.' + x.result, null, x.result)) : '');
 }

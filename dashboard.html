@@ -197,8 +197,50 @@ tr.voided td{opacity:.6}
 .p .warn.patch{color:#a5b4fc}
 .f .d .pt{color:#a5b4fc}
 
+/* 人員卡可點選 → 出勤調整 */
+.p{cursor:pointer}
+.p:hover{border-color:#31456f}
+.p .warn.hred{color:#f0abfc}
+.p .ses{font-size:10px;color:var(--muted);margin-left:4px}
+.box.wide{max-width:560px}
+.ahead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ahead h3{margin:0}
+.ahead .chipbtn{margin-left:auto}
+.adate{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.adate .txt{color-scheme:dark}
+.arow{display:flex;align-items:center;gap:9px;padding:10px 4px;border-bottom:1px solid var(--line);font-size:13.5px}
+.arow:last-child{border-bottom:0}
+.arow .t{font-weight:700;font-variant-numeric:tabular-nums;flex:none;min-width:66px}
+.arow .t small{display:block;font-weight:400;font-size:10.5px;color:var(--late)}
+.arow .src{color:var(--muted);font-size:12px;line-height:1.5;flex:1;min-width:0}
+.arow .src .pt{color:#a5b4fc} .arow .src .hr{color:#f0abfc} .arow .src .bd{color:var(--bad)}
+.arow .ops{flex:none;display:flex}
+.arow.voided{opacity:.5}
+.arow.voided .t{text-decoration:line-through}
+.arow.editing{background:#16305c;border-radius:9px}
+.aform{margin-top:14px;padding:14px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}
+.aform h4{margin:0 0 11px;font-size:13.5px;letter-spacing:1px}
+.seg{display:flex;gap:7px;margin-bottom:11px}
+.seg button{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--line);background:#0a1120;
+  color:var(--muted);font-size:14px;font-weight:700}
+.seg button.on[data-at="上班"]{border-color:var(--ok);color:#4ade80;background:#0d3b26}
+.seg button.on[data-at="下班"]{border-color:#f59e0b;color:#fbbf24;background:#3a2410}
+.aform .fld .row > *{flex:1;min-width:0}
+.aform input[type=date],.aform input[type=time]{color-scheme:dark}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.chips .mini{margin:0}
+.arow .g{font-size:10.5px;padding:2px 7px;border-radius:99px;flex:none}
+.ahead .chipbtn,#aHours{white-space:nowrap}
+.adate{flex-wrap:wrap}
+@media(max-width:640px){
+  #amodal{align-items:flex-start;padding:10px}
+  #amodal .box{padding:16px 14px}
+  .arow{gap:7px;font-size:13px}
+  .arow .t{min-width:44px}
+}
+
 /* Modal */
-#modal,#pmodal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:flex;align-items:center;
+#modal,#pmodal,#amodal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:flex;align-items:center;
   justify-content:center;z-index:50;padding:16px;overflow-y:auto}
 .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;width:100%;max-width:420px}
 .box h3{margin:0 0 16px;font-size:16px;letter-spacing:2px}
@@ -466,6 +508,53 @@ body.tv .p .nm{font-size:17px}
   </div>
 </div>
 
+<!-- ══════════ 出勤調整視窗（點人員卡開啟） ══════════ -->
+<div id="amodal" class="hidden">
+  <div class="box wide">
+    <div class="ahead">
+      <h3 id="aTitle">出勤調整</h3>
+      <button class="chipbtn" id="aClose">關閉</button>
+    </div>
+    <div class="adate">
+      <button class="chipbtn" id="aPrev" title="前一天">◀</button>
+      <input class="txt" type="date" id="aDate">
+      <button class="chipbtn" id="aNext" title="後一天">▶</button>
+      <span class="live" id="aHours" style="margin-left:auto"></span>
+    </div>
+    <div id="aList"><div class="empty">載入中…</div></div>
+
+    <div class="aform">
+      <h4 id="aFormTitle">＋ 新增打卡</h4>
+      <div class="seg">
+        <button data-at="上班">上班</button>
+        <button data-at="下班">下班</button>
+      </div>
+      <div class="fld"><div class="row">
+        <div><label>日期</label><input type="date" id="aFDate"></div>
+        <div><label>時間</label><input type="time" id="aFTime"></div>
+      </div></div>
+      <div class="fld"><label>原因（必填，會留在安全紀錄）</label>
+        <input id="aReason" maxlength="70" placeholder="例如：忘記打卡，經主管確認">
+        <div class="chips" id="aChips">
+          <button class="mini" type="button">忘記打卡，經主管確認</button>
+          <button class="mini" type="button">手機故障無法打卡</button>
+          <button class="mini" type="button">公出，經主管確認</button>
+          <button class="mini" type="button">打錯卡</button>
+        </div>
+      </div>
+      <div class="modalerr" id="aErr"></div>
+      <div class="acts">
+        <button class="chipbtn hidden" id="aCancelEdit" style="flex:none">取消修改</button>
+        <button class="primary" id="aSave">新增打卡</button>
+      </div>
+    </div>
+    <div class="fld" style="margin:12px 0 0"><div class="hint">
+      原始打卡紀錄不會被刪除或覆蓋：修改＝作廢舊的＋新增一筆「人資補登」；作廢的紀錄會從工時、看板、報表排除，
+      但仍保留在試算表，並寫入安全紀錄。核准的補卡被作廢時，補卡申請單也會一併標示作廢。
+    </div></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -631,8 +720,11 @@ function drawGrid() {
     let warn = '';
     if (r.flags.length) warn += '<div class="warn err">⚠ ' + esc(r.flags.join('、')) + '</div>';
     if (r.patched) warn += '<div class="warn patch">✎ 含補卡</div>';
-    return '<div class="' + cls + '"><div class="nm">' + esc(r.name) + '<em>' + esc(r.empId) +
-           '</em></div><div class="dp"><span>' + esc(r.dept) + '</span></div>' +
+    if (r.hrEdit) warn += '<div class="warn hred">✎ 含人資補登</div>';
+    return '<div class="' + cls + '" data-emp="' + esc(r.empId) + '" title="點選調整出勤">' +
+           '<div class="nm">' + esc(r.name) + '<em>' + esc(r.empId) + '</em></div>' +
+           '<div class="dp"><span>' + esc(r.dept) + '</span>' +
+           (r.sessions > 1 ? '<span class="ses">共 ' + r.sessions + ' 段</span>' : '') + '</div>' +
            body + warn + '</div>';
   }).join('') : '<div class="empty">沒有符合條件的人員</div>';
 }
@@ -641,11 +733,11 @@ function drawFeed() {
   const f = data.feed;
   $('feedCnt').textContent = '今日 ' + f.length + ' 筆';
   $('feed').innerHTML = f.length ? f.map(x =>
-    '<div class="f' + (x.result !== '正常' && x.result !== '補卡' ? ' bad' : '') + '">' +
+    '<div class="f' + (x.result !== '正常' && x.result !== '補卡' && x.result !== '人資補登' ? ' bad' : '') + '">' +
     '<span class="t">' + x.time + '</span>' +
     '<span class="g ' + (x.type === '上班' ? 'in' : 'out') + '">' + x.type + '</span>' +
     '<span class="n">' + esc(x.name) + '</span>' +
-    '<span class="d">' + (x.result === '補卡' ? '<span class="pt">✎ 補卡</span>'
+    '<span class="d">' + (x.result === '補卡' || x.result === '人資補登' ? '<span class="pt">✎ ' + esc(x.result) + '</span>'
       : esc(x.loc) + ' ' + x.dist + 'm' + (x.result !== '正常' ? '<br>⚠ ' + esc(x.result) : '')) +
     '</span></div>').join('')
     : '<div class="empty">今日尚無打卡</div>';
@@ -826,6 +918,172 @@ function download() {
   a.download = name; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   toast('✓ 已下載 ' + name);
+}
+
+/* ════════ 出勤調整（點人員卡） ════════
+   原始紀錄不刪不改：修改＝後端作廢舊的＋新增一筆「人資補登」，作廢＝標示「人資作廢」。 */
+let aEmp = '', aData = null, aType = '上班', aEdit = null, aBusy = false;
+
+function openDay(empId) {
+  const r = data && data.rows.find(x => x.empId === empId);
+  aEmp = empId; aData = null;
+  $('aTitle').textContent = r ? r.name + '　' + r.empId : empId;
+  $('aHours').textContent = '';
+  $('aList').innerHTML = '<div class="empty">載入中…</div>';
+  $('amodal').classList.remove('hidden');
+  resetAForm();
+  loadDay(data ? data.dateInput : ymd(new Date()));
+}
+
+function closeA() {
+  $('amodal').classList.add('hidden');
+  aEmp = ''; aData = null; aEdit = null;
+}
+
+async function loadDay(dateInput) {
+  const emp = aEmp;
+  $('aDate').value = dateInput;
+  $('aList').innerHTML = '<div class="empty">載入中…</div>';
+  try {
+    const r = await api('adminDay', { empId: emp, date: dateInput });
+    if (emp !== aEmp) return;                      // 等待期間已關閉或換人
+    setDay(r);
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('aList').innerHTML = '<div class="empty">載入失敗：' + esc(e.message) + '</div>';
+  }
+}
+
+function setDay(r) {
+  aData = r;
+  $('aTitle').textContent = r.name + '　' + r.empId + '　' + r.dept;
+  $('aDate').value = r.dateInput;
+  $('aDate').max = r.today;
+  $('aNext').disabled = r.dateInput >= r.today;
+  const live = r.rows.filter(x => !x.voided);
+  $('aHours').innerHTML = r.hours !== ''
+    ? '工時 <b style="color:var(--ink)">' + r.hours + '</b> 小時' + (r.breakMin ? '（已扣休息 ' + r.breakMin + ' 分）' : '')
+    : live.length ? '<span style="color:var(--late)">缺上班或下班卡，工時無法計算</span>' : '';
+  resetAForm();
+}
+
+function drawDay() {
+  const r = aData;
+  if (!r) return;
+  if (!r.rows.length) {
+    $('aList').innerHTML = '<div class="empty">' + esc(r.date) + '（' + esc(r.weekday) + '）沒有打卡紀錄，可在下方直接新增</div>';
+    return;
+  }
+  $('aList').innerHTML = r.rows.map((x, i) => {
+    let src;
+    if (x.voided) src = '已作廢（' + esc(x.result) + '）';
+    else if (x.result === '補卡') src = '<span class="pt">✎ 補卡</span> ' + esc(x.patchId);
+    else if (x.result === '人資補登') src = '<span class="hr">✎ 人資補登</span>' + (x.hrNote ? '：' + esc(x.hrNote) : '');
+    else src = esc(x.loc) + ' ' + esc(x.dist) + 'm' + (x.acc !== '' ? '　±' + esc(x.acc) : '') +
+               (x.result !== '正常' ? '　<span class="bd">⚠ ' + esc(x.result) + '</span>' : '');
+    const otherDay = x.date !== r.date ? '<small>' + esc(x.date.slice(5)) + '</small>' : '';
+    const ops = x.voided ? '' :
+      '<button class="mini" data-ae="' + i + '">修改</button><button class="mini danger" data-av="' + i + '">作廢</button>';
+    return '<div class="arow' + (x.voided ? ' voided' : '') + (aEdit && aEdit.row === x.row ? ' editing' : '') + '">' +
+      '<span class="g ' + (x.type === '上班' ? 'in' : 'out') + '">' + esc(x.type) + '</span>' +
+      '<span class="t">' + esc(x.time.slice(0, 5)) + otherDay + '</span>' +
+      '<span class="src">' + src + '</span><span class="ops">' + ops + '</span></div>';
+  }).join('');
+  $('aList').querySelectorAll('[data-ae]').forEach(b => b.onclick = () => startEdit(Number(b.dataset.ae)));
+  $('aList').querySelectorAll('[data-av]').forEach(b => b.onclick = () => voidPunch(Number(b.dataset.av)));
+}
+
+function setAType(t) {
+  aType = t;
+  document.querySelectorAll('[data-at]').forEach(b => b.classList.toggle('on', b.dataset.at === t));
+}
+
+function resetAForm() {
+  aEdit = null;
+  const live = aData ? aData.rows.filter(x => !x.voided) : [];
+  // 有上班卡但還沒下班卡時，預設幫忙選「下班」
+  setAType(live.some(x => x.type === '上班') && !live.some(x => x.type === '下班') ? '下班' : '上班');
+  $('aFDate').value = aData ? aData.dateInput : (data ? data.dateInput : ymd(new Date()));
+  $('aFDate').max = aData ? aData.today : ymd(new Date());
+  $('aFTime').value = '';
+  $('aReason').value = '';
+  $('aErr').textContent = '';
+  $('aFormTitle').textContent = '＋ 新增打卡';
+  $('aSave').textContent = '新增打卡';
+  $('aCancelEdit').classList.add('hidden');
+  drawDay();
+}
+
+function startEdit(i) {
+  const x = aData.rows[i];
+  aEdit = x;
+  setAType(x.type);
+  $('aFDate').value = x.date.replace(/\//g, '-');
+  $('aFTime').value = x.time.slice(0, 5);
+  $('aReason').value = '';
+  $('aErr').textContent = '';
+  $('aFormTitle').textContent = '✎ 修改 ' + x.date.slice(5) + ' ' + x.time.slice(0, 5) + ' 的' + x.type + '卡' +
+    (x.result === '補卡' ? '（補卡申請單會一併作廢）' : '');
+  $('aSave').textContent = '儲存修改';
+  $('aCancelEdit').classList.remove('hidden');
+  drawDay();
+  $('aFTime').focus();
+}
+
+async function saveA() {
+  if (aBusy || !aData) return;
+  const body = {
+    empId: aData.empId, type: aType, date: $('aFDate').value, time: $('aFTime').value,
+    reason: $('aReason').value.trim(), view: aData.dateInput
+  };
+  const err = m => { $('aErr').textContent = m; };
+  if (!body.date || !body.time) return err('請填寫日期與時間');
+  if (body.reason.length < 2) return err('請填寫原因（會留在安全紀錄）');
+  if (new Date(body.date + 'T' + body.time + ':00') > new Date()) return err('打卡時間不能晚於現在');
+  const editing = aEdit;
+  if (editing) Object.assign(body, { row: editing.row, ts: editing.ts });
+
+  aBusy = true; $('aSave').disabled = true; err('');
+  try {
+    const r = await api(editing ? 'adminPunchEdit' : 'adminPunchAdd', body);
+    setDay(r);
+    toast('✓ 已' + (editing ? '修改為' : '新增') + ' ' + body.date.slice(5).replace('-', '/') + ' ' + body.time + ' ' + body.type + '卡');
+    load(false);                                    // 看板跟著更新
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    err(e.message);
+  } finally {
+    aBusy = false; $('aSave').disabled = false;
+  }
+}
+
+async function voidPunch(i) {
+  if (aBusy || !aData) return;
+  const x = aData.rows[i];
+  const reason = prompt('作廢 ' + x.date.slice(5) + ' ' + x.time.slice(0, 5) + ' 的' + x.type + '卡' +
+    (x.result === '補卡' ? '\n（補卡申請單會一併作廢）' : '') + '\n\n請輸入作廢原因：');
+  if (reason === null) return;
+  if (reason.trim().length < 2) return toast('✕ 請填寫作廢原因', 'bad');
+  aBusy = true;
+  try {
+    const r = await api('adminPunchVoid', { empId: aData.empId, row: x.row, ts: x.ts, reason: reason.trim(), view: aData.dateInput });
+    setDay(r);
+    toast('✓ 已作廢 ' + x.time.slice(0, 5) + ' ' + x.type + '卡');
+    load(false);
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    toast('✕ ' + e.message, 'bad');
+  } finally {
+    aBusy = false;
+  }
+}
+
+function shiftADay(n) {
+  if (!aData) return;
+  const d = new Date(aData.dateInput + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  if (ymd(d) > aData.today) return;
+  loadDay(ymd(d));
 }
 
 /* ════════ 自動更新 / 登入登出 ════════ */
@@ -1029,7 +1287,7 @@ function enter() {
 function logout(msg) {
   clearInterval(timer);
   token = null; data = null; emps = []; exResult = null; boardDate = '';
-  patchData = null; deptData = null; closePM();
+  patchData = null; deptData = null; closePM(); closeA();
   localStorage.removeItem(LS);
   $('app').classList.add('hidden');
   $('login').classList.remove('hidden');
@@ -1059,7 +1317,22 @@ $('mSave').onclick = saveEmp;
 $('mRand').onclick = () => { $('mPin').value = String(Math.floor(1000 + Math.random() * 9000)); };
 $('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 $('pmodal').addEventListener('click', e => { if (e.target.id === 'pmodal') closePM(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePM(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePM(); closeA(); } });
+
+// 出勤調整：人員卡每 30 秒會重畫，所以把點擊綁在外層容器
+$('grid').addEventListener('click', e => {
+  const card = e.target.closest('[data-emp]');
+  if (card) openDay(card.dataset.emp);
+});
+$('amodal').addEventListener('click', e => { if (e.target.id === 'amodal') closeA(); });
+$('aClose').onclick = closeA;
+$('aPrev').onclick = () => shiftADay(-1);
+$('aNext').onclick = () => shiftADay(1);
+$('aDate').onchange = () => { if ($('aDate').value) loadDay($('aDate').value); };
+document.querySelectorAll('[data-at]').forEach(b => b.onclick = () => setAType(b.dataset.at));
+$('aChips').querySelectorAll('button').forEach(b => b.onclick = () => { $('aReason').value = b.textContent; });
+$('aSave').onclick = saveA;
+$('aCancelEdit').onclick = resetAForm;
 
 $('pBtn').onclick = loadPatchList;
 ['pStatus', 'pDept'].forEach(id => $(id).addEventListener('change', loadPatchList));
