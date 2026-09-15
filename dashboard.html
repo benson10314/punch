@@ -156,8 +156,32 @@ td.num{text-align:right}
 #pastBox{display:flex;align-items:center;gap:10px}
 #pastBox b{color:#dbeafe}
 
+/* 補卡簽核 */
+.tabcnt{background:#dc2626;color:#fff;border-radius:99px;font-size:10.5px;padding:1px 7px;margin-left:5px;font-weight:700}
+.pst{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:700;white-space:nowrap}
+.pst.pending{background:#3a2410;color:#fbbf24}
+.pst.approved{background:#0d3b26;color:#4ade80}
+.pst.rejected{background:#33202a;color:#fca5a5}
+.pst.withdrawn,.pst.voided{background:#1e293b;color:#94a3b8}
+td .sub{font-size:11px;color:var(--muted);margin-top:3px;white-space:normal;line-height:1.5}
+td .sub.bad{color:#fca5a5}
+td.wrap{white-space:normal;min-width:150px;max-width:260px;line-height:1.5}
+.overx{color:#f87171;font-weight:700}
+.tohr{font-size:11px;color:#c4b5fd;background:#2e1065;padding:2px 8px;border-radius:99px;white-space:nowrap}
+tr.voided td{opacity:.6}
+.mini.danger{color:#fca5a5;border-color:#5b2230}
+.dangerbtn{background:#7f1d1d;border:0;color:#fecaca;border-radius:9px;padding:9px 18px;font-size:13.5px;font-weight:700}
+.dangerbtn:hover{background:#991b1b}
+.dangerbtn:disabled,.primary:disabled{opacity:.5}
+.fld textarea{width:100%;padding:11px;font-size:14px;border:1.5px solid var(--line);border-radius:10px;
+  background:#0a1120;color:var(--ink);font-family:inherit;resize:vertical;line-height:1.55}
+.fld textarea:focus{outline:0;border-color:var(--work)}
+#dBody select.txt,#dBody input.txt{width:100%;min-width:190px}
+.p .warn.patch{color:#a5b4fc}
+.f .d .pt{color:#a5b4fc}
+
 /* Modal */
-#modal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:flex;align-items:center;
+#modal,#pmodal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:flex;align-items:center;
   justify-content:center;z-index:50;padding:16px;overflow-y:auto}
 .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;width:100%;max-width:420px}
 .box h3{margin:0 0 16px;font-size:16px;letter-spacing:2px}
@@ -231,6 +255,7 @@ body.tv .p .nm{font-size:17px}
   <div class="tabs">
     <button class="tab on" data-v="board">即時看板</button>
     <button class="tab" data-v="emp">員工管理</button>
+    <button class="tab" data-v="patch">補卡簽核<span class="tabcnt hidden" id="patchTabCnt">0</span></button>
     <button class="tab" data-v="export">匯出報表</button>
   </div>
 
@@ -303,6 +328,51 @@ body.tv .p .nm{font-size:17px}
     </div>
   </div>
 
+  <!-- ─── 補卡簽核 ─── -->
+  <div id="viewPatch" class="hidden">
+    <div class="panel">
+      <h2>補卡申請 <span id="patchCnt"></span></h2>
+      <div class="filters">
+        <select class="txt" id="pStatus">
+          <option value="待審">待審</option><option value="全部">全部狀態</option>
+          <option value="核准">核准</option><option value="駁回">駁回</option>
+          <option value="撤回">撤回</option><option value="作廢">作廢</option>
+        </select>
+        <select class="txt" id="pDept"><option>全部</option></select>
+        <label class="live">補卡日期</label><input class="txt" type="date" id="pFrom">
+        <label class="live">～</label><input class="txt" type="date" id="pTo">
+        <input class="txt push" id="pKw" placeholder="搜尋姓名／工號">
+        <button class="primary" id="pBtn">查詢</button>
+      </div>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>申請時間</th><th>員工</th><th>部門</th><th>補卡</th><th>原因</th>
+            <th class="num">當月第幾次</th><th>簽核主管</th><th>狀態／簽核</th><th>操作</th></tr></thead>
+          <tbody id="pBody"></tbody>
+        </table>
+      </div>
+      <div class="info" style="margin:14px 0 0">
+        待審的單人資可以<b>代簽</b>（主管請假，或部門沒設簽核主管時）。當月次數超過上限會標紅，但仍可核准。<br>
+        已核准的補卡若有問題只能<b>作廢</b>：系統不會刪除任何紀錄，只會把那筆補卡從工時、看板、報表中排除，並留下作廢人、時間與原因。
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>部門簽核主管 <span id="deptHint"></span></h2>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>部門</th><th class="num">人數</th><th>簽核主管</th><th>通知 Email（選填）</th></tr></thead>
+          <tbody id="dBody"></tbody>
+        </table>
+      </div>
+      <div class="filters" style="margin:12px 0 0"><button class="primary push" id="dSave">儲存部門主管</button></div>
+      <div class="info" style="margin:12px 0 0">
+        沒設簽核主管的部門，補卡單會直接送到上方清單由人資審核；主管本人申請的補卡也會送人資，不會自己簽自己。<br>
+        有填 Email 的主管，員工送單時會收到通知信。人資的通知信箱請到試算表「設定」分頁的「人資通知Email」填寫。
+      </div>
+    </div>
+  </div>
+
   <!-- ─── 匯出報表 ─── -->
   <div id="viewExport" class="hidden">
     <div class="panel">
@@ -358,6 +428,19 @@ body.tv .p .nm{font-size:17px}
   </div>
 </div>
 
+<!-- ══════════ 補卡代簽／作廢視窗 ══════════ -->
+<div id="pmodal" class="hidden">
+  <div class="box">
+    <h3 id="pmTitle">代簽補卡</h3>
+    <div class="info" id="pmInfo" style="margin-bottom:12px"></div>
+    <div class="fld"><label id="pmLabel">簽核意見</label>
+      <textarea id="pmText" rows="3" maxlength="200"></textarea>
+      <div class="hint" id="pmHint"></div></div>
+    <div class="modalerr" id="pmErr"></div>
+    <div class="acts" id="pmActs"></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -372,6 +455,8 @@ let token = null, data = null, timer = null, auto = true;
 let view = 'board', dept = '全部', kw = '', lastFeedTop = '';
 let emps = [], empDepts = [], editing = null, exResult = null;
 let boardDate = '';   // 空＝今天
+let patchData = null, deptData = null, pmTarget = null;
+const PST = { '待審': 'pending', '核准': 'approved', '駁回': 'rejected', '撤回': 'withdrawn', '作廢': 'voided' };
 
 async function api(action, body) {
   const res = await fetch(API_URL, {
@@ -407,6 +492,7 @@ function switchTab(v) {
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   $('viewBoard').classList.toggle('hidden', v !== 'board');
   $('viewEmp').classList.toggle('hidden', v !== 'emp');
+  $('viewPatch').classList.toggle('hidden', v !== 'patch');
   $('viewExport').classList.toggle('hidden', v !== 'export');
   // 自動更新只在看板頁跑，避免打斷編輯
   const onBoard = v === 'board';
@@ -414,6 +500,7 @@ function switchTab(v) {
   $('pastBox').classList.toggle('hidden', !onBoard || !data || data.isToday);
   setAuto(auto);
   if (v === 'emp' && !emps.length) loadEmps();
+  if (v === 'patch') { loadPatchList(); if (!deptData) loadDepts(); }
 }
 
 /* ════════ 即時看板 ════════ */
@@ -435,6 +522,7 @@ async function load(showErr) {
 
 function render() {
   const d = data, s = d.summary;
+  setPatchBadge(d.patchPending);
   $('dateTxt').textContent = d.date + '（' + d.weekday + '）';
   $('boardDate').value = d.dateInput;
   $('boardDate').max = d.today;
@@ -517,6 +605,7 @@ function drawGrid() {
           (r.breakMin ? '（已扣休息 ' + r.breakMin + ' 分）' : '') + '</div>' : '');
     let warn = '';
     if (r.flags.length) warn += '<div class="warn err">⚠ ' + esc(r.flags.join('、')) + '</div>';
+    if (r.patched) warn += '<div class="warn patch">✎ 含補卡</div>';
     return '<div class="' + cls + '"><div class="nm">' + esc(r.name) + '<em>' + esc(r.empId) +
            '</em></div><div class="dp"><span>' + esc(r.dept) + '</span></div>' +
            body + warn + '</div>';
@@ -527,12 +616,13 @@ function drawFeed() {
   const f = data.feed;
   $('feedCnt').textContent = '今日 ' + f.length + ' 筆';
   $('feed').innerHTML = f.length ? f.map(x =>
-    '<div class="f' + (x.result !== '正常' ? ' bad' : '') + '">' +
+    '<div class="f' + (x.result !== '正常' && x.result !== '補卡' ? ' bad' : '') + '">' +
     '<span class="t">' + x.time + '</span>' +
     '<span class="g ' + (x.type === '上班' ? 'in' : 'out') + '">' + x.type + '</span>' +
     '<span class="n">' + esc(x.name) + '</span>' +
-    '<span class="d">' + esc(x.loc) + ' ' + x.dist + 'm' +
-    (x.result !== '正常' ? '<br>⚠ ' + esc(x.result) : '') + '</span></div>').join('')
+    '<span class="d">' + (x.result === '補卡' ? '<span class="pt">✎ 補卡</span>'
+      : esc(x.loc) + ' ' + x.dist + 'm' + (x.result !== '正常' ? '<br>⚠ ' + esc(x.result) : '')) +
+    '</span></div>').join('')
     : '<div class="empty">今日尚無打卡</div>';
   const top = f.length ? f[0].time + f[0].name : '';
   if (lastFeedTop && top && top !== lastFeedTop) {
@@ -746,6 +836,162 @@ async function login() {
   finally { $('loginBtn').disabled = false; }
 }
 
+/* ════════ 補卡簽核 ════════ */
+function setPatchBadge(n) {
+  n = Number(n) || 0;
+  $('patchTabCnt').textContent = n;
+  $('patchTabCnt').classList.toggle('hidden', !n);
+}
+
+async function loadPatchList() {
+  $('pBody').innerHTML = '<tr><td colspan="9" class="empty">載入中…</td></tr>';
+  try {
+    patchData = await api('adminPatchList', {
+      status: $('pStatus').value, dept: $('pDept').value,
+      from: $('pFrom').value, to: $('pTo').value, kw: $('pKw').value.trim()
+    });
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('pBody').innerHTML = '<tr><td colspan="9" class="empty">載入失敗：' + esc(e.message) + '</td></tr>';
+    return;
+  }
+  const sel = $('pDept'), cur = sel.value;
+  sel.innerHTML = ['全部'].concat(patchData.depts).map(d => '<option>' + esc(d) + '</option>').join('');
+  sel.value = patchData.depts.includes(cur) ? cur : '全部';
+  setPatchBadge(patchData.pendingCount);
+  drawPatchList();
+}
+
+function drawPatchList() {
+  const rows = patchData.rows;
+  $('patchCnt').textContent = '共 ' + rows.length + ' 筆　・　全部待審 ' + patchData.pendingCount +
+                              '　・　每月上限 ' + patchData.limit + ' 次';
+  $('pBody').innerHTML = rows.length ? rows.map(x => {
+    let sign = '<span class="pst ' + (PST[x.status] || '') + '">' + esc(x.status) + '</span>';
+    if (x.status === '待審' && x.toHr) sign += ' <span class="tohr">送人資</span>';
+    if (x.status !== '待審' && x.signer) sign += '<div class="sub">' + esc(x.signer) + '　' + esc(x.signedAt) + '</div>';
+    if (x.comment) sign += '<div class="sub">意見：' + esc(x.comment) + '</div>';
+    if (x.status === '作廢') sign += '<div class="sub bad">作廢：' + esc(x.voidReason) + '（' + esc(x.voidAt) + '）</div>';
+    let act = '';
+    if (x.status === '待審') act = '<button class="mini" data-pd="' + esc(x.id) + '">代簽</button>';
+    else if (x.status === '核准') act = '<button class="mini danger" data-pv="' + esc(x.id) + '">作廢</button>';
+    return '<tr class="' + (x.status === '作廢' ? 'voided' : '') + '">' +
+      '<td>' + esc(x.appliedAt) + '<div class="sub">' + esc(x.id) + '</div></td>' +
+      '<td><b>' + esc(x.name) + '</b><div class="sub">' + esc(x.empId) + '</div></td>' +
+      '<td>' + esc(x.dept) + '</td>' +
+      '<td><span class="g ' + (x.type === '上班' ? 'in' : 'out') + '">' + esc(x.type) + '</span> ' +
+        esc(x.date) + ' <b>' + esc(x.time) + '</b></td>' +
+      '<td class="wrap">' + esc(x.reason) + '</td>' +
+      '<td class="num">' + (x.overLimit ? '<span class="overx" title="超過每月上限">' + x.count + ' ⚠</span>' : x.count) + '</td>' +
+      '<td>' + (x.approver ? esc(x.approver) : '<span class="tohr">人資</span>') + '</td>' +
+      '<td>' + sign + '</td><td>' + act + '</td></tr>';
+  }).join('') : '<tr><td colspan="9" class="empty">沒有符合條件的補卡申請</td></tr>';
+
+  $('pBody').querySelectorAll('[data-pd]').forEach(b => b.onclick = () => openPM('decide', b.dataset.pd));
+  $('pBody').querySelectorAll('[data-pv]').forEach(b => b.onclick = () => openPM('void', b.dataset.pv));
+}
+
+function openPM(mode, id) {
+  pmTarget = patchData.rows.find(x => x.id === id);
+  if (!pmTarget) return;
+  const x = pmTarget;
+  $('pmTitle').textContent = mode === 'void' ? '作廢已核准的補卡' : '人資代簽補卡';
+  $('pmInfo').innerHTML =
+    '<b>' + esc(x.name) + '（' + esc(x.empId) + '）</b>　' + esc(x.dept) + '<br>' +
+    '補卡：' + esc(x.date) + ' ' + esc(x.time) + '　' + esc(x.type) + '<br>' +
+    '原因：' + esc(x.reason) + '<br>' +
+    '當月第 ' + x.count + ' 次' + (x.overLimit ? '　<span class="overx">⚠ 超過每月上限 ' + patchData.limit + ' 次</span>' : '') +
+    (mode === 'void' ? '<br>簽核：' + esc(x.signer) + '　' + esc(x.signedAt) : '');
+  $('pmLabel').textContent = mode === 'void' ? '作廢原因（必填）' : '簽核意見';
+  $('pmHint').textContent = mode === 'void'
+    ? '作廢後這筆補卡會從工時、看板、報表中排除，申請單與打卡紀錄都保留原樣供稽核。'
+    : '核准可不填；駁回請填寫原因，員工在 App 裡看得到。';
+  $('pmText').value = '';
+  $('pmErr').textContent = '';
+  $('pmActs').innerHTML = mode === 'void'
+    ? '<button class="chipbtn" data-pa="cancel" style="flex:none">取消</button>' +
+      '<button class="dangerbtn" data-pa="void" style="flex:1">確認作廢</button>'
+    : '<button class="chipbtn" data-pa="cancel" style="flex:none">取消</button>' +
+      '<button class="dangerbtn" data-pa="reject">駁回</button>' +
+      '<button class="primary" data-pa="approve" style="flex:1">代簽核准</button>';
+  $('pmActs').querySelectorAll('[data-pa]').forEach(b => b.onclick = () =>
+    b.dataset.pa === 'cancel' ? closePM() : pmSubmit(b.dataset.pa));
+  $('pmodal').classList.remove('hidden');
+  $('pmText').focus();
+}
+
+function closePM() { $('pmodal').classList.add('hidden'); pmTarget = null; }
+
+async function pmSubmit(action) {
+  if (!pmTarget) return;
+  const text = $('pmText').value.trim();
+  if (action === 'void' && !text) { $('pmErr').textContent = '作廢請填寫原因'; return; }
+  if (action === 'reject' && !text) { $('pmErr').textContent = '駁回請填寫原因'; return; }
+  const btns = $('pmActs').querySelectorAll('button');
+  btns.forEach(b => b.disabled = true);
+  try {
+    if (action === 'void') await api('adminPatchVoid', { id: pmTarget.id, reason: text });
+    else await api('adminPatchDecide', { id: pmTarget.id, decision: action, comment: text });
+    closePM();
+    toast('✓ ' + (action === 'void' ? '已作廢' : action === 'approve' ? '已代簽核准' : '已駁回'));
+    loadPatchList();
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('pmErr').textContent = e.message;
+  } finally {
+    btns.forEach(b => b.disabled = false);
+  }
+}
+
+async function loadDepts() {
+  $('dBody').innerHTML = '<tr><td colspan="4" class="empty">載入中…</td></tr>';
+  try {
+    deptData = await api('adminDeptList');
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('dBody').innerHTML = '<tr><td colspan="4" class="empty">載入失敗：' + esc(e.message) + '</td></tr>';
+    return;
+  }
+  drawDepts();
+}
+
+function drawDepts() {
+  const unset = deptData.rows.filter(r => !r.approverName).length;
+  $('deptHint').innerHTML = unset ? '<span class="overx">' + unset + ' 個部門未設定（送人資）</span>' : '全部部門都已設定';
+  $('dBody').innerHTML = deptData.rows.length ? deptData.rows.map(r => {
+    // 同部門的人排前面，方便挑主管
+    const list = deptData.employees.slice().sort((a, b) =>
+      (a.dept === r.dept ? 0 : 1) - (b.dept === r.dept ? 0 : 1) || (a.empId < b.empId ? -1 : 1));
+    const opts = '<option value="">（未設定，送人資）</option>' + list.map(e =>
+      '<option value="' + esc(e.empId) + '"' + (r.empId && e.empId.toUpperCase() === r.empId.toUpperCase() ? ' selected' : '') + '>' +
+      esc(e.name + '（' + e.empId + '）・' + e.dept) + '</option>').join('');
+    return '<tr><td><b>' + esc(r.dept) + '</b></td><td class="num">' + r.headcount + '</td>' +
+      '<td><select class="txt" data-dd="' + esc(r.dept) + '">' + opts + '</select>' +
+        (r.invalid ? '<div class="sub bad">原設定「' + esc(r.empId) + '」查無此人或已停用，請重新選擇</div>' : '') + '</td>' +
+      '<td><input class="txt" type="email" data-de="' + esc(r.dept) + '" value="' + esc(r.email) + '" placeholder="主管信箱"></td></tr>';
+  }).join('') : '<tr><td colspan="4" class="empty">員工分頁還沒有任何部門</td></tr>';
+}
+
+async function saveDepts() {
+  const rows = [...$('dBody').querySelectorAll('select[data-dd]')].map(sel => ({
+    dept: sel.dataset.dd,
+    empId: sel.value,
+    email: ($('dBody').querySelector('input[data-de="' + CSS.escape(sel.dataset.dd) + '"]') || {}).value || ''
+  }));
+  $('dSave').disabled = true;
+  try {
+    const r = await api('adminDeptSave', { rows: rows });
+    toast('✓ ' + r.msg);
+    await loadDepts();
+    loadPatchList();          // 主管換了，清單上的「簽核主管」欄要跟著更新
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    toast('✕ ' + e.message, 'bad');
+  } finally {
+    $('dSave').disabled = false;
+  }
+}
+
 function enter() {
   $('login').classList.add('hidden');
   $('app').classList.remove('hidden');
@@ -758,6 +1004,7 @@ function enter() {
 function logout(msg) {
   clearInterval(timer);
   token = null; data = null; emps = []; exResult = null; boardDate = '';
+  patchData = null; deptData = null; closePM();
   localStorage.removeItem(LS);
   $('app').classList.add('hidden');
   $('login').classList.remove('hidden');
@@ -786,7 +1033,13 @@ $('mCancel').onclick = closeModal;
 $('mSave').onclick = saveEmp;
 $('mRand').onclick = () => { $('mPin').value = String(Math.floor(1000 + Math.random() * 9000)); };
 $('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+$('pmodal').addEventListener('click', e => { if (e.target.id === 'pmodal') closePM(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePM(); } });
+
+$('pBtn').onclick = loadPatchList;
+['pStatus', 'pDept'].forEach(id => $(id).addEventListener('change', loadPatchList));
+$('pKw').addEventListener('keydown', e => { if (e.key === 'Enter') loadPatchList(); });
+$('dSave').onclick = saveDepts;
 
 $('prevDay').onclick = () => shiftDay(-1);
 $('nextDay').onclick = () => shiftDay(1);

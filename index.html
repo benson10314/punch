@@ -223,6 +223,78 @@ body{
 .spin{width:34px;height:34px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;
   border-radius:50%;animation:sp .8s linear infinite;margin-right:12px}
 @keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── 語言切換 ── */
+.hdr-r{display:flex;align-items:center;gap:8px;flex:none}
+.who b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.langseg{display:inline-flex;background:rgba(255,255,255,.12);border-radius:999px;padding:3px}
+.langseg button{border:0;background:0;color:#cbd5e1;font-family:inherit;font-size:12px;font-weight:700;
+  padding:5px 9px;border-radius:999px;cursor:pointer;letter-spacing:.3px;line-height:1.2}
+.langseg button.on{background:#fff;color:#0f172a}
+.loginlang{display:flex;justify-content:center;margin:18px 0 0}
+
+/* ── 補卡／簽核卡片 ── */
+#patchCard{border-top:4px solid #6366f1;padding-top:15px}
+#apprCard{border-top:4px solid #7c3aed;padding-top:15px}
+.chead{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.chead h3{margin:0}
+.chead .qgo{margin-left:auto}
+.cbadge{background:#7c3aed;color:#fff;border-radius:99px;font-size:11.5px;padding:2px 8px;font-weight:700}
+.pquota{font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:4px}
+.pitem{padding:12px 0;border-bottom:1px solid var(--line)}
+.pitem:last-child{border-bottom:0}
+.prow{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.prow .pd{font-weight:700;font-size:14.5px;font-variant-numeric:tabular-nums}
+.pitem.voided .pd{text-decoration:line-through;color:var(--muted)}
+.pmeta{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.7;word-break:break-word}
+.ps{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;flex:none}
+.ps.s-pending{background:#fef3c7;color:#b45309}
+.ps.s-approved{background:var(--okbg);color:var(--ok)}
+.ps.s-rejected{background:var(--badbg);color:var(--bad)}
+.ps.s-withdrawn,.ps.s-voided{background:#f1f5f9;color:#64748b}
+.tag.patch{background:#eef2ff;color:#4f46e5}
+.over{color:var(--bad);font-weight:700;font-size:12px}
+.mini{margin-left:auto;border:1px solid var(--line);background:#fff;color:#475569;border-radius:8px;
+  padding:5px 11px;font-size:12.5px;font-family:inherit;cursor:pointer;flex:none}
+.mini.go{background:#7c3aed;border-color:#7c3aed;color:#fff;font-weight:700}
+
+/* ── 補卡表單／簽核面板（底部滑出） ── */
+.ovl{position:fixed;inset:0;z-index:92;display:flex;align-items:flex-end;justify-content:center;
+  background:rgba(15,23,42,0);transition:background .25s}
+.ovl.on{background:rgba(15,23,42,.55)}
+.ovl .sheet{width:100%;max-width:460px;background:#fff;border-radius:22px 22px 0 0;
+  padding:24px 20px calc(22px + env(safe-area-inset-bottom));max-height:94vh;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.9,.3,1);
+  box-shadow:0 -8px 40px rgba(15,23,42,.3)}
+.ovl.on .sheet{transform:translateY(0)}
+.sh-title{font-size:16px;font-weight:700;text-align:center;margin-bottom:14px;letter-spacing:.5px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.seg button{padding:12px 6px;border:1.5px solid var(--line);border-radius:12px;background:#f8fafc;
+  font-family:inherit;font-size:15px;font-weight:700;color:#475569;cursor:pointer}
+.seg button.on.in{border-color:#059669;background:var(--okbg);color:#047857}
+.seg button.on.out{border-color:#ea580c;background:#fff7ed;color:#c2410c}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.fl{margin-bottom:12px}
+.frow .fl{margin-bottom:0}
+.fl label{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:5px}
+.fl input,.fl textarea{width:100%;padding:11px;font-size:15px;font-family:inherit;border:1.5px solid var(--line);
+  border-radius:11px;background:#f8fafc;color:var(--ink);min-width:0}
+.fl textarea{min-height:78px;resize:vertical;line-height:1.55}
+.fl input:focus,.fl textarea:focus{outline:0;border-color:var(--brand);background:#fff}
+.fhint{font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.6}
+.fwarn{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:11px;padding:10px 12px;
+  font-size:12.5px;line-height:1.65;margin-bottom:10px}
+.sacts{display:flex;gap:10px;margin-top:14px}
+.sacts button{flex:1;padding:15px 0;border:0;border-radius:13px;font-family:inherit;font-size:15.5px;
+  font-weight:700;letter-spacing:.5px;cursor:pointer}
+.sacts .cancel{flex:0 0 88px;background:#f1f5f9;color:var(--muted)}
+.sacts .send{background:var(--brand);color:#fff}
+.sacts .rej{background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca}
+.sacts .apv{background:linear-gradient(160deg,#10b981,#047857);color:#fff}
+.sacts button:disabled{opacity:.5}
+.dinfo{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13.5px;
+  line-height:1.85;margin-bottom:12px;word-break:break-word}
+.dinfo .k{color:var(--muted);display:inline-block;min-width:5.5em}
 </style>
 </head>
 <body>
@@ -231,24 +303,29 @@ body{
 
   <!-- ══════════ 登入 ══════════ -->
   <div id="loginView" class="hidden">
-    <div class="clock" style="margin-top:26px">
-      <div class="t" style="font-size:30px;font-weight:600;letter-spacing:6px">行動打卡</div>
-      <div class="d" id="loginSub">請輸入員工編號與 PIN 碼</div>
+    <div class="loginlang">
+      <div class="langseg">
+        <button data-lang="zh">中文</button><button data-lang="vi">Tiếng Việt</button><button data-lang="en">English</button>
+      </div>
+    </div>
+    <div class="clock" style="margin-top:18px">
+      <div class="t" style="font-size:30px;font-weight:600;letter-spacing:4px" data-i18n="app.title">行動打卡</div>
+      <div class="d" id="loginSub" data-i18n="login.sub">請輸入員工編號與 PIN 碼</div>
     </div>
     <div class="card">
       <div class="field">
-        <label for="empId">員工編號</label>
+        <label for="empId" data-i18n="login.empId">員工編號</label>
         <input id="empId" type="text" inputmode="text" autocomplete="username"
-               autocapitalize="characters" placeholder="例如 A001">
+               autocapitalize="characters" data-i18n-ph="login.empIdPh">
       </div>
       <div class="field">
-        <label for="pin">PIN 碼</label>
+        <label for="pin" data-i18n="login.pin">PIN 碼</label>
         <input id="pin" type="password" inputmode="numeric" autocomplete="current-password"
-               placeholder="人資提供的 4 碼數字">
+               data-i18n-ph="login.pinPh">
       </div>
-      <label class="check"><input id="remember" type="checkbox" checked>在這支手機記住我</label>
-      <button id="loginBtn" class="primary">登　入</button>
-      <div class="note">忘記 PIN 碼請洽人資重設。<br>本系統會在打卡當下記錄你的所在位置。</div>
+      <label class="check"><input id="remember" type="checkbox" checked><span data-i18n="login.remember">在這支手機記住我</span></label>
+      <button id="loginBtn" class="primary" data-i18n="login.btn">登　入</button>
+      <div class="note" data-i18n-html="login.note"></div>
     </div>
   </div>
 
@@ -256,7 +333,12 @@ body{
   <div id="mainView" class="hidden">
     <div class="top">
       <div class="who"><b id="uName">—</b><span id="uMeta">—</span></div>
-      <button class="linkbtn" id="logoutBtn">登出</button>
+      <div class="hdr-r">
+        <div class="langseg">
+          <button data-lang="zh">中</button><button data-lang="vi">VI</button><button data-lang="en">EN</button>
+        </div>
+        <button class="linkbtn" id="logoutBtn" data-i18n="main.logout">登出</button>
+      </div>
     </div>
 
     <div class="clock">
@@ -265,51 +347,63 @@ body{
     </div>
 
     <div id="installBanner" class="banner hidden">
-      <div>把這頁「加入主畫面」，之後就能像 App 一樣一鍵開啟。<br>
-      <b>iPhone</b>：分享 → 加入主畫面　<b>Android</b>：右上 ⋮ → 安裝應用程式</div>
+      <div data-i18n-html="banner.install"></div>
       <button id="closeBanner">×</button>
     </div>
 
     <div class="card" id="gpsCard">
-      <div class="gps-head"><span class="dot live"></span><span id="gpsTitle">定位中…</span></div>
+      <div class="gps-head"><span class="dot live"></span><span id="gpsTitle">…</span></div>
       <div class="gps-metrics hidden" id="gpsMetrics"></div>
-      <div class="gps-sub" id="gpsSub">正在取得手機定位，第一次可能需要 5～15 秒。</div>
+      <div class="gps-sub" id="gpsSub"></div>
       <div class="bar"><i id="gpsBar"></i></div>
     </div>
 
     <div class="btns">
-      <button class="punch in"  id="btnIn"  disabled>上班打卡<small>CLOCK IN</small></button>
-      <button class="punch out" id="btnOut" disabled>下班打卡<small>CLOCK OUT</small></button>
+      <button class="punch in"  id="btnIn"  disabled><span data-i18n="punch.in">上班打卡</span><small data-i18n="punch.inSub">CLOCK IN</small></button>
+      <button class="punch out" id="btnOut" disabled><span data-i18n="punch.out">下班打卡</span><small data-i18n="punch.outSub">CLOCK OUT</small></button>
+    </div>
+
+    <!-- 主管才看得到 -->
+    <div class="card hidden" id="apprCard">
+      <div class="chead"><h3 data-i18n="appr.title">待我簽核</h3><span class="cbadge hidden" id="apprCnt">0</span></div>
+      <div id="apprList"></div>
     </div>
 
     <div class="card hidden" id="rmdCard">
-      <h3>今日提醒事項</h3>
+      <h3 data-i18n="rmd.title">今日提醒事項</h3>
       <div id="rmdList"></div>
     </div>
 
     <div class="card">
-      <h3>今日打卡紀錄</h3>
-      <div id="todayList"><div class="empty">今天還沒有打卡紀錄</div></div>
+      <h3 data-i18n="today.title">今日打卡紀錄</h3>
+      <div id="todayList"></div>
+    </div>
+
+    <div class="card" id="patchCard">
+      <div class="chead"><h3 data-i18n="patch.title">忘刷卡補卡</h3>
+        <button class="qgo" id="patchNew" data-i18n="patch.new">＋ 申請補卡</button></div>
+      <div class="pquota" id="patchQuota"></div>
+      <div id="patchList"></div>
     </div>
 
     <div class="card">
-      <h3>查詢紀錄</h3>
+      <h3 data-i18n="hist.title">查詢紀錄</h3>
       <div class="qrow">
-        <label>起</label><input type="date" id="qFrom">
-        <label>迄</label><input type="date" id="qTo">
+        <label data-i18n="hist.from">起</label><input type="date" id="qFrom">
+        <label data-i18n="hist.to">迄</label><input type="date" id="qTo">
       </div>
       <div class="qrow qquick">
-        <button class="linkbtn" data-q="thisMonth">本月</button>
-        <button class="linkbtn" data-q="lastMonth">上月</button>
-        <button class="linkbtn" data-q="7d">近 7 天</button>
-        <button class="linkbtn" data-q="30d">近 30 天</button>
-        <button class="qgo" id="histBtn">查　詢</button>
+        <button class="linkbtn" data-q="thisMonth" data-i18n="hist.thisMonth">本月</button>
+        <button class="linkbtn" data-q="lastMonth" data-i18n="hist.lastMonth">上月</button>
+        <button class="linkbtn" data-q="7d" data-i18n="hist.7d">近 7 天</button>
+        <button class="linkbtn" data-q="30d" data-i18n="hist.30d">近 30 天</button>
+        <button class="qgo" id="histBtn" data-i18n="hist.go">查　詢</button>
       </div>
       <div id="histInfo" class="qinfo hidden"></div>
-      <div id="histList"><div class="empty">選好日期後按「查詢」</div></div>
+      <div id="histList"></div>
     </div>
 
-    <div class="note">打卡時間以伺服器時間為準，手機時間不影響紀錄。</div>
+    <div class="note" data-i18n="note.server">打卡時間以伺服器時間為準，手機時間不影響紀錄。</div>
   </div>
 </div>
 
@@ -318,13 +412,13 @@ body{
   <div class="rbox">
     <div class="rhead">
       <div class="ic">⏰</div>
-      <div class="ti">超時提醒</div>
+      <div class="ti" data-i18n="rmd.popTitle">超時提醒</div>
       <div class="tm" id="rTime">—</div>
     </div>
     <div class="rbody">
       <div class="msg" id="rMsg"></div>
       <div class="cnt hidden" id="rCnt"></div>
-      <button id="rOk">我知道了</button>
+      <button id="rOk" data-i18n="rmd.ok">我知道了</button>
     </div>
   </div>
 </div>
@@ -333,7 +427,7 @@ body{
 <div id="confirm" class="hidden">
   <div class="sheet">
     <div class="grip"></div>
-    <div class="ctype" id="cType">上班打卡</div>
+    <div class="ctype" id="cType">—</div>
     <div class="cnotice hidden" id="cNotice">
       <div class="zh" id="cNoticeZh"></div>
       <div class="vi" id="cNoticeVi"></div>
@@ -341,14 +435,56 @@ body{
     </div>
     <div class="cwarn hidden" id="cWarn"></div>
     <div class="cacts">
-      <button class="cancel" id="cCancel">取消</button>
-      <button class="go" id="cGo">確認打卡</button>
+      <button class="cancel" id="cCancel" data-i18n="confirm.cancel">取消</button>
+      <button class="go" id="cGo">—</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 補卡申請表單 ══════════ -->
+<div id="patchSheet" class="ovl hidden">
+  <div class="sheet">
+    <div class="grip"></div>
+    <div class="sh-title" data-i18n="patch.formTitle">申請補卡</div>
+    <div class="fl"><label data-i18n="patch.type">補卡類型</label>
+      <div class="seg">
+        <button class="in" data-pt="上班" data-i18n="type.上班">上班</button>
+        <button class="out" data-pt="下班" data-i18n="type.下班">下班</button>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fl"><label data-i18n="patch.date">日期</label><input type="date" id="pfDate"></div>
+      <div class="fl"><label data-i18n="patch.time">時間</label><input type="time" id="pfTime"></div>
+    </div>
+    <div class="fhint" id="pfRule"></div>
+    <div class="fl"><label data-i18n="patch.reason">原因</label>
+      <textarea id="pfReason" maxlength="200" data-i18n-ph="patch.reasonPh"></textarea></div>
+    <div class="fwarn hidden" id="pfOver"></div>
+    <div class="sacts">
+      <button class="cancel" id="pfCancel" data-i18n="patch.cancel">取消</button>
+      <button class="send" id="pfSend" data-i18n="patch.submit">送出申請</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 主管簽核面板 ══════════ -->
+<div id="decideSheet" class="ovl hidden">
+  <div class="sheet">
+    <div class="grip"></div>
+    <div class="sh-title" data-i18n="appr.decideTitle">簽核補卡申請</div>
+    <div class="dinfo" id="dInfo"></div>
+    <div class="fl"><label data-i18n="appr.comment">簽核意見</label>
+      <textarea id="dComment" maxlength="200" data-i18n-ph="appr.commentPh"></textarea></div>
+    <div class="sacts">
+      <button class="cancel" id="dCancel" data-i18n="confirm.cancel">取消</button>
+      <button class="rej" id="dReject" data-i18n="appr.reject">駁回</button>
+      <button class="apv" id="dApprove" data-i18n="appr.approve">核准</button>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
-<div id="loader" class="hidden"><span class="spin"></span><span id="loaderMsg">處理中…</span></div>
+<div id="loader" class="hidden"><span class="spin"></span><span id="loaderMsg">…</span></div>
 
 <script>
 /* ════════════════════════════════════════════════════════════
@@ -359,7 +495,7 @@ body{
 const API_URL = 'https://script.google.com/macros/s/AKfycbxbyGMSYWs67z04nGR7iY1dg4Xvx3moLMDJf5gmi2UssLUtmLOnPUnzGAfYDxG1T_Hc7Q/exec';
 
 /* ────────────────────────────────────────────────────────────
-   打卡確認面板上的提醒文字（三國語言）
+   打卡確認面板上的提醒文字（三國語言，不論介面切換成哪種語言都三語同時顯示）
    showOn: '上班' 只在上班打卡出現；改成 '下班' 或 'both' 即可調整
    不需要提醒就把 zh / vi / en 三行都清空
    ──────────────────────────────────────────────────────────── */
@@ -369,18 +505,289 @@ const NOTICE = {
   zh: '打卡前請先至 UOF 完成下班打卡。',
   vi: 'Trước khi chấm công, vui lòng hoàn tất thao tác chấm công tan ca trên hệ thống UOF.',
   en: 'Before clocking in, please complete the clock-out procedure on the UOF system.',
-  // 倒數期間顯示在提醒框下方的字
+  // 倒數期間顯示在確認鈕上的字
   waitZh: '請詳閱提醒',
   waitVi: 'Vui lòng đọc kỹ thông báo nhắc nhở.',
   waitEn: 'Please read the reminder carefully.'
 };
 
+/* ════════════════════════════════════════════════════════════
+   介面文字（中文／越南文／英文）
+   ※ 越南文與英文為機器翻譯等級，未經母語人士校稿；若同仁反映用語不順，直接改這裡即可。
+   ※ 鍵名以「type.上班」「ps.待審」這種中文結尾的，是對應後端傳來的中文值，請勿更改鍵名。
+   ════════════════════════════════════════════════════════════ */
+const I18N = {
+  zh: {
+    'app.title': '行動打卡',
+    'login.sub': '請輸入員工編號與 PIN 碼', 'login.empId': '員工編號', 'login.empIdPh': '例如 A001',
+    'login.pin': 'PIN 碼', 'login.pinPh': '人資提供的 4 碼數字', 'login.remember': '在這支手機記住我',
+    'login.btn': '登　入', 'login.note': '忘記 PIN 碼請洽人資重設。<br>本系統會在打卡當下記錄你的所在位置。',
+    'login.needBoth': '請輸入員工編號與 PIN 碼', 'login.cannotConnect': '無法連線：{msg}',
+    'main.logout': '登出', 'main.logoutConfirm': '確定要登出嗎？',
+    'banner.install': '把這頁「加入主畫面」，之後就能像 App 一樣一鍵開啟。<br><b>iPhone</b>：分享 → 加入主畫面　<b>Android</b>：右上 ⋮ → 安裝應用程式',
+    'gps.locating': '定位中…', 'gps.locatingSub': '正在取得手機定位，第一次可能需要 5～15 秒。',
+    'gps.noSupport': '此裝置不支援定位', 'gps.noSupportSub': '請改用 Chrome 或 Safari 開啟。',
+    'gps.noHttps': '網址不是 HTTPS', 'gps.noHttpsSub': '瀏覽器只允許在 https:// 網址下取得定位，請確認開啟的是人資提供的正式網址。',
+    'gps.denied': '定位權限被拒絕', 'gps.deniedSub': '請到手機「設定 → 瀏覽器 → 位置」開啟權限，或點網址列左側的鎖頭圖示允許定位，然後重新整理。',
+    'gps.timeout': '定位逾時', 'gps.timeoutSub': '訊號不佳，請走到戶外或靠近窗邊，稍候會自動重試。',
+    'gps.fail': '無法取得定位', 'gps.failSub': '請確認手機的「定位服務」已開啟。',
+    'gps.noLoc': '尚未設定打卡地點', 'gps.noLocSub': '請聯絡人資在系統中設定公司座標。',
+    'gps.weak': '定位訊號不穩', 'gps.weakSub': '定位誤差超過 ±{limit} 公尺，請走到戶外或靠近窗邊，等訊號穩定再打卡。',
+    'gps.inside': '已在「{name}」範圍內',
+    'gps.outside': '不在打卡範圍內', 'gps.outsideSub': '請靠近「{name}」，進入 {radius} 公尺範圍內才能打卡。',
+    'gps.metersAllow': '公尺　允許 {radius}', 'gps.accuracy': '定位誤差（公尺）',
+    'punch.in': '上班打卡', 'punch.out': '下班打卡', 'punch.inSub': 'CLOCK IN', 'punch.outSub': 'CLOCK OUT',
+    'type.上班': '上班', 'type.下班': '下班',
+    'result.超出範圍': '超出範圍', 'result.補卡': '補卡',
+    'rmd.title': '今日提醒事項', 'rmd.read': '已讀', 'rmd.popTitle': '超時提醒',
+    'rmd.popTime': '預定時間　{time}', 'rmd.more': '尚有 {n} 則提醒', 'rmd.ok': '我知道了',
+    'today.title': '今日打卡紀錄', 'today.empty': '今天還沒有打卡紀錄', 'unit.m': '{d} 公尺',
+    'hist.title': '查詢紀錄', 'hist.from': '起', 'hist.to': '迄', 'hist.thisMonth': '本月', 'hist.lastMonth': '上月',
+    'hist.7d': '近 7 天', 'hist.30d': '近 30 天', 'hist.go': '查　詢',
+    'hist.hint': '選好日期後按「查詢」', 'hist.loading': '查詢中…', 'hist.none': '這段期間沒有打卡紀錄',
+    'hist.info': '{from} ～ {to}　共 {n} 筆', 'hist.fail': '查詢失敗：{msg}', 'hist.needDates': '請先選擇起訖日期',
+    'confirm.cancel': '取消', 'confirm.go': '確認打卡',
+    'confirm.dup': '⚠ 你今天已經打過<b>{type}卡</b>（{times}）。<br>確定要再打一次嗎？',
+    'loading.default': '處理中…', 'loading.login': '登入中…', 'loading.locate': '確認位置中…', 'loading.send': '送出打卡…',
+    'punch.ok': '✓ {type}打卡成功　{time}　@{loc}（{dist} 公尺）',
+    'note.server': '打卡時間以伺服器時間為準，手機時間不影響紀錄。',
+    'err.noApi': '系統尚未設定 API 網址，請聯絡人資', 'err.http': '連線失敗（HTTP {status}）', 'err.generic': '操作失敗',
+    'err.gpsDenied': '定位權限被拒絕，無法打卡', 'err.gpsFail': '取得定位失敗，請到訊號較好的地方再試',
+    'err.AUTH_NOT_FOUND': '查無此員工編號',
+    'err.AUTH_DISABLED': '此帳號已停用，請聯絡人資',
+    'err.AUTH_EXPIRED': '登入已失效（PIN 可能已被人資變更），請重新登入',
+    'err.AUTH_NO_PIN': '此帳號尚未設定 PIN 碼，請聯絡人資',
+    'err.AUTH_LOCKED': '此帳號因 PIN 連續輸入錯誤已暫時鎖定，請於 {min} 分鐘後再試，或聯絡人資解鎖。',
+    'err.AUTH_PIN_WRONG': 'PIN 碼不正確（已連續錯誤 {n} 次，達 {max} 次將鎖定 {min} 分鐘）',
+    'err.AUTH_PIN_LOCKED': 'PIN 碼連續輸入錯誤 {n} 次，已鎖定 {min} 分鐘。若非本人操作請通知人資。',
+    'err.PUNCH_TYPE': '打卡類型不正確',
+    'err.PUNCH_NO_GPS': '沒有取得定位座標，請確認已開啟定位權限',
+    'err.PUNCH_ACCURACY': '定位誤差 ±{acc} 公尺，超過允許的 ±{limit} 公尺。請走到戶外或靠近窗邊，等訊號穩定再打卡。',
+    'err.PUNCH_NO_LOCATION': '系統尚未設定任何啟用中的打卡地點，請聯絡人資',
+    'err.PUNCH_OUT_OF_RANGE': '目前位置距離「{name}」約 {dist} 公尺，超出允許範圍（{radius} 公尺），無法打卡。',
+    'err.PUNCH_COOLDOWN': '你在 {time} 已經打過「{type}」卡了，{min} 分鐘內不能重複打卡。',
+    'err.RANGE_ORDER': '起始日期不能晚於結束日期',
+    'err.RANGE_TOO_LONG': '查詢區間最長一年，請縮小範圍',
+    'err.PATCH_TYPE': '請選擇補上班卡或下班卡',
+    'err.PATCH_BAD_DATE': '請填寫正確的補卡日期與時間',
+    'err.PATCH_FUTURE': '補卡時間不能晚於現在',
+    'err.PATCH_TOO_OLD': '只能補 {days} 天內的卡',
+    'err.PATCH_NO_REASON': '請填寫補卡原因',
+    'err.PATCH_DUPLICATE': '{date} 已經有一張「{type}」補卡申請（{status}），不能重複申請',
+    'err.PATCH_BAD_DECISION': '簽核結果不正確',
+    'err.PATCH_NEED_COMMENT': '駁回請填寫原因',
+    'err.PATCH_NOT_FOUND': '找不到這張補卡申請',
+    'err.PATCH_NOT_PENDING': '這張申請目前是「{status}」，無法再變更',
+    'err.PATCH_NOT_APPROVER': '你不是這張申請的簽核主管',
+    'patch.title': '忘刷卡補卡', 'patch.new': '＋ 申請補卡',
+    'patch.quota': '本月已申請 {count}／{limit} 次　・　可補 {days} 天內的卡',
+    'patch.approverIs': '簽核主管：{name}', 'patch.toHr': '簽核：人資',
+    'patch.empty': '目前沒有補卡申請', 'patch.loading': '載入中…',
+    'patch.formTitle': '申請補卡', 'patch.type': '補卡類型', 'patch.date': '日期', 'patch.time': '時間',
+    'patch.reason': '原因', 'patch.reasonPh': '例如：手機沒電、忘記打卡、定位失敗',
+    'patch.rule': '可補 {days} 天內的卡，每月上限 {limit} 次',
+    'patch.overWarn': '⚠ 這會是 {ym} 第 {count} 次補卡，已超過每月上限 {limit} 次。仍可送出，但主管會看到超額標示。',
+    'patch.submit': '送出申請', 'patch.cancel': '取消',
+    'patch.sent': '✓ 已送出，等待 {name} 簽核', 'patch.sentHr': '✓ 已送出，等待人資簽核',
+    'patch.withdraw': '撤回', 'patch.withdrawConfirm': '確定要撤回這張補卡申請嗎？', 'patch.withdrawn': '✓ 已撤回',
+    'patch.applied': '申請於 {at}', 'patch.comment': '意見：{c}', 'patch.void': '作廢原因：{r}',
+    'patch.reasonLine': '原因：{r}', 'patch.who': '{name}（{id}）・{dept}', 'patch.nth': '當月第 {n} 次',
+    'patch.needFields': '請填寫日期、時間與原因', 'patch.future': '補卡時間不能晚於現在',
+    'signer.self': '本人撤回', 'signer.hr': '人資（戰情室代簽）',
+    'ps.待審': '待審', 'ps.核准': '核准', 'ps.駁回': '駁回', 'ps.撤回': '已撤回', 'ps.作廢': '已作廢',
+    'appr.title': '待我簽核', 'appr.empty': '目前沒有待簽核的申請', 'appr.approve': '核准', 'appr.reject': '駁回',
+    'appr.review': '簽核', 'appr.decideTitle': '簽核補卡申請', 'appr.comment': '簽核意見',
+    'appr.commentPh': '核准可不填；駁回請寫原因', 'appr.needComment': '駁回請填寫原因',
+    'appr.doneApprove': '✓ 已核准', 'appr.doneReject': '✓ 已駁回', 'appr.over': '超過每月上限 {limit} 次',
+    'appr.applicant': '申請人', 'appr.patch': '補卡', 'appr.reason': '原因', 'appr.applied': '申請時間'
+  },
+
+  vi: {
+    'app.title': 'Chấm công di động',
+    'login.sub': 'Vui lòng nhập mã nhân viên và mã PIN', 'login.empId': 'Mã nhân viên', 'login.empIdPh': 'Ví dụ: A001',
+    'login.pin': 'Mã PIN', 'login.pinPh': 'Mã 4 số do phòng Nhân sự cấp', 'login.remember': 'Ghi nhớ đăng nhập trên điện thoại này',
+    'login.btn': 'Đăng nhập', 'login.note': 'Quên mã PIN, vui lòng liên hệ phòng Nhân sự để cấp lại.<br>Hệ thống sẽ ghi nhận vị trí của bạn tại thời điểm chấm công.',
+    'login.needBoth': 'Vui lòng nhập mã nhân viên và mã PIN', 'login.cannotConnect': 'Không thể kết nối: {msg}',
+    'main.logout': 'Thoát', 'main.logoutConfirm': 'Bạn có chắc muốn đăng xuất?',
+    'banner.install': 'Thêm trang này vào màn hình chính để mở nhanh như một ứng dụng.<br><b>iPhone</b>: Chia sẻ → Thêm vào MH chính　<b>Android</b>: ⋮ góc trên → Cài đặt ứng dụng',
+    'gps.locating': 'Đang định vị…', 'gps.locatingSub': 'Đang lấy vị trí điện thoại, lần đầu có thể mất 5–15 giây.',
+    'gps.noSupport': 'Thiết bị không hỗ trợ định vị', 'gps.noSupportSub': 'Vui lòng mở bằng Chrome hoặc Safari.',
+    'gps.noHttps': 'Địa chỉ không phải HTTPS', 'gps.noHttpsSub': 'Trình duyệt chỉ cho phép định vị với địa chỉ https://. Vui lòng mở đúng đường dẫn do phòng Nhân sự cung cấp.',
+    'gps.denied': 'Quyền định vị bị từ chối', 'gps.deniedSub': 'Vui lòng vào “Cài đặt → Trình duyệt → Vị trí” để cấp quyền, hoặc nhấn biểu tượng ổ khóa trên thanh địa chỉ để cho phép, sau đó tải lại trang.',
+    'gps.timeout': 'Định vị quá thời gian', 'gps.timeoutSub': 'Tín hiệu yếu, vui lòng ra ngoài trời hoặc đến gần cửa sổ. Hệ thống sẽ tự thử lại.',
+    'gps.fail': 'Không lấy được vị trí', 'gps.failSub': 'Vui lòng kiểm tra “Dịch vụ định vị” trên điện thoại đã được bật.',
+    'gps.noLoc': 'Chưa thiết lập địa điểm chấm công', 'gps.noLocSub': 'Vui lòng liên hệ phòng Nhân sự để thiết lập tọa độ công ty.',
+    'gps.weak': 'Tín hiệu định vị không ổn định', 'gps.weakSub': 'Sai số định vị vượt quá ±{limit} mét. Vui lòng ra ngoài trời hoặc đến gần cửa sổ, chờ tín hiệu ổn định rồi chấm công.',
+    'gps.inside': 'Đang trong phạm vi “{name}”',
+    'gps.outside': 'Ngoài phạm vi chấm công', 'gps.outsideSub': 'Vui lòng đến gần “{name}”, trong phạm vi {radius} mét mới chấm công được.',
+    'gps.metersAllow': 'mét · cho phép {radius}', 'gps.accuracy': 'Sai số định vị (mét)',
+    'punch.in': 'Vào ca', 'punch.out': 'Tan ca', 'punch.inSub': '上班打卡', 'punch.outSub': '下班打卡',
+    'type.上班': 'Vào ca', 'type.下班': 'Tan ca',
+    'result.超出範圍': 'Ngoài phạm vi', 'result.補卡': 'Bổ sung công',
+    'rmd.title': 'Nhắc nhở hôm nay', 'rmd.read': 'Đã xem', 'rmd.popTitle': 'Nhắc nhở quá giờ',
+    'rmd.popTime': 'Thời gian: {time}', 'rmd.more': 'Còn {n} nhắc nhở', 'rmd.ok': 'Tôi đã hiểu',
+    'today.title': 'Chấm công hôm nay', 'today.empty': 'Hôm nay chưa có dữ liệu chấm công', 'unit.m': '{d} mét',
+    'hist.title': 'Tra cứu lịch sử', 'hist.from': 'Từ', 'hist.to': 'Đến', 'hist.thisMonth': 'Tháng này', 'hist.lastMonth': 'Tháng trước',
+    'hist.7d': '7 ngày', 'hist.30d': '30 ngày', 'hist.go': 'Tra cứu',
+    'hist.hint': 'Chọn ngày rồi nhấn “Tra cứu”', 'hist.loading': 'Đang tra cứu…', 'hist.none': 'Không có dữ liệu chấm công trong khoảng thời gian này',
+    'hist.info': '{from} ～ {to} · {n} lượt', 'hist.fail': 'Tra cứu thất bại: {msg}', 'hist.needDates': 'Vui lòng chọn ngày bắt đầu và kết thúc',
+    'confirm.cancel': 'Hủy', 'confirm.go': 'Xác nhận',
+    'confirm.dup': '⚠ Hôm nay bạn đã chấm công <b>{type}</b> ({times}).<br>Bạn có chắc muốn chấm thêm lần nữa?',
+    'loading.default': 'Đang xử lý…', 'loading.login': 'Đang đăng nhập…', 'loading.locate': 'Đang xác nhận vị trí…', 'loading.send': 'Đang gửi dữ liệu…',
+    'punch.ok': '✓ Chấm công {type} thành công　{time}　@{loc} ({dist} mét)',
+    'note.server': 'Thời gian chấm công lấy theo máy chủ, giờ trên điện thoại không ảnh hưởng.',
+    'err.noApi': 'Hệ thống chưa cấu hình địa chỉ API, vui lòng liên hệ phòng Nhân sự', 'err.http': 'Kết nối thất bại (HTTP {status})', 'err.generic': 'Thao tác thất bại',
+    'err.gpsDenied': 'Quyền định vị bị từ chối, không thể chấm công', 'err.gpsFail': 'Không lấy được vị trí, vui lòng đến nơi có tín hiệu tốt hơn',
+    'err.AUTH_NOT_FOUND': 'Không tìm thấy mã nhân viên',
+    'err.AUTH_DISABLED': 'Tài khoản đã bị vô hiệu hóa, vui lòng liên hệ phòng Nhân sự',
+    'err.AUTH_EXPIRED': 'Phiên đăng nhập đã hết hạn (có thể mã PIN đã được thay đổi), vui lòng đăng nhập lại',
+    'err.AUTH_NO_PIN': 'Tài khoản chưa có mã PIN, vui lòng liên hệ phòng Nhân sự',
+    'err.AUTH_LOCKED': 'Tài khoản tạm bị khóa do nhập sai PIN nhiều lần. Vui lòng thử lại sau {min} phút hoặc liên hệ phòng Nhân sự.',
+    'err.AUTH_PIN_WRONG': 'Mã PIN không đúng (đã sai {n} lần liên tiếp, sai {max} lần sẽ bị khóa {min} phút)',
+    'err.AUTH_PIN_LOCKED': 'Nhập sai PIN {n} lần liên tiếp, tài khoản bị khóa {min} phút. Nếu không phải bạn thao tác, vui lòng báo phòng Nhân sự.',
+    'err.PUNCH_TYPE': 'Loại chấm công không hợp lệ',
+    'err.PUNCH_NO_GPS': 'Không có tọa độ định vị, vui lòng kiểm tra quyền định vị',
+    'err.PUNCH_ACCURACY': 'Sai số định vị ±{acc} mét, vượt mức cho phép ±{limit} mét. Vui lòng ra ngoài trời hoặc gần cửa sổ, chờ tín hiệu ổn định.',
+    'err.PUNCH_NO_LOCATION': 'Hệ thống chưa có địa điểm chấm công, vui lòng liên hệ phòng Nhân sự',
+    'err.PUNCH_OUT_OF_RANGE': 'Vị trí hiện tại cách “{name}” khoảng {dist} mét, ngoài phạm vi cho phép ({radius} mét), không thể chấm công.',
+    'err.PUNCH_COOLDOWN': 'Bạn đã chấm công “{type}” lúc {time}, không thể chấm lại trong {min} phút.',
+    'err.RANGE_ORDER': 'Ngày bắt đầu không được sau ngày kết thúc',
+    'err.RANGE_TOO_LONG': 'Khoảng tra cứu tối đa một năm, vui lòng thu hẹp',
+    'err.PATCH_TYPE': 'Vui lòng chọn bổ sung vào ca hoặc tan ca',
+    'err.PATCH_BAD_DATE': 'Vui lòng nhập đúng ngày và giờ cần bổ sung',
+    'err.PATCH_FUTURE': 'Thời gian bổ sung không được sau thời điểm hiện tại',
+    'err.PATCH_TOO_OLD': 'Chỉ được bổ sung chấm công trong vòng {days} ngày',
+    'err.PATCH_NO_REASON': 'Vui lòng nhập lý do bổ sung',
+    'err.PATCH_DUPLICATE': 'Ngày {date} đã có đơn bổ sung “{type}” ({status}), không thể gửi trùng',
+    'err.PATCH_BAD_DECISION': 'Kết quả duyệt không hợp lệ',
+    'err.PATCH_NEED_COMMENT': 'Vui lòng nhập lý do từ chối',
+    'err.PATCH_NOT_FOUND': 'Không tìm thấy đơn bổ sung này',
+    'err.PATCH_NOT_PENDING': 'Đơn này hiện ở trạng thái “{status}”, không thể thay đổi',
+    'err.PATCH_NOT_APPROVER': 'Bạn không phải người duyệt đơn này',
+    'patch.title': 'Quên chấm công', 'patch.new': '＋ Xin bổ sung',
+    'patch.quota': 'Tháng này đã xin {count}/{limit} lần · bổ sung trong vòng {days} ngày',
+    'patch.approverIs': 'Người duyệt: {name}', 'patch.toHr': 'Người duyệt: phòng Nhân sự',
+    'patch.empty': 'Chưa có đơn bổ sung chấm công', 'patch.loading': 'Đang tải…',
+    'patch.formTitle': 'Đơn bổ sung chấm công', 'patch.type': 'Loại bổ sung', 'patch.date': 'Ngày', 'patch.time': 'Giờ',
+    'patch.reason': 'Lý do', 'patch.reasonPh': 'Ví dụ: điện thoại hết pin, quên chấm công, lỗi định vị',
+    'patch.rule': 'Bổ sung trong vòng {days} ngày, tối đa {limit} lần mỗi tháng',
+    'patch.overWarn': '⚠ Đây sẽ là lần bổ sung thứ {count} trong tháng {ym}, vượt giới hạn {limit} lần/tháng. Vẫn có thể gửi, nhưng quản lý sẽ thấy đánh dấu vượt mức.',
+    'patch.submit': 'Gửi đơn', 'patch.cancel': 'Hủy',
+    'patch.sent': '✓ Đã gửi, chờ {name} duyệt', 'patch.sentHr': '✓ Đã gửi, chờ phòng Nhân sự duyệt',
+    'patch.withdraw': 'Rút lại', 'patch.withdrawConfirm': 'Bạn có chắc muốn rút lại đơn bổ sung này?', 'patch.withdrawn': '✓ Đã rút lại',
+    'patch.applied': 'Gửi lúc {at}', 'patch.comment': 'Ý kiến: {c}', 'patch.void': 'Lý do hủy: {r}',
+    'patch.reasonLine': 'Lý do: {r}', 'patch.who': '{name} ({id}) · {dept}', 'patch.nth': 'Lần thứ {n} trong tháng',
+    'patch.needFields': 'Vui lòng nhập ngày, giờ và lý do', 'patch.future': 'Thời gian bổ sung không được sau thời điểm hiện tại',
+    'signer.self': 'Bản thân rút lại', 'signer.hr': 'Phòng Nhân sự (duyệt thay)',
+    'ps.待審': 'Chờ duyệt', 'ps.核准': 'Đã duyệt', 'ps.駁回': 'Từ chối', 'ps.撤回': 'Đã rút lại', 'ps.作廢': 'Đã hủy',
+    'appr.title': 'Chờ tôi duyệt', 'appr.empty': 'Không có đơn nào chờ duyệt', 'appr.approve': 'Duyệt', 'appr.reject': 'Từ chối',
+    'appr.review': 'Xét duyệt', 'appr.decideTitle': 'Duyệt đơn bổ sung chấm công', 'appr.comment': 'Ý kiến duyệt',
+    'appr.commentPh': 'Duyệt có thể để trống; từ chối vui lòng ghi lý do', 'appr.needComment': 'Vui lòng nhập lý do từ chối',
+    'appr.doneApprove': '✓ Đã duyệt', 'appr.doneReject': '✓ Đã từ chối', 'appr.over': 'Vượt giới hạn {limit} lần/tháng',
+    'appr.applicant': 'Người xin', 'appr.patch': 'Bổ sung', 'appr.reason': 'Lý do', 'appr.applied': 'Thời gian gửi'
+  },
+
+  en: {
+    'app.title': 'Mobile Clock-in',
+    'login.sub': 'Enter your employee ID and PIN', 'login.empId': 'Employee ID', 'login.empIdPh': 'e.g. A001',
+    'login.pin': 'PIN', 'login.pinPh': '4-digit PIN from HR', 'login.remember': 'Remember me on this phone',
+    'login.btn': 'Sign in', 'login.note': 'Forgot your PIN? Please ask HR to reset it.<br>Your location is recorded each time you clock in or out.',
+    'login.needBoth': 'Please enter your employee ID and PIN', 'login.cannotConnect': 'Unable to connect: {msg}',
+    'main.logout': 'Sign out', 'main.logoutConfirm': 'Sign out now?',
+    'banner.install': 'Add this page to your Home Screen to open it like an app.<br><b>iPhone</b>: Share → Add to Home Screen　<b>Android</b>: ⋮ menu → Install app',
+    'gps.locating': 'Locating…', 'gps.locatingSub': 'Getting your location. The first time may take 5–15 seconds.',
+    'gps.noSupport': 'Location not supported', 'gps.noSupportSub': 'Please open this page in Chrome or Safari.',
+    'gps.noHttps': 'Not an HTTPS address', 'gps.noHttpsSub': 'Browsers only allow location access on https:// pages. Please use the official link provided by HR.',
+    'gps.denied': 'Location permission denied', 'gps.deniedSub': 'Go to Settings → Browser → Location to allow access, or tap the lock icon in the address bar, then reload the page.',
+    'gps.timeout': 'Location timed out', 'gps.timeoutSub': 'Weak signal. Please move outdoors or near a window; it will retry automatically.',
+    'gps.fail': 'Unable to get location', 'gps.failSub': 'Please make sure Location Services is turned on.',
+    'gps.noLoc': 'No clock-in location set', 'gps.noLocSub': 'Please ask HR to set the company coordinates.',
+    'gps.weak': 'Weak location signal', 'gps.weakSub': 'Location accuracy is worse than ±{limit} m. Please move outdoors or near a window and wait for a stable signal.',
+    'gps.inside': 'Within “{name}” range',
+    'gps.outside': 'Outside clock-in range', 'gps.outsideSub': 'Please move closer to “{name}” — you must be within {radius} m to clock in.',
+    'gps.metersAllow': 'm · limit {radius}', 'gps.accuracy': 'Accuracy (m)',
+    'punch.in': 'Clock In', 'punch.out': 'Clock Out', 'punch.inSub': '上班打卡', 'punch.outSub': '下班打卡',
+    'type.上班': 'Clock in', 'type.下班': 'Clock out',
+    'result.超出範圍': 'Out of range', 'result.補卡': 'Punch fix',
+    'rmd.title': 'Today’s reminders', 'rmd.read': 'Read', 'rmd.popTitle': 'Overtime reminder',
+    'rmd.popTime': 'Scheduled: {time}', 'rmd.more': '{n} more reminder(s)', 'rmd.ok': 'Got it',
+    'today.title': 'Today’s records', 'today.empty': 'No records yet today', 'unit.m': '{d} m',
+    'hist.title': 'Attendance history', 'hist.from': 'From', 'hist.to': 'To', 'hist.thisMonth': 'This month', 'hist.lastMonth': 'Last month',
+    'hist.7d': '7 days', 'hist.30d': '30 days', 'hist.go': 'Search',
+    'hist.hint': 'Pick a date range, then tap “Search”', 'hist.loading': 'Searching…', 'hist.none': 'No records in this period',
+    'hist.info': '{from} ～ {to} · {n} record(s)', 'hist.fail': 'Search failed: {msg}', 'hist.needDates': 'Please choose a start and end date',
+    'confirm.cancel': 'Cancel', 'confirm.go': 'Confirm',
+    'confirm.dup': '⚠ You already have a <b>{type}</b> record today ({times}).<br>Record another one?',
+    'loading.default': 'Processing…', 'loading.login': 'Signing in…', 'loading.locate': 'Checking location…', 'loading.send': 'Submitting…',
+    'punch.ok': '✓ {type} recorded　{time}　@{loc} ({dist} m)',
+    'note.server': 'Times are recorded by the server; your phone’s clock does not affect them.',
+    'err.noApi': 'API address is not configured. Please contact HR.', 'err.http': 'Connection failed (HTTP {status})', 'err.generic': 'Operation failed',
+    'err.gpsDenied': 'Location permission denied; cannot clock in', 'err.gpsFail': 'Unable to get location. Please move to a spot with better signal.',
+    'err.AUTH_NOT_FOUND': 'Employee ID not found',
+    'err.AUTH_DISABLED': 'This account is disabled. Please contact HR.',
+    'err.AUTH_EXPIRED': 'Your session has expired (your PIN may have been changed). Please sign in again.',
+    'err.AUTH_NO_PIN': 'No PIN has been set for this account. Please contact HR.',
+    'err.AUTH_LOCKED': 'This account is temporarily locked after too many wrong PINs. Try again in {min} minute(s) or contact HR.',
+    'err.AUTH_PIN_WRONG': 'Incorrect PIN ({n} wrong in a row; {max} will lock the account for {min} minutes)',
+    'err.AUTH_PIN_LOCKED': '{n} wrong PINs in a row — the account is locked for {min} minutes. If this wasn’t you, please tell HR.',
+    'err.PUNCH_TYPE': 'Invalid clock type',
+    'err.PUNCH_NO_GPS': 'No location data. Please check location permission.',
+    'err.PUNCH_ACCURACY': 'Location accuracy ±{acc} m exceeds the allowed ±{limit} m. Please move outdoors or near a window.',
+    'err.PUNCH_NO_LOCATION': 'No active clock-in location. Please contact HR.',
+    'err.PUNCH_OUT_OF_RANGE': 'You are about {dist} m from “{name}”, outside the allowed {radius} m. Cannot clock in.',
+    'err.PUNCH_COOLDOWN': 'You already recorded “{type}” at {time}. Please wait {min} minute(s) before trying again.',
+    'err.RANGE_ORDER': 'Start date cannot be after end date',
+    'err.RANGE_TOO_LONG': 'The search range can be at most one year',
+    'err.PATCH_TYPE': 'Please choose clock in or clock out',
+    'err.PATCH_BAD_DATE': 'Please enter a valid date and time',
+    'err.PATCH_FUTURE': 'The time cannot be in the future',
+    'err.PATCH_TOO_OLD': 'You can only fix punches from the last {days} days',
+    'err.PATCH_NO_REASON': 'Please enter a reason',
+    'err.PATCH_DUPLICATE': 'A “{type}” request for {date} already exists ({status})',
+    'err.PATCH_BAD_DECISION': 'Invalid approval decision',
+    'err.PATCH_NEED_COMMENT': 'Please enter a reason for rejecting',
+    'err.PATCH_NOT_FOUND': 'Request not found',
+    'err.PATCH_NOT_PENDING': 'This request is “{status}” and can no longer be changed',
+    'err.PATCH_NOT_APPROVER': 'You are not the approver for this request',
+    'patch.title': 'Missed punch', 'patch.new': '＋ Request fix',
+    'patch.quota': 'This month: {count}/{limit} requests · within {days} days',
+    'patch.approverIs': 'Approver: {name}', 'patch.toHr': 'Approver: HR',
+    'patch.empty': 'No missed-punch requests', 'patch.loading': 'Loading…',
+    'patch.formTitle': 'Missed-punch request', 'patch.type': 'Type', 'patch.date': 'Date', 'patch.time': 'Time',
+    'patch.reason': 'Reason', 'patch.reasonPh': 'e.g. phone battery died, forgot to clock in, GPS failed',
+    'patch.rule': 'Within {days} days · up to {limit} per month',
+    'patch.overWarn': '⚠ This will be request #{count} for {ym}, over the monthly limit of {limit}. You can still submit, but your approver will see it flagged.',
+    'patch.submit': 'Submit', 'patch.cancel': 'Cancel',
+    'patch.sent': '✓ Submitted — waiting for {name}', 'patch.sentHr': '✓ Submitted — waiting for HR',
+    'patch.withdraw': 'Withdraw', 'patch.withdrawConfirm': 'Withdraw this request?', 'patch.withdrawn': '✓ Withdrawn',
+    'patch.applied': 'Submitted {at}', 'patch.comment': 'Comment: {c}', 'patch.void': 'Void reason: {r}',
+    'patch.reasonLine': 'Reason: {r}', 'patch.who': '{name} ({id}) · {dept}', 'patch.nth': '#{n} this month',
+    'patch.needFields': 'Please fill in date, time and reason', 'patch.future': 'The time cannot be in the future',
+    'signer.self': 'Withdrawn by applicant', 'signer.hr': 'HR (on behalf)',
+    'ps.待審': 'Pending', 'ps.核准': 'Approved', 'ps.駁回': 'Rejected', 'ps.撤回': 'Withdrawn', 'ps.作廢': 'Voided',
+    'appr.title': 'Awaiting my approval', 'appr.empty': 'Nothing to approve', 'appr.approve': 'Approve', 'appr.reject': 'Reject',
+    'appr.review': 'Review', 'appr.decideTitle': 'Review missed-punch request', 'appr.comment': 'Comment',
+    'appr.commentPh': 'Optional to approve; required to reject', 'appr.needComment': 'Please enter a reason for rejecting',
+    'appr.doneApprove': '✓ Approved', 'appr.doneReject': '✓ Rejected', 'appr.over': 'Over monthly limit ({limit})',
+    'appr.applicant': 'Applicant', 'appr.patch': 'Fix', 'appr.reason': 'Reason', 'appr.applied': 'Submitted'
+  }
+};
+
+const LANG_HTML = { zh: 'zh-Hant', vi: 'vi', en: 'en' };
+const WD_SHORT = { zh: ['日', '一', '二', '三', '四', '五', '六'], vi: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                   en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] };
+const WD_LONG_VI = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+const MON_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const STATUS_CLASS = { '待審': 's-pending', '核准': 's-approved', '駁回': 's-rejected', '撤回': 's-withdrawn', '作廢': 's-voided' };
+
 /* ─── 狀態 ─── */
-const LS = 'gpsclock.auth', LS_DEV = 'gpsclock.device', LS_BANNER = 'gpsclock.banner';
+const LS = 'gpsclock.auth', LS_DEV = 'gpsclock.device', LS_BANNER = 'gpsclock.banner', LS_LANG = 'gpsclock.lang';
+let lang = detectLang();
 let auth = null;          // {empId, token, name, dept}
 let cfg = null;           // 伺服器設定 + 地點清單
 let pos = null;           // 最近一次定位 {lat,lng,acc}
 let near = null;          // 最近的打卡地點 {name,dist,radius}
+let lastGps = null;       // 最後一次定位狀態，切換語言時用來重畫
 let watchId = null;
 let busy = false;
 let todayRows = [];       // 今日已打卡紀錄，用來提醒重複打卡
@@ -390,36 +797,145 @@ let reminders = [];       // 今日超時提醒名單
 let firedIds = {};        // 這次開啟已經跳過的提醒，避免重複彈窗
 let rmdQueue = [];        // 同時到期時排隊顯示
 let rmdShowing = null;
+let histResult = null;    // 最後一次查詢結果，切換語言時重畫
+let approval = { isApprover: false, pending: 0 };
+let patchInfo = null;     // patchMine 回傳
+let pendingRows = [];     // 待我簽核
+let decideTarget = null;
+let pendingLimit = 0;     // 待簽清單的每月上限（標紅用）
+let pfType = '上班';
 
 const $ = id => document.getElementById(id);
-const WD = ['日','一','二','三','四','五','六'];
+const P2 = v => String(v).padStart(2, '0');
+
+/* ─── 多國語言 ─── */
+function detectLang() {
+  try { const s = localStorage.getItem(LS_LANG); if (s && I18N[s]) return s; } catch (e) {}
+  const list = (navigator.languages || [navigator.language || '']).map(x => String(x).toLowerCase());
+  for (const l of list) {
+    if (l.startsWith('vi')) return 'vi';
+    if (l.startsWith('zh')) return 'zh';
+    if (l.startsWith('en')) return 'en';
+  }
+  return 'zh';
+}
+
+function hasKey(key) { return I18N[lang][key] !== undefined || I18N.zh[key] !== undefined; }
+
+/** t('gps.inside', {name:'公司'})；找不到時退回中文，再找不到回傳 fallback 或鍵名 */
+function t(key, params, fallback) {
+  let s = I18N[lang][key];
+  if (s === undefined) s = I18N.zh[key];
+  if (s === undefined) return fallback !== undefined ? fallback : key;
+  return s.replace(/\{(\w+)\}/g, (m, k) => (params && params[k] !== undefined) ? params[k] : m);
+}
+
+function applyI18n() {
+  document.documentElement.lang = LANG_HTML[lang];
+  document.title = t('app.title');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll('.langseg button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+}
+
+function setLang(l) {
+  if (!I18N[l] || l === lang) return;
+  lang = l;
+  try { localStorage.setItem(LS_LANG, l); } catch (e) {}
+  applyI18n();
+  rerenderAll();
+}
+
+/** 切換語言後，把動態產生的內容全部重畫一次 */
+function rerenderAll() {
+  tick();
+  if (pos && cfg) render();
+  else if (lastGps) gpsState.apply(null, lastGps);
+  drawToday(todayRows);
+  drawReminders();
+  if (histResult) drawHistory(histResult);
+  else $('histList').innerHTML = '<div class="empty">' + esc(t('hist.hint')) + '</div>';
+  if (auth) { drawPatches(); drawPending(); }
+  if (rmdShowing) paintReminder(rmdShowing);
+  if (pendingType) paintConfirm(pendingType);
+  if (decideTarget) paintDecide(decideTarget);
+  if (!$('patchSheet').classList.contains('hidden')) paintPatchForm();
+}
+
+const typeText = v => t('type.' + v, null, v);
+const statusText = v => t('ps.' + v, null, v);
+function signerText(v) {
+  if (v === '本人撤回') return t('signer.self');
+  if (v === '人資（戰情室代簽）') return t('signer.hr');
+  return v;
+}
+
+/** 伺服器錯誤：有代碼就翻成目前語言，沒有就用伺服器給的中文 */
+function errText(e) {
+  if (e && e.code && hasKey('err.' + e.code)) {
+    const p = Object.assign({}, e.params || {});
+    if (p.type) p.type = typeText(p.type);
+    if (p.status) p.status = statusText(p.status);
+    return t('err.' + e.code, p);
+  }
+  return e && e.message ? e.message : t('err.generic');
+}
+function isAuthErr(e) {
+  return !!e && (['AUTH_EXPIRED', 'AUTH_DISABLED', 'AUTH_NOT_FOUND'].indexOf(e.code) >= 0 ||
+                 (!e.code && /重新登入|停用|查無/.test(e.message || '')));
+}
+
+/** 日期顯示：mm/dd 加星期，依語言調整順序 */
+function dayLabel(mm, dd, wi) {
+  if (lang === 'vi') return dd + '/' + mm + ' (' + WD_SHORT.vi[wi] + ')';
+  if (lang === 'en') return WD_SHORT.en[wi] + ' ' + mm + '/' + dd;
+  return mm + '/' + dd + '（' + WD_SHORT.zh[wi] + '）';
+}
+function ymdLabel(s) {           // 'yyyy/MM/dd'
+  const m = String(s || '').match(/^(\d{4})\/(\d{2})\/(\d{2})/);
+  if (!m) return s || '';
+  return dayLabel(m[2], m[3], new Date(+m[1], +m[2] - 1, +m[3]).getDay());
+}
+function longDate(n) {
+  const wi = n.getDay();
+  if (lang === 'vi') return WD_LONG_VI[wi] + ', ' + P2(n.getDate()) + '/' + P2(n.getMonth() + 1) + '/' + n.getFullYear();
+  if (lang === 'en') return WD_SHORT.en[wi] + ', ' + n.getDate() + ' ' + MON_EN[n.getMonth()] + ' ' + n.getFullYear();
+  return n.getFullYear() + ' 年 ' + (n.getMonth() + 1) + ' 月 ' + n.getDate() + ' 日　星期' + WD_SHORT.zh[wi];
+}
 
 /* ─── 與後端溝通 ───
    用 text/plain 送出，避開 CORS preflight（Apps Script 不支援 OPTIONS） */
 async function api(action, data) {
   if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL)) {
-    throw new Error('系統尚未設定 API 網址，請聯絡人資');
+    throw new Error(t('err.noApi'));
   }
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(Object.assign({ action }, data || {}))
   });
-  if (!res.ok) throw new Error('連線失敗（HTTP ' + res.status + '）');
+  if (!res.ok) throw new Error(t('err.http', { status: res.status }));
   const json = await res.json();
-  if (json.ok === false) throw new Error(json.msg || '操作失敗');
+  if (json.ok === false) {
+    const e = new Error(json.msg || t('err.generic'));
+    e.code = json.code || '';
+    e.params = json.params || {};
+    throw e;
+  }
   return json;
 }
+const authBody = extra => Object.assign({ empId: auth.empId, token: auth.token }, extra || {});
 
 /* ─── 小工具 ─── */
 function toast(msg, kind) {
-  const t = $('toast');
-  t.textContent = msg; t.className = 'show ' + (kind || 'ok');
+  const el = $('toast');
+  el.textContent = msg; el.className = 'show ' + (kind || 'ok');
   clearTimeout(toast._h);
-  toast._h = setTimeout(() => { t.className = ''; }, kind === 'bad' ? 6000 : 3800);
+  toast._h = setTimeout(() => { el.className = ''; }, kind === 'bad' ? 6000 : 3800);
 }
 function loading(on, msg) {
-  $('loaderMsg').textContent = msg || '處理中…';
+  $('loaderMsg').textContent = msg || t('loading.default');
   $('loader').classList.toggle('hidden', !on);
 }
 function esc(s) {
@@ -442,23 +958,22 @@ function haversine(a, b, c, d) {
   const x = Math.sin(dLat / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
 }
+function ymd(d) { return d.getFullYear() + '-' + P2(d.getMonth() + 1) + '-' + P2(d.getDate()); }
+function openOvl(id) { const b = $(id); b.classList.remove('hidden'); void b.offsetWidth; b.classList.add('on'); }
+function closeOvl(id) { const b = $(id); b.classList.remove('on'); setTimeout(() => b.classList.add('hidden'), 280); }
 
 /* ─── 時鐘 ─── */
 function tick() {
   const n = new Date();
-  const p = v => String(v).padStart(2, '0');
-  $('clockT').innerHTML = p(n.getHours()) + ':' + p(n.getMinutes()) +
-                          '<small>:' + p(n.getSeconds()) + '</small>';
-  $('clockD').textContent = n.getFullYear() + ' 年 ' + (n.getMonth() + 1) + ' 月 ' +
-                            n.getDate() + ' 日　星期' + WD[n.getDay()];
+  $('clockT').innerHTML = P2(n.getHours()) + ':' + P2(n.getMinutes()) + '<small>:' + P2(n.getSeconds()) + '</small>';
+  $('clockD').textContent = longDate(n);
 }
 
 /* ─── 定位 ─── */
 function startWatch() {
-  if (!navigator.geolocation) return gpsState('bad', '此裝置不支援定位', '請改用 Chrome 或 Safari 開啟。');
-  if (!window.isSecureContext) {
-    return gpsState('bad', '網址不是 HTTPS', '瀏覽器只允許在 https:// 網址下取得定位，請確認開啟的是人資提供的正式網址。');
-  }
+  gpsState('', 'gps.locating', null, 'gps.locatingSub', null);
+  if (!navigator.geolocation) return gpsState('bad', 'gps.noSupport', null, 'gps.noSupportSub', null);
+  if (!window.isSecureContext) return gpsState('bad', 'gps.noHttps', null, 'gps.noHttpsSub', null);
   if (watchId !== null) navigator.geolocation.clearWatch(watchId);
   watchId = navigator.geolocation.watchPosition(
     p => { pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy }; render(); },
@@ -468,36 +983,33 @@ function startWatch() {
 }
 function gpsError(err) {
   pos = null;
-  if (err.code === 1) {
-    gpsState('bad', '定位權限被拒絕',
-      '請到手機「設定 → 瀏覽器 → 位置」開啟權限，或點網址列左側的鎖頭圖示允許定位，然後重新整理。');
-  } else if (err.code === 3) {
-    gpsState('warn', '定位逾時', '訊號不佳，請走到戶外或靠近窗邊，稍候會自動重試。');
-  } else {
-    gpsState('bad', '無法取得定位', '請確認手機的「定位服務」已開啟。');
-  }
+  if (err.code === 1) gpsState('bad', 'gps.denied', null, 'gps.deniedSub', null);
+  else if (err.code === 3) gpsState('warn', 'gps.timeout', null, 'gps.timeoutSub', null);
+  else gpsState('bad', 'gps.fail', null, 'gps.failSub', null);
   refreshButtons();
 }
+
 /**
- * kind: ''|ok|warn|bad　title: 標題　sub: 補充說明（可省略）
+ * 定位卡片。標題與說明都用字典鍵名傳入，切換語言時才能重畫。
  * metrics: {dist, radius, acc} 有給才顯示「距離／定位誤差」兩格數字
  */
-function gpsState(kind, title, sub, pct, metrics) {
+function gpsState(kind, titleKey, titleParams, subKey, subParams, pct, metrics) {
+  lastGps = [kind, titleKey, titleParams, subKey, subParams, pct, metrics];
   const c = $('gpsCard');
   c.className = 'card ' + kind;          // 一定要保留 card，否則卡片會失去白底與圓角
-  $('gpsTitle').textContent = title;
+  $('gpsTitle').textContent = t(titleKey, titleParams);
 
   const m = $('gpsMetrics');
   if (metrics) {
     m.innerHTML =
-      '<div class="m-dist"><b>' + metrics.dist + '</b><span>公尺　允許 ' + metrics.radius + '</span></div>' +
-      '<div class="m-acc"><b>±' + metrics.acc + '</b><span>定位誤差（公尺）</span></div>';
+      '<div class="m-dist"><b>' + metrics.dist + '</b><span>' + esc(t('gps.metersAllow', { radius: metrics.radius })) + '</span></div>' +
+      '<div class="m-acc"><b>±' + metrics.acc + '</b><span>' + esc(t('gps.accuracy')) + '</span></div>';
     m.classList.remove('hidden');
   } else {
     m.classList.add('hidden');
   }
-
-  $('gpsSub').innerHTML = sub || '';
+  const sub = subKey ? t(subKey, subParams) : '';
+  $('gpsSub').textContent = sub;
   $('gpsSub').classList.toggle('hidden', !sub);
   $('gpsBar').style.width = (pct == null ? 0 : Math.max(3, Math.min(100, pct))) + '%';
 }
@@ -507,7 +1019,7 @@ function render() {
   if (!pos || !cfg) return;
   if (!cfg.locations.length) {
     near = null;
-    gpsState('bad', '尚未設定打卡地點', '請聯絡人資在系統中設定公司座標。');
+    gpsState('bad', 'gps.noLoc', null, 'gps.noLocSub', null);
     return refreshButtons();
   }
   near = cfg.locations.reduce((best, L) => {
@@ -517,19 +1029,15 @@ function render() {
 
   const limit = near.radius + (cfg.tolerance || 0);
   const inside = near.dist <= limit;
-  const accBad = pos.acc > cfg.accuracyLimit;
   const dist = Math.round(near.dist);
   const metrics = { dist: dist, radius: near.radius, acc: Math.round(pos.acc) };
 
-  if (accBad) {
-    gpsState('warn', '定位訊號不穩',
-      '定位誤差超過 ±' + cfg.accuracyLimit + ' 公尺，請走到戶外或靠近窗邊，等訊號穩定再打卡。',
-      100, metrics);
+  if (pos.acc > cfg.accuracyLimit) {
+    gpsState('warn', 'gps.weak', null, 'gps.weakSub', { limit: cfg.accuracyLimit }, 100, metrics);
   } else if (inside) {
-    gpsState('ok', '已在「' + near.name + '」範圍內', '', (1 - dist / limit) * 100, metrics);
+    gpsState('ok', 'gps.inside', { name: near.name }, '', null, (1 - dist / limit) * 100, metrics);
   } else {
-    gpsState('bad', '不在打卡範圍內',
-      '請靠近「' + near.name + '」，進入 ' + near.radius + ' 公尺範圍內才能打卡。', 100, metrics);
+    gpsState('bad', 'gps.outside', null, 'gps.outsideSub', { name: near.name, radius: near.radius }, 100, metrics);
   }
   refreshButtons();
 }
@@ -547,7 +1055,7 @@ function freshPosition() {
   return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(
       p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy }),
-      err => reject(new Error(err.code === 1 ? '定位權限被拒絕，無法打卡' : '取得定位失敗，請到訊號較好的地方再試')),
+      err => reject(new Error(err.code === 1 ? t('err.gpsDenied') : t('err.gpsFail'))),
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
     );
   });
@@ -556,6 +1064,13 @@ function freshPosition() {
 /* ═══════════ 超時提醒 ═══════════
    用 20 秒輪詢比對時間，而不是 setTimeout —— 手機休眠後 setTimeout 會失準，
    輪詢則能在螢幕一亮就補上到期的提醒。 */
+
+/** 提醒內容：新版後端給 {zh,vi,en}，舊版給中文字串 */
+function rmsg(r) {
+  if (!r || r.msg == null) return '';
+  if (typeof r.msg === 'string') return r.msg;
+  return r.msg[lang] || r.msg.zh || '';
+}
 
 function setReminders(list) {
   reminders = Array.isArray(list) ? list : [];
@@ -570,14 +1085,14 @@ function drawReminders() {
   $('rmdList').innerHTML = reminders.map(r =>
     '<div class="rmd' + (r.acked ? ' done' : '') + '">' +
     '<span class="t">' + esc(r.time) + '</span>' +
-    '<span class="m">' + esc(r.msg) + '</span>' +
-    (r.acked ? '<span class="ok">已讀</span>' : '') + '</div>').join('');
+    '<span class="m">' + esc(rmsg(r)) + '</span>' +
+    (r.acked ? '<span class="ok">' + esc(t('rmd.read')) + '</span>' : '') + '</div>').join('');
 }
 
 /** 目前時間（HH:mm）已經到或超過的、還沒讀過也還沒跳過的，就排進佇列 */
 function checkReminders() {
   const n = new Date();
-  const now = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0');
+  const now = P2(n.getHours()) + ':' + P2(n.getMinutes());
   reminders.forEach(r => {
     if (r.acked || firedIds[r.id]) return;
     if (r.time > now) return;
@@ -587,15 +1102,18 @@ function checkReminders() {
   if (!rmdShowing) showNextReminder();
 }
 
+function paintReminder(r) {
+  $('rTime').textContent = t('rmd.popTime', { time: r.time });
+  $('rMsg').textContent = rmsg(r);
+  $('rCnt').textContent = t('rmd.more', { n: rmdQueue.length });
+  $('rCnt').classList.toggle('hidden', rmdQueue.length === 0);
+}
+
 function showNextReminder() {
   if (rmdShowing || !rmdQueue.length) return;
   const r = rmdQueue.shift();
   rmdShowing = r;
-
-  $('rTime').textContent = '預定時間　' + r.time;
-  $('rMsg').textContent = r.msg;
-  $('rCnt').textContent = '尚有 ' + rmdQueue.length + ' 則提醒';
-  $('rCnt').classList.toggle('hidden', rmdQueue.length === 0);
+  paintReminder(r);
 
   const box = $('remind');
   box.classList.remove('hidden');
@@ -617,7 +1135,7 @@ async function ackReminder() {
     const hit = reminders.find(x => x.id === r.id);
     if (hit) hit.acked = true;
     drawReminders();
-    try { await api('ackReminder', { empId: auth.empId, token: auth.token, id: r.id }); }
+    try { await api('ackReminder', authBody({ id: r.id })); }
     catch (e) { /* 記錄已讀失敗不影響員工，下次開啟會再提醒一次 */ }
   }
   setTimeout(showNextReminder, 350);
@@ -629,14 +1147,14 @@ function beep() {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return;
     const ctx = new Ctx();
-    [0, 0.32, 0.64].forEach(t => {
+    [0, 0.32, 0.64].forEach(s => {
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.type = 'sine'; o.frequency.value = 880;
-      g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
-      g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.22);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime + s);
+      g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + s + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + s + 0.22);
       o.connect(g); g.connect(ctx.destination);
-      o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.24);
+      o.start(ctx.currentTime + s); o.stop(ctx.currentTime + s + 0.24);
     });
     setTimeout(() => ctx.close(), 1500);
   } catch (e) { /* 靜音模式或未授權播放，就只靠震動與畫面 */ }
@@ -648,11 +1166,10 @@ function askPunch(type) {
   pendingType = type;
 
   const isIn = type === '上班';
-  $('cType').textContent = type + '打卡';
   $('cType').className = 'ctype ' + (isIn ? 'in' : 'out');
   $('cGo').className = 'go ' + (isIn ? 'in' : 'out');
 
-  // 三國語言提醒
+  // 三國語言提醒（不隨介面語言變動，永遠三語並列）
   const showNotice = (NOTICE.zh || NOTICE.vi || NOTICE.en) &&
                      (NOTICE.showOn === 'both' || NOTICE.showOn === type);
   $('cNotice').classList.toggle('hidden', !showNotice);
@@ -661,17 +1178,7 @@ function askPunch(type) {
     $('cNoticeVi').textContent = NOTICE.vi || '';
     $('cNoticeEn').textContent = NOTICE.en || '';
   }
-
-  // 今天已經打過同一種卡就提醒一下
-  const same = todayRows.filter(r => r.type === type);
-  const warn = $('cWarn');
-  if (same.length) {
-    warn.innerHTML = '⚠ 你今天已經打過<b>' + type + '卡</b>（' +
-      same.map(r => r.time).join('、') + '）。<br>確定要再打一次嗎？';
-    warn.classList.remove('hidden');
-  } else {
-    warn.classList.add('hidden');
-  }
+  paintConfirm(type);
 
   // 有提醒要看時，確認鈕先鎖住倒數幾秒，逼使用者真的把提醒讀完
   startCountdown(showNotice ? (Number(NOTICE.countdown) || 0) : 0);
@@ -682,6 +1189,20 @@ function askPunch(type) {
   box.classList.add('on');
 }
 
+/** 確認面板裡會隨語言變動的部分 */
+function paintConfirm(type) {
+  $('cType').textContent = t(type === '上班' ? 'punch.in' : 'punch.out');
+  const same = todayRows.filter(r => r.type === type);
+  const warn = $('cWarn');
+  if (same.length) {
+    warn.innerHTML = t('confirm.dup', { type: esc(typeText(type)), times: esc(same.map(r => r.time).join('、')) });
+    warn.classList.remove('hidden');
+  } else {
+    warn.classList.add('hidden');
+  }
+  if (!cdTimer) $('cGo').textContent = t('confirm.go');
+}
+
 /** sec > 0 時，確認鈕在倒數結束前不能按，鈕面顯示三語「請詳閱提醒」與剩餘秒數 */
 function startCountdown(sec) {
   const go = $('cGo'), acts = go.parentElement;
@@ -690,13 +1211,11 @@ function startCountdown(sec) {
   const done = () => {
     clearInterval(cdTimer); cdTimer = null;
     go.disabled = false;
-    go.textContent = '確認打卡';
+    go.textContent = t('confirm.go');
     acts.classList.remove('waiting');
   };
   if (!sec || sec < 1) return done();
 
-  const esc = t => String(t == null ? '' : t)
-    .replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
   let left = Math.round(sec);
   const paint = () => {
     go.innerHTML =
@@ -725,55 +1244,54 @@ function closeConfirm() {
 /* ─── 打卡 ─── */
 async function punch(type) {
   if (busy) return;
-  busy = true; refreshButtons(); loading(true, '確認位置中…');
+  busy = true; refreshButtons(); loading(true, t('loading.locate'));
   try {
     const fresh = await freshPosition();
     pos = fresh; render();
-    loading(true, '送出打卡…');
-    const r = await api('punch', {
-      empId: auth.empId, token: auth.token, type: type,
-      lat: fresh.lat, lng: fresh.lng, acc: fresh.acc, device: deviceId()
-    });
+    loading(true, t('loading.send'));
+    const r = await api('punch', authBody({ type: type, lat: fresh.lat, lng: fresh.lng, acc: fresh.acc, device: deviceId() }));
     drawToday(r.today);
-    toast('✓ ' + type + '打卡成功　' + r.time + '　@' + r.location +
-          '（' + r.distance + ' 公尺）', r.result === '正常' ? 'ok' : 'warn');
+    toast(t('punch.ok', { type: typeText(type), time: r.time, loc: r.location, dist: r.distance }),
+          r.result === '正常' ? 'ok' : 'warn');
     if (navigator.vibrate) navigator.vibrate(60);
   } catch (e) {
-    toast('✕ ' + e.message, 'bad');
-    if (/重新登入|停用|查無/.test(e.message)) logout();
+    toast('✕ ' + errText(e), 'bad');
+    if (isAuthErr(e)) logout();
   } finally {
     busy = false; loading(false); refreshButtons();
   }
 }
 
+/** 紀錄右側說明：地點距離、異常或補卡標籤 */
+function recMeta(x) {
+  if (x.result === '補卡') return '<span class="tag patch">' + esc(t('result.補卡')) + '</span>';
+  return esc(x.loc) + '　' + esc(t('unit.m', { d: x.dist })) +
+    (x.result !== '正常' ? '<br>⚠ ' + esc(t('result.' + x.result, null, x.result)) : '');
+}
+
 function drawToday(rows) {
   todayRows = rows || [];
   const box = $('todayList');
-  if (!rows || !rows.length) { box.innerHTML = '<div class="empty">今天還沒有打卡紀錄</div>'; return; }
-  box.innerHTML = rows.map(r =>
-    '<div class="rec"><span class="tag ' + (r.type === '上班' ? 'in' : 'out') + '">' + r.type + '</span>' +
-    '<span class="tm">' + r.time + '</span>' +
-    '<span class="mt">' + r.loc + '　' + r.dist + ' 公尺' +
-    (r.result !== '正常' ? '<br>⚠ ' + r.result : '') + '</span></div>').join('');
+  if (!todayRows.length) { box.innerHTML = '<div class="empty">' + esc(t('today.empty')) + '</div>'; return; }
+  box.innerHTML = todayRows.map(r =>
+    '<div class="rec"><span class="tag ' + (r.type === '上班' ? 'in' : 'out') + '">' + esc(typeText(r.type)) + '</span>' +
+    '<span class="tm">' + esc(r.time) + '</span><span class="mt">' + recMeta(r) + '</span></div>').join('');
 }
 
-function ymd(d) {
-  const p = v => String(v).padStart(2, '0');
-  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
-}
+/* ─── 查詢紀錄 ─── */
 
-/** 快捷區間；q 省略＝只設日期不查詢 */
+/** 快捷區間 */
 function setQRange(q) {
   const n = new Date();
-  let f, t = n;
+  let f, to = n;
   if (q === 'lastMonth') {
     f = new Date(n.getFullYear(), n.getMonth() - 1, 1);
-    t = new Date(n.getFullYear(), n.getMonth(), 0);
+    to = new Date(n.getFullYear(), n.getMonth(), 0);
   } else if (q === '7d') { f = new Date(n); f.setDate(n.getDate() - 6); }
   else if (q === '30d') { f = new Date(n); f.setDate(n.getDate() - 29); }
   else { q = 'thisMonth'; f = new Date(n.getFullYear(), n.getMonth(), 1); }
   $('qFrom').value = ymd(f);
-  $('qTo').value = ymd(t);
+  $('qTo').value = ymd(to);
   $('qTo').max = ymd(n);
   $('qFrom').max = ymd(n);
   document.querySelectorAll('[data-q]').forEach(b => b.classList.toggle('on', b.dataset.q === q));
@@ -781,38 +1299,245 @@ function setQRange(q) {
 
 async function loadHistory() {
   const from = $('qFrom').value, to = $('qTo').value;
-  if (!from || !to) return toast('請先選擇起訖日期', 'bad');
-  if (from > to) return toast('起始日期不能晚於結束日期', 'bad');
+  if (!from || !to) return toast(t('hist.needDates'), 'bad');
+  if (from > to) return toast(t('err.RANGE_ORDER'), 'bad');
 
   $('histBtn').disabled = true;
   $('histInfo').classList.add('hidden');
-  $('histList').innerHTML = '<div class="empty">查詢中…</div>';
+  $('histList').innerHTML = '<div class="empty">' + esc(t('hist.loading')) + '</div>';
   try {
-    const r = await api('history', { empId: auth.empId, token: auth.token, from: from, to: to });
-
-    if (!r.count) {
-      $('histList').innerHTML = '<div class="empty">這段期間沒有打卡紀錄</div>';
-    } else {
-      let html = '', lastDate = '';
-      r.rows.forEach(x => {
-        if (x.date !== lastDate) {
-          lastDate = x.date;
-          html += '<div class="dsep">' + esc(x.date) + '（' + esc(x.wd) + '）</div>';
-        }
-        html += '<div class="rec"><span class="tag ' + (x.type === '上班' ? 'in' : 'out') + '">' +
-          esc(x.type) + '</span><span class="tm">' + esc(x.time) + '</span>' +
-          '<span class="mt">' + esc(x.loc) + ' ' + x.dist + ' 公尺' +
-          (x.result !== '正常' ? '<br>⚠ ' + esc(x.result) : '') + '</span></div>';
-      });
-      $('histList').innerHTML = html;
-    }
-    $('histInfo').textContent = r.from + ' ～ ' + r.to + '　共 ' + r.count + ' 筆';
-    $('histInfo').classList.remove('hidden');
+    histResult = await api('history', authBody({ from: from, to: to }));
+    drawHistory(histResult);
   } catch (e) {
-    if (/重新登入|停用|查無/.test(e.message)) return logout(e.message);
-    $('histList').innerHTML = '<div class="empty">查詢失敗：' + esc(e.message) + '</div>';
+    histResult = null;
+    if (isAuthErr(e)) return logout();
+    $('histList').innerHTML = '<div class="empty">' + esc(t('hist.fail', { msg: errText(e) })) + '</div>';
   } finally {
     $('histBtn').disabled = false;
+  }
+}
+
+function drawHistory(r) {
+  if (!r.count) {
+    $('histList').innerHTML = '<div class="empty">' + esc(t('hist.none')) + '</div>';
+  } else {
+    let html = '', lastDate = '';
+    r.rows.forEach(x => {
+      if (x.date !== lastDate) {
+        lastDate = x.date;
+        const md = String(x.date).split('/');
+        html += '<div class="dsep">' + esc(dayLabel(md[0], md[1], '日一二三四五六'.indexOf(x.wd))) + '</div>';
+      }
+      html += '<div class="rec"><span class="tag ' + (x.type === '上班' ? 'in' : 'out') + '">' +
+        esc(typeText(x.type)) + '</span><span class="tm">' + esc(x.time) + '</span>' +
+        '<span class="mt">' + recMeta(x) + '</span></div>';
+    });
+    $('histList').innerHTML = html;
+  }
+  $('histInfo').textContent = t('hist.info', { from: r.from, to: r.to, n: r.count });
+  $('histInfo').classList.remove('hidden');
+}
+
+/* ═══════════ 忘刷卡補卡 ═══════════ */
+
+async function loadPatches() {
+  if (!auth) return;
+  try {
+    patchInfo = await api('patchMine', authBody());
+  } catch (e) {
+    if (isAuthErr(e)) return logout();
+    patchInfo = null;
+    $('patchList').innerHTML = '<div class="empty">' + esc(errText(e)) + '</div>';
+    return;
+  }
+  drawPatches();
+}
+
+/** 一張補卡單的 HTML；forAppr＝主管簽核清單用 */
+function patchItemHtml(x, forAppr) {
+  const md = x.date;
+  const lines = [];
+  if (forAppr) lines.push(esc(t('patch.who', { name: x.name, id: x.empId, dept: x.dept })));
+  lines.push(esc(t('patch.reasonLine', { r: x.reason })));
+  lines.push(esc(t('patch.applied', { at: x.appliedAt })) + (x.count > 0 ? '　・　' + esc(t('patch.nth', { n: x.count })) : ''));
+  if (x.signer && x.status !== '待審') lines.push(esc(signerText(x.signer)) + '　' + esc(x.signedAt));
+  if (x.comment) lines.push(esc(t('patch.comment', { c: x.comment })));
+  if (x.status === '作廢' && x.voidReason) lines.push(esc(t('patch.void', { r: x.voidReason })));
+
+  let btn = '';
+  if (forAppr) btn = '<button class="mini go" data-dc="' + esc(x.id) + '">' + esc(t('appr.review')) + '</button>';
+  else if (x.status === '待審') btn = '<button class="mini" data-wd="' + esc(x.id) + '">' + esc(t('patch.withdraw')) + '</button>';
+
+  return '<div class="pitem' + (x.status === '作廢' ? ' voided' : '') + '">' +
+    '<div class="prow">' +
+      '<span class="ps ' + (STATUS_CLASS[x.status] || 's-pending') + '">' + esc(statusText(x.status)) + '</span>' +
+      '<span class="tag ' + (x.type === '上班' ? 'in' : 'out') + '">' + esc(typeText(x.type)) + '</span>' +
+      '<span class="pd">' + esc(ymdLabel(md)) + ' ' + esc(x.time) + '</span>' +
+      (x.overLimit ? '<span class="over">⚠ ' + esc(t('appr.over', { limit: (forAppr ? pendingLimit : patchInfo && patchInfo.limit) || '' })) + '</span>' : '') +
+      btn +
+    '</div>' +
+    '<div class="pmeta">' + lines.join('<br>') + '</div></div>';
+}
+
+function drawPatches() {
+  if (!auth) return;
+  if (!patchInfo) {
+    $('patchQuota').textContent = '';
+    $('patchList').innerHTML = '<div class="empty">' + esc(t('patch.loading')) + '</div>';
+    return;
+  }
+  const n = new Date();
+  const ym = n.getFullYear() + '/' + P2(n.getMonth() + 1);
+  $('patchQuota').innerHTML =
+    esc(t('patch.quota', { count: patchInfo.counts[ym] || 0, limit: patchInfo.limit, days: patchInfo.days })) + '<br>' +
+    esc(patchInfo.toHr ? t('patch.toHr') : t('patch.approverIs', { name: patchInfo.approver }));
+  $('patchList').innerHTML = patchInfo.rows.length
+    ? patchInfo.rows.map(x => patchItemHtml(x, false)).join('')
+    : '<div class="empty">' + esc(t('patch.empty')) + '</div>';
+  $('patchList').querySelectorAll('[data-wd]').forEach(b => { b.onclick = () => withdrawPatch(b.dataset.wd); });
+}
+
+function openPatchForm() {
+  if (!patchInfo) { loadPatches(); return; }
+  const n = new Date();
+  const minD = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  minD.setDate(minD.getDate() - patchInfo.days);
+  $('pfDate').min = ymd(minD);
+  $('pfDate').max = ymd(n);
+  $('pfDate').value = ymd(n);
+  $('pfTime').value = '';
+  $('pfReason').value = '';
+  pfType = '上班';
+  paintPatchForm();
+  openOvl('patchSheet');
+}
+
+function paintPatchForm() {
+  document.querySelectorAll('[data-pt]').forEach(b => b.classList.toggle('on', b.dataset.pt === pfType));
+  if (patchInfo) $('pfRule').textContent = t('patch.rule', { days: patchInfo.days, limit: patchInfo.limit });
+  updateOverWarn();
+}
+
+/** 選到的日期所屬月份若已達上限，提醒會被標紅 */
+function updateOverWarn() {
+  const d = $('pfDate').value, box = $('pfOver');
+  if (!d || !patchInfo) { box.classList.add('hidden'); return; }
+  const ym = d.slice(0, 7).replace('-', '/');
+  const next = (patchInfo.counts[ym] || 0) + 1;
+  if (next > patchInfo.limit) {
+    box.textContent = t('patch.overWarn', { ym: ym, count: next, limit: patchInfo.limit });
+    box.classList.remove('hidden');
+  } else {
+    box.classList.add('hidden');
+  }
+}
+
+async function submitPatch() {
+  const date = $('pfDate').value, time = $('pfTime').value, reason = $('pfReason').value.trim();
+  if (!date || !time || reason.length < 2) return toast(t('patch.needFields'), 'bad');
+  if (new Date(date + 'T' + time + ':00') > new Date()) return toast(t('patch.future'), 'bad');
+
+  $('pfSend').disabled = true;
+  try {
+    const r = await api('patchSubmit', authBody({ date: date, time: time, type: pfType, reason: reason }));
+    closeOvl('patchSheet');
+    toast(r.toHr ? t('patch.sentHr') : t('patch.sent', { name: r.approver }), r.overLimit ? 'warn' : 'ok');
+    loadPatches();
+  } catch (e) {
+    if (isAuthErr(e)) { closeOvl('patchSheet'); return logout(); }
+    toast('✕ ' + errText(e), 'bad');
+  } finally {
+    $('pfSend').disabled = false;
+  }
+}
+
+async function withdrawPatch(id) {
+  if (!confirm(t('patch.withdrawConfirm'))) return;
+  try {
+    await api('patchWithdraw', authBody({ id: id }));
+    toast(t('patch.withdrawn'));
+    loadPatches();
+  } catch (e) {
+    if (isAuthErr(e)) return logout();
+    toast('✕ ' + errText(e), 'bad');
+    loadPatches();
+  }
+}
+
+/* ─── 主管簽核 ─── */
+
+async function loadPending() {
+  if (!auth || !approval.isApprover) {
+    pendingRows = [];
+    $('apprCard').classList.add('hidden');
+    return;
+  }
+  $('apprCard').classList.remove('hidden');
+  try {
+    const r = await api('patchPending', authBody());
+    pendingRows = r.rows || [];
+    approval.pending = pendingRows.length;
+    pendingLimit = r.limit || 0;
+  } catch (e) {
+    if (isAuthErr(e)) return logout();
+    $('apprList').innerHTML = '<div class="empty">' + esc(errText(e)) + '</div>';
+    return;
+  }
+  drawPending();
+}
+
+function drawPending() {
+  if (!approval.isApprover) { $('apprCard').classList.add('hidden'); return; }
+  $('apprCard').classList.remove('hidden');
+  $('apprCnt').textContent = pendingRows.length;
+  $('apprCnt').classList.toggle('hidden', !pendingRows.length);
+  $('apprList').innerHTML = pendingRows.length
+    ? pendingRows.map(x => patchItemHtml(x, true)).join('')
+    : '<div class="empty">' + esc(t('appr.empty')) + '</div>';
+  $('apprList').querySelectorAll('[data-dc]').forEach(b => { b.onclick = () => openDecide(b.dataset.dc); });
+}
+
+function openDecide(id) {
+  decideTarget = pendingRows.find(x => x.id === id);
+  if (!decideTarget) return;
+  $('dComment').value = '';
+  paintDecide(decideTarget);
+  openOvl('decideSheet');
+}
+
+function paintDecide(x) {
+  const row = (k, v) => '<span class="k">' + esc(t(k)) + '</span>' + v;
+  $('dInfo').innerHTML = [
+    row('appr.applicant', esc(t('patch.who', { name: x.name, id: x.empId, dept: x.dept }))),
+    row('appr.patch', '<b>' + esc(ymdLabel(x.date)) + ' ' + esc(x.time) + '</b>　' + esc(typeText(x.type))),
+    row('appr.reason', esc(x.reason)),
+    row('appr.applied', esc(x.appliedAt) + '　・　' +
+      (x.overLimit ? '<span class="over">' + esc(t('patch.nth', { n: x.count })) + '　⚠ ' +
+                     esc(t('appr.over', { limit: pendingLimit || '' })) + '</span>'
+                   : esc(t('patch.nth', { n: x.count }))))
+  ].join('<br>');
+}
+
+function closeDecide() { decideTarget = null; closeOvl('decideSheet'); }
+
+async function decide(decision) {
+  if (!decideTarget) return;
+  const comment = $('dComment').value.trim();
+  if (decision === 'reject' && !comment) return toast(t('appr.needComment'), 'bad');
+
+  ['dApprove', 'dReject'].forEach(id => { $(id).disabled = true; });
+  try {
+    await api('patchDecide', authBody({ id: decideTarget.id, decision: decision, comment: comment }));
+    closeDecide();
+    toast(decision === 'approve' ? t('appr.doneApprove') : t('appr.doneReject'));
+    loadPending();
+  } catch (e) {
+    if (isAuthErr(e)) { closeDecide(); return logout(); }
+    toast('✕ ' + errText(e), 'bad');
+    closeDecide();
+    loadPending();                 // 可能已被別人（人資）簽掉，重抓清單
+  } finally {
+    ['dApprove', 'dReject'].forEach(id => { $(id).disabled = false; });
   }
 }
 
@@ -820,16 +1545,16 @@ async function loadHistory() {
 async function login() {
   const empId = $('empId').value.trim();
   const pin = $('pin').value.trim();
-  if (!empId || !pin) return toast('請輸入員工編號與 PIN 碼', 'bad');
-  $('loginBtn').disabled = true; loading(true, '登入中…');
+  if (!empId || !pin) return toast(t('login.needBoth'), 'bad');
+  $('loginBtn').disabled = true; loading(true, t('loading.login'));
   try {
     const r = await api('login', { empId: empId, pin: pin });
     auth = { empId: r.empId, token: r.token, name: r.name, dept: r.dept };
     if ($('remember').checked) localStorage.setItem(LS, JSON.stringify(auth));
     else sessionStorage.setItem(LS, JSON.stringify(auth));
-    enterMain(r.today, r.reminders);
+    enterMain(r);
   } catch (e) {
-    toast('✕ ' + e.message, 'bad');
+    toast('✕ ' + errText(e), 'bad');
   } finally {
     $('loginBtn').disabled = false; loading(false);
   }
@@ -838,9 +1563,12 @@ async function login() {
 function logout() {
   localStorage.removeItem(LS); sessionStorage.removeItem(LS);
   if (pendingType) closeConfirm();
-  auth = null; todayRows = [];
+  ['patchSheet', 'decideSheet'].forEach(id => { $(id).classList.remove('on'); $(id).classList.add('hidden'); });
+  auth = null; todayRows = []; histResult = null;
   reminders = []; firedIds = {}; rmdQueue = []; rmdShowing = null;
+  approval = { isApprover: false, pending: 0 }; patchInfo = null; pendingRows = []; decideTarget = null;
   $('rmdCard').classList.add('hidden');
+  $('apprCard').classList.add('hidden');
   $('remind').classList.remove('on'); $('remind').classList.add('hidden');
   if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
   $('mainView').classList.add('hidden');
@@ -848,26 +1576,36 @@ function logout() {
   $('pin').value = '';
 }
 
-/** 定期回頭問伺服器，才拿得到人資剛加進去的提醒 */
+/** 定期回頭問伺服器：拿人資剛加的提醒、主管的待簽數量 */
 async function refreshToday() {
   if (!auth) return;
   try {
-    const r = await api('today', { empId: auth.empId, token: auth.token });
+    const r = await api('today', authBody());
     drawToday(r.today);
     setReminders(r.reminders);
+    const prev = approval;
+    approval = r.approval || { isApprover: false, pending: 0 };
+    if (approval.isApprover !== prev.isApprover || approval.pending !== prev.pending) loadPending();
   } catch (e) {
-    if (/重新登入|停用|查無/.test(e.message)) logout(e.message);
+    if (isAuthErr(e)) logout();
   }
 }
 
-function enterMain(today, rmds) {
+function enterMain(r) {
   $('uName').textContent = auth.name;
   $('uMeta').textContent = auth.dept + '　' + auth.empId;
   $('loginView').classList.add('hidden');
   $('mainView').classList.remove('hidden');
-  drawToday(today || []);
-  setReminders(rmds || []);
+  drawToday(r.today || []);
+  setReminders(r.reminders || []);
   setQRange('thisMonth');
+  histResult = null;
+  $('histList').innerHTML = '<div class="empty">' + esc(t('hist.hint')) + '</div>';
+  approval = r.approval || { isApprover: false, pending: 0 };
+  patchInfo = null;
+  drawPatches();
+  loadPatches();
+  loadPending();
   startWatch();
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   if (!standalone && !localStorage.getItem(LS_BANNER)) $('installBanner').classList.remove('hidden');
@@ -875,33 +1613,53 @@ function enterMain(today, rmds) {
 
 /* ─── 啟動 ─── */
 async function boot() {
+  applyI18n();
   tick(); setInterval(tick, 1000);
 
+  document.querySelectorAll('.langseg button').forEach(b => { b.onclick = () => setLang(b.dataset.lang); });
   $('loginBtn').onclick = login;
   $('pin').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
-  $('logoutBtn').onclick = () => { if (confirm('確定要登出嗎？')) logout(); };
+  $('logoutBtn').onclick = () => { if (confirm(t('main.logoutConfirm'))) logout(); };
   $('btnIn').onclick = () => askPunch('上班');
   $('btnOut').onclick = () => askPunch('下班');
   $('cCancel').onclick = closeConfirm;
   $('cGo').onclick = () => {
-    const t = pendingType;
+    const tp = pendingType;
     closeConfirm();
-    if (t) punch(t);
+    if (tp) punch(tp);
   };
   $('confirm').addEventListener('click', e => { if (e.target.id === 'confirm') closeConfirm(); });
-  addEventListener('keydown', e => { if (e.key === 'Escape' && pendingType) closeConfirm(); });
   $('rOk').onclick = ackReminder;
 
-  // 每 20 秒比對一次提醒時間；每 5 分鐘向伺服器重抓名單
+  $('patchNew').onclick = openPatchForm;
+  $('pfCancel').onclick = () => closeOvl('patchSheet');
+  $('pfSend').onclick = submitPatch;
+  $('pfDate').addEventListener('change', updateOverWarn);
+  document.querySelectorAll('[data-pt]').forEach(b => { b.onclick = () => { pfType = b.dataset.pt; paintPatchForm(); }; });
+  $('patchSheet').addEventListener('click', e => { if (e.target.id === 'patchSheet') closeOvl('patchSheet'); });
+  $('dCancel').onclick = closeDecide;
+  $('dApprove').onclick = () => decide('approve');
+  $('dReject').onclick = () => decide('reject');
+  $('decideSheet').addEventListener('click', e => { if (e.target.id === 'decideSheet') closeDecide(); });
+
+  addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (pendingType) closeConfirm();
+    if (!$('patchSheet').classList.contains('hidden')) closeOvl('patchSheet');
+    if (decideTarget) closeDecide();
+  });
+
+  // 每 20 秒比對一次提醒時間；每 5 分鐘向伺服器重抓提醒與待簽數
   setInterval(() => { if (auth) checkReminders(); }, 20000);
   setInterval(refreshToday, 300000);
-  // 手機從休眠醒來、或切回 App 時立刻補檢查
+  // 手機從休眠醒來、或切回 App 時立刻補檢查，順便更新補卡狀態
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && auth) { checkReminders(); refreshToday(); }
+    if (document.visibilityState === 'visible' && auth) { checkReminders(); refreshToday(); loadPatches(); }
   });
   $('histBtn').onclick = loadHistory;
-  document.querySelectorAll('[data-q]').forEach(b =>
-    b.onclick = () => { setQRange(b.dataset.q); loadHistory(); });
+  document.querySelectorAll('[data-q]').forEach(b => {
+    b.onclick = () => { setQRange(b.dataset.q); loadHistory(); };
+  });
   $('closeBanner').onclick = () => {
     $('installBanner').classList.add('hidden'); localStorage.setItem(LS_BANNER, '1');
   };
@@ -909,7 +1667,7 @@ async function boot() {
   try {
     cfg = await api('config');
   } catch (e) {
-    $('loginSub').textContent = '無法連線：' + e.message;
+    $('loginSub').textContent = t('login.cannotConnect', { msg: errText(e) });
     $('loginView').classList.remove('hidden');
     return;
   }
@@ -918,8 +1676,8 @@ async function boot() {
   if (saved) {
     try {
       auth = JSON.parse(saved);
-      const r = await api('today', { empId: auth.empId, token: auth.token });
-      return enterMain(r.today, r.reminders);
+      const r = await api('today', authBody());
+      return enterMain(r);
     } catch (e) {
       localStorage.removeItem(LS); sessionStorage.removeItem(LS); auth = null;
     }
