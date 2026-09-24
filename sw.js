@@ -3,7 +3,7 @@
    打卡 API 一律走網路，絕不快取。
    ※ 改版後請把 VERSION 加 1，使用者下次開啟就會自動更新。 */
 
-const VERSION = 'v8';
+const VERSION = 'v9';
 const CACHE = 'punch-' + VERSION;
 const SHELL = [
   './',
