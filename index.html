@@ -240,6 +240,23 @@ body{
 .chead h3{margin:0}
 .chead .qgo{margin-left:auto}
 .cbadge{background:#7c3aed;color:#fff;border-radius:99px;font-size:11.5px;padding:2px 8px;font-weight:700}
+
+/* 公告 */
+#annCard{border-top:4px solid #2563eb;padding-top:15px}
+#annCard h3{color:#1d4ed8}
+#annCard .cbadge{background:#dc2626}
+.ann{padding:12px 0;border-bottom:1px solid var(--line)}
+.ann:last-child{border-bottom:0}
+.ann .at{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ann .at b{font-size:15px;line-height:1.45}
+.ann .new{background:#fee2e2;color:#b91c1c;border-radius:99px;font-size:10.5px;padding:2px 8px;font-weight:700;flex:none}
+.ann .dt{color:var(--muted);font-size:11.5px;margin-left:auto;flex:none}
+.ann .ab{margin-top:6px;font-size:13.5px;line-height:1.7;white-space:pre-wrap;color:#1f2937}
+.ann .aack{margin-top:10px;display:flex;align-items:center;gap:10px}
+.ann .aack button{background:#1d4ed8;border:0;color:#fff;border-radius:10px;padding:10px 18px;
+  font-size:14px;font-weight:700}
+.ann .aack button:disabled{opacity:.55}
+.ann .done{color:var(--ok);font-size:12.5px;font-weight:700}
 .pquota{font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:4px}
 .pitem{padding:12px 0;border-bottom:1px solid var(--line)}
 .pitem:last-child{border-bottom:0}
@@ -361,6 +378,11 @@ body{
     <div class="btns">
       <button class="punch in"  id="btnIn"  disabled><span data-i18n="punch.in">上班打卡</span><small data-i18n="punch.inSub">CLOCK IN</small></button>
       <button class="punch out" id="btnOut" disabled><span data-i18n="punch.out">下班打卡</span><small data-i18n="punch.outSub">CLOCK OUT</small></button>
+    </div>
+
+    <div class="card hidden" id="annCard">
+      <div class="chead"><h3 data-i18n="ann.title">公告</h3><span class="cbadge hidden" id="annCnt">0</span></div>
+      <div id="annList"></div>
     </div>
 
     <!-- 主管才看得到 -->
@@ -554,6 +576,8 @@ const I18N = {
     'err.noApi': '系統尚未設定 API 網址，請聯絡人資', 'err.http': '連線失敗（HTTP {status}）', 'err.generic': '操作失敗',
     'err.NET_TIMEOUT': '連線逾時，網路訊號可能不穩，請稍後再試', 'err.NET_FAIL': '無法連線，請確認手機網路是否開啟',
     'err.NET_BAD': '伺服器暫時沒有回應，請稍後再試', 'err.SYS_BUSY': '系統忙碌中，請稍候幾秒再試一次',
+    'ann.title': '公告', 'ann.new': '未讀', 'ann.ack': '我已閱讀', 'ann.acked': '✓ 已閱讀 {at}',
+    'ann.acking': '送出中…', 'ann.ackFail': '記錄已閱讀失敗，請稍後再試',
     'loading.verify': '連線不穩，正在確認是否已打卡成功…',
     'punch.okVerified': '✓ 已確認{type}打卡成功（{time}）', 'net.offline': '⚠ 網路不穩，畫面資料可能不是最新的',
     'err.gpsDenied': '定位權限被拒絕，無法打卡', 'err.gpsFail': '取得定位失敗，請到訊號較好的地方再試',
@@ -643,6 +667,8 @@ const I18N = {
     'err.noApi': 'Hệ thống chưa cấu hình địa chỉ API, vui lòng liên hệ phòng Nhân sự', 'err.http': 'Kết nối thất bại (HTTP {status})', 'err.generic': 'Thao tác thất bại',
     'err.NET_TIMEOUT': 'Kết nối quá thời gian, tín hiệu mạng có thể yếu, vui lòng thử lại sau', 'err.NET_FAIL': 'Không thể kết nối, vui lòng kiểm tra mạng điện thoại',
     'err.NET_BAD': 'Máy chủ tạm thời không phản hồi, vui lòng thử lại sau', 'err.SYS_BUSY': 'Hệ thống đang bận, vui lòng đợi vài giây rồi thử lại',
+    'ann.title': 'Thông báo', 'ann.new': 'Chưa đọc', 'ann.ack': 'Tôi đã đọc', 'ann.acked': '✓ Đã đọc {at}',
+    'ann.acking': 'Đang gửi…', 'ann.ackFail': 'Ghi nhận đã đọc thất bại, vui lòng thử lại sau',
     'loading.verify': 'Mạng không ổn định, đang kiểm tra đã chấm công thành công chưa…',
     'punch.okVerified': '✓ Đã xác nhận chấm công {type} thành công ({time})', 'net.offline': '⚠ Mạng không ổn định, dữ liệu có thể chưa cập nhật',
     'err.gpsDenied': 'Quyền định vị bị từ chối, không thể chấm công', 'err.gpsFail': 'Không lấy được vị trí, vui lòng đến nơi có tín hiệu tốt hơn',
@@ -732,6 +758,8 @@ const I18N = {
     'err.noApi': 'API address is not configured. Please contact HR.', 'err.http': 'Connection failed (HTTP {status})', 'err.generic': 'Operation failed',
     'err.NET_TIMEOUT': 'Connection timed out. The signal may be weak, please try again.', 'err.NET_FAIL': 'Cannot connect. Please check your mobile data or Wi-Fi.',
     'err.NET_BAD': 'The server is not responding right now. Please try again.', 'err.SYS_BUSY': 'The system is busy. Please wait a few seconds and try again.',
+    'ann.title': 'Announcements', 'ann.new': 'Unread', 'ann.ack': 'I have read this', 'ann.acked': '✓ Read {at}',
+    'ann.acking': 'Sending…', 'ann.ackFail': 'Could not record your confirmation, please try again',
     'loading.verify': 'Unstable connection, checking whether your punch was recorded…',
     'punch.okVerified': '✓ Confirmed: {type} recorded ({time})', 'net.offline': '⚠ Unstable connection, data may be out of date',
     'err.gpsDenied': 'Location permission denied; cannot clock in', 'err.gpsFail': 'Unable to get location. Please move to a spot with better signal.',
@@ -805,6 +833,7 @@ let busy = false;
 let todayRows = [];       // 今日已打卡紀錄，用來提醒重複打卡
 let pendingType = null;   // 等待確認的打卡類型
 let cdTimer = null;       // 確認鈕的倒數計時
+let announcements = [];   // 目前有效的公告
 let reminders = [];       // 今日超時提醒名單
 let firedIds = {};        // 這次開啟已經跳過的提醒，避免重複彈窗
 let rmdQueue = [];        // 同時到期時排隊顯示
@@ -866,6 +895,7 @@ function rerenderAll() {
   else if (lastGps) gpsState.apply(null, lastGps);
   drawToday(todayRows);
   drawReminders();
+  drawAnnouncements();
   if (histResult) drawHistory(histResult);
   else $('histList').innerHTML = '<div class="empty">' + esc(t('hist.hint')) + '</div>';
   if (auth) { drawPatches(); drawPending(); }
@@ -1111,6 +1141,70 @@ function freshPosition() {
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
     );
   });
+}
+
+/* ═══════════ 公告 ═══════════
+   內容由後端一次帶回中／越／英三種，切換語言不必重抓。
+   需要已讀的公告按「我已閱讀」後，人資在戰情室看得到誰讀了。 */
+
+/** 依目前語言取出公告文字；舊版後端若回字串就直接用 */
+function annText(v) {
+  if (v == null) return '';
+  if (typeof v === 'string') return v;
+  return v[lang] || v.zh || '';
+}
+
+function setAnnouncements(list) {
+  announcements = Array.isArray(list) ? list : [];
+  drawAnnouncements();
+}
+
+function drawAnnouncements() {
+  const box = $('annCard');
+  if (!announcements.length) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+
+  const unread = announcements.filter(a => a.needAck && !a.acked).length;
+  $('annCnt').textContent = unread;
+  $('annCnt').classList.toggle('hidden', !unread);
+
+  $('annList').innerHTML = announcements.map((a, i) =>
+    '<div class="ann">' +
+      '<div class="at">' +
+        (a.needAck && !a.acked ? '<span class="new">' + esc(t('ann.new')) + '</span>' : '') +
+        '<b>' + esc(annText(a.title)) + '</b>' +
+        (a.date ? '<span class="dt">' + esc(a.date) + '</span>' : '') +
+      '</div>' +
+      '<div class="ab">' + esc(annText(a.body)) + '</div>' +
+      (a.needAck
+        ? '<div class="aack">' + (a.acked
+            ? '<span class="done">' + esc(t('ann.acked', { at: a.ackAt || '' })) + '</span>'
+            : '<button data-ann="' + i + '">' + esc(t('ann.ack')) + '</button>') + '</div>'
+        : '') +
+    '</div>').join('');
+
+  $('annList').querySelectorAll('[data-ann]').forEach(b => {
+    b.onclick = () => ackAnnouncement(Number(b.dataset.ann), b);
+  });
+}
+
+async function ackAnnouncement(i, btn) {
+  const a = announcements[i];
+  if (!a || a.acked) return;
+  btn.disabled = true;
+  btn.textContent = t('ann.acking');
+  try {
+    await api('ackAnnounce', authBody({ id: a.id, lang: lang, device: deviceId() }));
+    const n = new Date();
+    a.acked = true;
+    a.ackAt = P2(n.getMonth() + 1) + '/' + P2(n.getDate()) + ' ' + P2(n.getHours()) + ':' + P2(n.getMinutes());
+    drawAnnouncements();
+  } catch (e) {
+    if (isAuthErr(e)) return logout();
+    toast('✕ ' + t('ann.ackFail'), 'bad');
+    btn.disabled = false;
+    btn.textContent = t('ann.ack');
+  }
 }
 
 /* ═══════════ 超時提醒 ═══════════
@@ -1637,7 +1731,7 @@ function logout() {
   if (pendingType) closeConfirm();
   ['patchSheet', 'decideSheet'].forEach(id => { $(id).classList.remove('on'); $(id).classList.add('hidden'); });
   auth = null; todayRows = []; histResult = null;
-  reminders = []; firedIds = {}; rmdQueue = []; rmdShowing = null;
+  reminders = []; firedIds = {}; rmdQueue = []; rmdShowing = null; announcements = [];
   approval = { isApprover: false, pending: 0 }; patchInfo = null; pendingRows = []; decideTarget = null;
   $('rmdCard').classList.add('hidden');
   $('apprCard').classList.add('hidden');
@@ -1662,6 +1756,7 @@ function applyHome(r) {
   if (r.cfg) { cfg = r.cfg; saveLocal(LS_CFG, r.cfg); if (pos) render(); }
   if (r.today) drawToday(r.today);
   if (r.reminders) setReminders(r.reminders);
+  if (r.announcements) setAnnouncements(r.announcements);
   if (r.approval) approval = r.approval;
   if (r.patch) { patchInfo = r.patch; drawPatches(); }
   if (r.pending) {
@@ -1673,6 +1768,7 @@ function applyHome(r) {
   drawPending();
   if (auth && r.today) {
     saveLocal(LS_HOME, { empId: auth.empId, day: ymd(new Date()), today: r.today, reminders: r.reminders,
+                         announcements: announcements,
                          approval: approval, patch: patchInfo,
                          pending: approval.isApprover ? { rows: pendingRows, limit: pendingLimit } : null });
   }
@@ -1705,7 +1801,7 @@ function enterMain(r) {
   $('histList').innerHTML = '<div class="empty">' + esc(t('hist.hint')) + '</div>';
   approval = r.approval || { isApprover: false, pending: 0 };
   patchInfo = null; pendingRows = [];
-  drawToday([]); setReminders([]); drawPatches();
+  drawToday([]); setReminders([]); setAnnouncements([]); drawPatches();
   applyHome(r);
   startWatch();
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;

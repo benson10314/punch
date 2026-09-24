@@ -239,8 +239,28 @@ tr.voided td{opacity:.6}
   .arow .t{min-width:44px}
 }
 
+/* 公告 */
+.annt{font-weight:700;font-size:14px}
+.annb{color:var(--muted);font-size:11.5px;margin-top:3px;white-space:normal;line-height:1.5;max-width:420px}
+.bar2{height:7px;border-radius:99px;background:#23324f;overflow:hidden;width:120px;margin-top:5px}
+.bar2 i{display:block;height:100%;background:var(--ok)}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.rmh{margin:0 0 8px;font-size:13px;color:var(--ok);letter-spacing:1px}
+.rmh.rmh-bad{color:var(--late)}
+.rmlist{max-height:46vh;overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:4px 10px}
+.rmlist .rr2{display:flex;gap:8px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}
+.rmlist .rr2:last-child{border-bottom:0}
+.rmlist .rr2 span.d{color:var(--muted);font-size:11.5px}
+.rmlist .rr2 span.t{margin-left:auto;color:var(--muted);font-size:11.5px}
+.fld .checks{display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+.fld .checks label{display:inline-flex;align-items:center;gap:7px;margin:0;font-size:13px;color:var(--ink);font-weight:400}
+.fld .checks input{width:auto;padding:0;margin:0}
+#anDepts{background:#0a1120;border:1.5px solid var(--line);color:var(--ink);border-radius:10px;padding:6px}
+#anDepts option{padding:4px 6px}
+.aform .row textarea,.box .row textarea,.box .row input{flex:1;min-width:0}
+
 /* Modal */
-#modal,#pmodal,#amodal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:flex;align-items:center;
+#modal,#pmodal,#amodal,#amodalAnn,#rmodal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:flex;align-items:center;
   justify-content:center;z-index:50;padding:16px;overflow-y:auto}
 .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;width:100%;max-width:420px}
 .box h3{margin:0 0 16px;font-size:16px;letter-spacing:2px}
@@ -323,6 +343,7 @@ body.tv .p .nm{font-size:17px}
     <button class="tab on" data-v="board">即時看板</button>
     <button class="tab" data-v="emp">員工管理</button>
     <button class="tab" data-v="patch">補卡簽核<span class="tabcnt hidden" id="patchTabCnt">0</span></button>
+    <button class="tab" data-v="ann">公告</button>
     <button class="tab" data-v="export">匯出報表</button>
   </div>
 
@@ -440,6 +461,27 @@ body.tv .p .nm{font-size:17px}
     </div>
   </div>
 
+  <!-- ─── 公告 ─── -->
+  <div id="viewAnn" class="hidden">
+    <div class="panel">
+      <h2>公告 <span id="annCnt"></span></h2>
+      <div class="filters">
+        <button class="primary" id="annNew">＋ 新增公告</button>
+        <label class="live push"><input type="checkbox" id="annShowOff"> 顯示已停用／已結束</label>
+      </div>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>公告</th><th>期間</th><th>對象</th><th>已讀</th><th>狀態</th><th>操作</th></tr></thead>
+          <tbody id="annBody"></tbody>
+        </table>
+      </div>
+      <div class="info" style="margin:14px 0 0">
+        公告只要打中文，越南文與英文由系統自動翻譯（和超時提醒同一套）；需要精準用字時，可在新增／編輯視窗自行填寫譯文。<br>
+        勾選「需要員工按我已閱讀」才會統計已讀；未勾選的公告只是顯示，不會要求員工回覆。
+      </div>
+    </div>
+  </div>
+
   <!-- ─── 匯出報表 ─── -->
   <div id="viewExport" class="hidden">
     <div class="panel">
@@ -505,6 +547,65 @@ body.tv .p .nm{font-size:17px}
       <div class="hint" id="pmHint"></div></div>
     <div class="modalerr" id="pmErr"></div>
     <div class="acts" id="pmActs"></div>
+  </div>
+</div>
+
+<!-- ══════════ 公告編輯視窗 ══════════ -->
+<div id="amodalAnn" class="hidden">
+  <div class="box wide">
+    <div class="ahead"><h3 id="anTitle">新增公告</h3><button class="chipbtn" id="anClose">關閉</button></div>
+    <div class="fld"><label>標題</label><input id="anT" maxlength="60" placeholder="例如：10/10 國慶日連假公告"></div>
+    <div class="fld"><label>內容</label>
+      <textarea id="anB" rows="5" maxlength="1000" placeholder="請用中文撰寫，系統會自動翻成越南文與英文"></textarea></div>
+    <div class="fld"><div class="row">
+      <div><label>開始日期（留空＝立即）</label><input type="date" id="anFrom"></div>
+      <div><label>結束日期（留空＝不限）</label><input type="date" id="anTo"></div>
+    </div></div>
+    <div class="fld"><label>對象部門</label>
+      <select class="txt" id="anDepts" multiple size="5" style="width:100%"></select>
+      <div class="hint">按住 Ctrl（Mac 為 Command）可複選；選「全部」＝全公司。</div>
+    </div>
+    <div class="fld"><div class="checks">
+      <label><input type="checkbox" id="anAck" checked> 需要員工按「我已閱讀」（才會統計已讀）</label>
+      <label><input type="checkbox" id="anActive" checked> 啟用</label>
+    </div></div>
+    <div class="fld">
+      <label><button class="mini" id="anTrToggle" type="button">▸ 自行填寫越南文／英文（選填）</button></label>
+      <div id="anTrBox" class="hidden">
+        <div class="row" style="margin-bottom:8px">
+          <input id="anTVi" maxlength="60" placeholder="越南文標題">
+          <input id="anTEn" maxlength="60" placeholder="英文標題">
+        </div>
+        <div class="row">
+          <textarea id="anBVi" rows="3" maxlength="1000" placeholder="越南文內容"></textarea>
+          <textarea id="anBEn" rows="3" maxlength="1000" placeholder="英文內容"></textarea>
+        </div>
+        <div class="hint">留空＝由系統自動翻譯；填了就以這裡的內容為準。</div>
+      </div>
+    </div>
+    <div class="modalerr" id="anErr"></div>
+    <div class="acts">
+      <button class="chipbtn" id="anCancel" style="flex:none">取消</button>
+      <button class="primary" id="anSave">儲存公告</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 已讀名單視窗 ══════════ -->
+<div id="rmodal" class="hidden">
+  <div class="box wide">
+    <div class="ahead"><h3 id="rmTitle">已讀名單</h3><button class="chipbtn" id="rmClose">關閉</button></div>
+    <div class="info" id="rmSum" style="margin-bottom:12px"></div>
+    <div class="cols2">
+      <div>
+        <h4 class="rmh">已讀 <span id="rmReadCnt"></span></h4>
+        <div class="rmlist" id="rmRead"></div>
+      </div>
+      <div>
+        <h4 class="rmh rmh-bad">未讀 <span id="rmUnreadCnt"></span></h4>
+        <div class="rmlist" id="rmUnread"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -574,7 +675,8 @@ const PST = { '待審': 'pending', '核准': 'approved', '駁回': 'rejected', '
 
 /* Google Apps Script 回應時間落差大（實測 2～16 秒）：每個請求都有逾時；
    「讀取」類遇到斷線、逾時、系統忙碌自動重試，「寫入」類（存檔、簽核、作廢…）絕不自動重送 */
-const RETRY_ACTIONS = ['board', 'empList', 'adminPatchList', 'adminDeptList', 'adminDay', 'export'];
+const RETRY_ACTIONS = ['board', 'empList', 'adminPatchList', 'adminDeptList', 'adminDay', 'export',
+                       'adminAnnList', 'adminAnnReaders'];
 
 async function apiOnce(action, body, ms) {
   const ctl = new AbortController();
@@ -639,6 +741,7 @@ function switchTab(v) {
   $('viewBoard').classList.toggle('hidden', v !== 'board');
   $('viewEmp').classList.toggle('hidden', v !== 'emp');
   $('viewPatch').classList.toggle('hidden', v !== 'patch');
+  $('viewAnn').classList.toggle('hidden', v !== 'ann');
   $('viewExport').classList.toggle('hidden', v !== 'export');
   // 自動更新只在看板頁跑，避免打斷編輯
   const onBoard = v === 'board';
@@ -647,6 +750,7 @@ function switchTab(v) {
   setAuto(auto);
   if (v === 'emp' && !emps.length) loadEmps();
   if (v === 'patch') { loadPatchList(); if (!deptData) loadDepts(); }
+  if (v === 'ann') loadAnns();
 }
 
 /* ════════ 即時看板 ════════ */
@@ -974,6 +1078,147 @@ function download() {
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   toast('✓ 已下載 ' + name);
 }
+
+/* ════════ 公告 ════════
+   人資打中文，越南文與英文由後端自動翻譯；需要已讀的公告可以看到誰讀了、誰沒讀。 */
+let annData = null, annEdit = null;
+
+async function loadAnns() {
+  $('annBody').innerHTML = '<tr><td colspan="6" class="empty">載入中…</td></tr>';
+  try {
+    annData = await api('adminAnnList');
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('annBody').innerHTML = '<tr><td colspan="6" class="empty">載入失敗：' + esc(e.message) + '</td></tr>';
+    return;
+  }
+  drawAnns();
+}
+
+function drawAnns() {
+  const showOff = $('annShowOff').checked;
+  const rows = annData.rows.filter(a => showOff || (a.active && a.showing));
+  const live = annData.rows.filter(a => a.active && a.showing).length;
+  $('annCnt').textContent = '共 ' + annData.rows.length + ' 則　・　目前顯示中 ' + live + ' 則';
+
+  $('annBody').innerHTML = rows.length ? rows.map(a => {
+    const pct = a.targets ? Math.round(a.read / a.targets * 100) : 0;
+    const readCell = a.needAck
+      ? '<b>' + a.read + '</b> / ' + a.targets +
+        '<div class="bar2"><i style="width:' + pct + '%"></i></div>' +
+        (a.targets - a.read > 0 ? '<div class="sub">未讀 ' + (a.targets - a.read) + ' 人</div>' : '')
+      : '<span class="sub">不需已讀</span>';
+    const state = !a.active ? '<span class="pst withdrawn">停用</span>'
+      : a.showing ? '<span class="pst approved">顯示中</span>'
+                  : '<span class="pst withdrawn">未開始／已結束</span>';
+    return '<tr class="' + (a.active ? '' : 'voided') + '">' +
+      '<td class="wrap"><div class="annt">' + esc(a.title) + '</div>' +
+        '<div class="annb">' + esc(a.body.length > 60 ? a.body.slice(0, 60) + '…' : a.body) + '</div></td>' +
+      '<td>' + esc(a.from || '不限') + '<div class="sub">～ ' + esc(a.to || '不限') + '</div></td>' +
+      '<td>' + esc(a.depts) + '<div class="sub">' + a.targets + ' 人</div></td>' +
+      '<td>' + readCell + '</td>' +
+      '<td>' + state + '</td>' +
+      '<td><button class="mini" data-ae2="' + esc(a.id) + '">編輯</button>' +
+        (a.needAck ? '<button class="mini" data-ar="' + esc(a.id) + '">已讀名單</button>' : '') +
+        '<button class="mini' + (a.active ? ' danger' : '') + '" data-at2="' + esc(a.id) + '">' +
+        (a.active ? '停用' : '啟用') + '</button></td></tr>';
+  }).join('') : '<tr><td colspan="6" class="empty">目前沒有公告，按「＋ 新增公告」建立</td></tr>';
+
+  $('annBody').querySelectorAll('[data-ae2]').forEach(b => b.onclick = () => openAnn(b.dataset.ae2));
+  $('annBody').querySelectorAll('[data-ar]').forEach(b => b.onclick = () => openReaders(b.dataset.ar));
+  $('annBody').querySelectorAll('[data-at2]').forEach(b => b.onclick = () => toggleAnn(b.dataset.at2));
+}
+
+function openAnn(id) {
+  annEdit = id ? annData.rows.find(a => a.id === id) : null;
+  const a = annEdit || { title: '', body: '', from: '', to: '', depts: '全部', needAck: true, active: true,
+                         titleVi: '', bodyVi: '', titleEn: '', bodyEn: '' };
+  $('anTitle').textContent = annEdit ? '編輯公告' : '新增公告';
+  $('anT').value = a.title;
+  $('anB').value = a.body;
+  $('anFrom').value = (a.from || '').replace(/\//g, '-');
+  $('anTo').value = (a.to || '').replace(/\//g, '-');
+  $('anAck').checked = a.needAck;
+  $('anActive').checked = a.active;
+  $('anTVi').value = a.titleVi || ''; $('anBVi').value = a.bodyVi || '';
+  $('anTEn').value = a.titleEn || ''; $('anBEn').value = a.bodyEn || '';
+  $('anTrBox').classList.toggle('hidden', !(a.titleVi || a.bodyVi || a.titleEn || a.bodyEn));
+  $('anErr').textContent = '';
+
+  const want = (a.depts || '全部').split(/[,，、]/).map(x => x.trim());
+  $('anDepts').innerHTML = ['全部'].concat(annData.depts)
+    .map(d => '<option value="' + esc(d) + '"' + (want.includes(d) ? ' selected' : '') + '>' + esc(d) + '</option>').join('');
+  $('amodalAnn').classList.remove('hidden');
+  $('anT').focus();
+}
+
+function closeAnn() { $('amodalAnn').classList.add('hidden'); annEdit = null; }
+
+async function saveAnn() {
+  const picked = [...$('anDepts').selectedOptions].map(o => o.value);
+  const depts = (!picked.length || picked.includes('全部')) ? '全部' : picked.join('、');
+  const body = {
+    id: annEdit ? annEdit.id : '', title: $('anT').value.trim(), body: $('anB').value.trim(),
+    from: $('anFrom').value, to: $('anTo').value, depts: depts,
+    needAck: $('anAck').checked, active: $('anActive').checked,
+    titleVi: $('anTVi').value.trim(), bodyVi: $('anBVi').value.trim(),
+    titleEn: $('anTEn').value.trim(), bodyEn: $('anBEn').value.trim()
+  };
+  if (!body.title || !body.body) { $('anErr').textContent = '標題與內容都要填寫'; return; }
+  $('anSave').disabled = true;
+  try {
+    await api('adminAnnSave', body);
+    closeAnn();
+    toast('✓ ' + (annEdit ? '已更新公告' : '已新增公告'));
+    loadAnns();
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('anErr').textContent = e.message;
+  } finally {
+    $('anSave').disabled = false;
+  }
+}
+
+async function toggleAnn(id) {
+  const a = annData.rows.find(x => x.id === id);
+  if (!a) return;
+  if (a.active && !confirm('停用「' + a.title + '」？員工就不會再看到這則公告。')) return;
+  try {
+    await api('adminAnnSave', Object.assign({}, a, { active: !a.active }));
+    toast('✓ 已' + (a.active ? '停用' : '啟用'));
+    loadAnns();
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    toast('✕ ' + e.message, 'bad');
+  }
+}
+
+async function openReaders(id) {
+  $('rmodal').classList.remove('hidden');
+  $('rmTitle').textContent = '已讀名單';
+  $('rmSum').textContent = '載入中…';
+  $('rmRead').innerHTML = ''; $('rmUnread').innerHTML = '';
+  try {
+    const r = await api('adminAnnReaders', { id: id });
+    const total = r.read.length + r.unread.length;
+    $('rmTitle').textContent = r.title;
+    $('rmSum').innerHTML = '對象 <b>' + total + '</b> 人　・　已讀 <b>' + r.read.length + '</b> 人　・　未讀 <b>' +
+      r.unread.length + '</b> 人　（' + (total ? Math.round(r.read.length / total * 100) : 0) + '%）';
+    $('rmReadCnt').textContent = r.read.length;
+    $('rmUnreadCnt').textContent = r.unread.length;
+    $('rmRead').innerHTML = r.read.length ? r.read.map(x =>
+      '<div class="rr2"><b>' + esc(x.name) + '</b><span class="d">' + esc(x.dept) + '</span>' +
+      '<span class="t">' + esc(x.at) + '</span></div>').join('') : '<div class="empty">還沒有人按已閱讀</div>';
+    $('rmUnread').innerHTML = r.unread.length ? r.unread.map(x =>
+      '<div class="rr2"><b>' + esc(x.name) + '</b><span class="d">' + esc(x.dept) + '</span>' +
+      '<span class="t">' + esc(x.empId) + '</span></div>').join('') : '<div class="empty">全部都讀過了 🎉</div>';
+  } catch (e) {
+    if (/失效|密碼/.test(e.message)) return logout(e.message);
+    $('rmSum').textContent = '載入失敗：' + e.message;
+  }
+}
+
+function closeReaders() { $('rmodal').classList.add('hidden'); }
 
 /* ════════ 出勤調整（點人員卡） ════════
    原始紀錄不刪不改：修改＝後端作廢舊的＋新增一筆「人資補登」，作廢＝標示「人資作廢」。 */
@@ -1342,7 +1587,7 @@ function enter() {
 function logout(msg) {
   clearInterval(timer);
   token = null; data = null; emps = []; exResult = null; boardDate = '';
-  patchData = null; deptData = null; closePM(); closeA();
+  patchData = null; deptData = null; annData = null; closePM(); closeA(); closeAnn(); closeReaders();
   localStorage.removeItem(LS);
   $('app').classList.add('hidden');
   $('login').classList.remove('hidden');
@@ -1372,7 +1617,9 @@ $('mSave').onclick = saveEmp;
 $('mRand').onclick = () => { $('mPin').value = String(Math.floor(1000 + Math.random() * 9000)); };
 $('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 $('pmodal').addEventListener('click', e => { if (e.target.id === 'pmodal') closePM(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePM(); closeA(); } });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closePM(); closeA(); closeAnn(); closeReaders(); }
+});
 
 // 出勤調整：人員卡每 30 秒會重畫，所以把點擊綁在外層容器
 $('grid').addEventListener('click', e => {
@@ -1388,6 +1635,21 @@ document.querySelectorAll('[data-at]').forEach(b => b.onclick = () => setAType(b
 $('aChips').querySelectorAll('button').forEach(b => b.onclick = () => { $('aReason').value = b.textContent; });
 $('aSave').onclick = saveA;
 $('aCancelEdit').onclick = resetAForm;
+
+// 公告
+$('annNew').onclick = () => openAnn('');
+$('annShowOff').onchange = () => { if (annData) drawAnns(); };
+$('anCancel').onclick = closeAnn;
+$('anClose').onclick = closeAnn;
+$('anSave').onclick = saveAnn;
+$('anTrToggle').onclick = () => {
+  const box = $('anTrBox'), show = box.classList.contains('hidden');
+  box.classList.toggle('hidden', !show);
+  $('anTrToggle').textContent = (show ? '▾' : '▸') + ' 自行填寫越南文／英文（選填）';
+};
+$('rmClose').onclick = closeReaders;
+$('amodalAnn').addEventListener('click', e => { if (e.target.id === 'amodalAnn') closeAnn(); });
+$('rmodal').addEventListener('click', e => { if (e.target.id === 'rmodal') closeReaders(); });
 
 $('pBtn').onclick = loadPatchList;
 ['pStatus', 'pDept'].forEach(id => $(id).addEventListener('change', loadPatchList));
